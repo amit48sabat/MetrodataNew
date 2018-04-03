@@ -4,6 +4,8 @@ import java.util.Date;
 
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.incture.metrodata.constant.Message;
 import com.incture.metrodata.dao.CourierDetailsDAO;
@@ -12,6 +14,9 @@ import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.entity.CourierDetailsDo;
 import com.incture.metrodata.util.ServicesUtil;
 
+
+@Service("courierService")
+@Transactional
 public class CourierDetailService implements CourierDetailServiceLocal {
 
 	@Autowired

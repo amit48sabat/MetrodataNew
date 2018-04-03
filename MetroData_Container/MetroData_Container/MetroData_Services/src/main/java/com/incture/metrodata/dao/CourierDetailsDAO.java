@@ -1,5 +1,7 @@
 package com.incture.metrodata.dao;
 
+import org.springframework.stereotype.Repository;
+
 import com.incture.metrodata.dto.CourierDetailsDTO;
 import com.incture.metrodata.entity.CourierDetailsDo;
 import com.incture.metrodata.exceptions.ExecutionFault;
@@ -7,6 +9,8 @@ import com.incture.metrodata.exceptions.InvalidInputFault;
 import com.incture.metrodata.exceptions.NoResultFault;
 import com.incture.metrodata.util.ServicesUtil;
 
+
+@Repository("CourierDetailsDAO")
 public class CourierDetailsDAO extends BaseDao<CourierDetailsDo, CourierDetailsDTO> {
 
 	@Override

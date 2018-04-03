@@ -26,7 +26,7 @@ public class WareHouseDetailsDo implements BaseDo {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "WARE_HOUSE_ID")
-	private String wareHouseId;
+	private Long wareHouseId;
 
 	@Column(name = "WARE_HOUSE_NAME", length = 100)
 	private String wareHouseName;

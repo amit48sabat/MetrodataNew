@@ -9,6 +9,6 @@ public interface WareHouseServiceLocal {
 	ResponseDto update(WareHouseDetailsDTO dto);
 	ResponseDto find(WareHouseDetailsDTO dto);
 	ResponseDto findAll();
-	ResponseDto delte(WareHouseDetailsDTO dto);
+	ResponseDto delete(WareHouseDetailsDTO dto);
 	
 }

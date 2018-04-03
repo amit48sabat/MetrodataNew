@@ -4,6 +4,8 @@ import java.util.Date;
 
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.incture.metrodata.constant.Message;
 import com.incture.metrodata.dao.WareHouseDAO;
@@ -12,6 +14,8 @@ import com.incture.metrodata.dto.WareHouseDetailsDTO;
 import com.incture.metrodata.entity.WareHouseDetailsDo;
 import com.incture.metrodata.util.ServicesUtil;
 
+@Service("wareHouseService")
+@Transactional
 public class WareHouseService implements WareHouseServiceLocal {
 
 	@Autowired
@@ -86,7 +90,7 @@ public class WareHouseService implements WareHouseServiceLocal {
 	}
 
 	@Override
-	public ResponseDto delte(WareHouseDetailsDTO dto) {
+	public ResponseDto delete(WareHouseDetailsDTO dto) {
 		ResponseDto responseDto = new ResponseDto();
 		try {
 			// setting created at and updated at

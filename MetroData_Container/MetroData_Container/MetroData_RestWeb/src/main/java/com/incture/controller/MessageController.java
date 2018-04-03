@@ -62,11 +62,6 @@ public class MessageController {
 		return messageService.delete(dto);
 	}
 
-	@RequestMapping(value = "/{messageId}", method = RequestMethod.GET)
-	public ResponseDto findById(@PathVariable Long messageId) {
-		MessageDetailsDTO dto = new MessageDetailsDTO();
-		dto.setMessageId(messageId);
-		return messageService.delete(dto);
-	}
+	
 
 }

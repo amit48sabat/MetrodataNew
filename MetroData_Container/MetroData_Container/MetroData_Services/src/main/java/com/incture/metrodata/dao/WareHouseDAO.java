@@ -1,12 +1,14 @@
 package com.incture.metrodata.dao;
 
+import org.springframework.stereotype.Repository;
+
 import com.incture.metrodata.dto.WareHouseDetailsDTO;
 import com.incture.metrodata.entity.WareHouseDetailsDo;
 import com.incture.metrodata.exceptions.ExecutionFault;
 import com.incture.metrodata.exceptions.InvalidInputFault;
 import com.incture.metrodata.exceptions.NoResultFault;
 import com.incture.metrodata.util.ServicesUtil;
-
+@Repository("WareHouseDAO")
 public class WareHouseDAO extends BaseDao<WareHouseDetailsDo, WareHouseDetailsDTO> {
 
 	@Override
