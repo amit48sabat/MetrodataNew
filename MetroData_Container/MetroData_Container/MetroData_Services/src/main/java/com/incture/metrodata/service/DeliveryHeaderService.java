@@ -18,7 +18,6 @@ import com.incture.metrodata.dao.DeliveryHeaderDAO;
 import com.incture.metrodata.dao.TripDAO;
 import com.incture.metrodata.dto.DeliveryHeaderDTO;
 import com.incture.metrodata.dto.ResponseDto;
-import com.incture.metrodata.dto.TripDetailsDTO;
 import com.incture.metrodata.entity.DeliveryHeaderDo;
 import com.incture.metrodata.exceptions.ExecutionFault;
 import com.incture.metrodata.util.ServicesUtil;

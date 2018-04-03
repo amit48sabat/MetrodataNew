@@ -4,13 +4,15 @@ import org.springframework.stereotype.Repository;
 
 import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.entity.UserDetailsDo;
+import com.incture.metrodata.util.CourierDetailsComparator;
 import com.incture.metrodata.util.ServicesUtil;
+import com.incture.metrodata.util.WareHouseComparator;
 
 @Repository("UserDao")
 public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 
 	@Override
-	public UserDetailsDo importDto(UserDetailsDTO userDetailsDTO, UserDetailsDo detailsDo) {
+	public UserDetailsDo importDto(UserDetailsDTO userDetailsDTO, UserDetailsDo detailsDo) throws Exception {
 		if (ServicesUtil.isEmpty(detailsDo))
 			detailsDo = new UserDetailsDo();
 
@@ -18,13 +20,13 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			if (!ServicesUtil.isEmpty(userDetailsDTO.getUserId())) {
 				detailsDo.setUserId(userDetailsDTO.getUserId());
 			}
-			if(!ServicesUtil.isEmpty(userDetailsDTO.getFirstName())){
+			if (!ServicesUtil.isEmpty(userDetailsDTO.getFirstName())) {
 				detailsDo.setFirstName(userDetailsDTO.getFirstName());
 			}
-			if(!ServicesUtil.isEmpty(userDetailsDTO.getLastName())){
+			if (!ServicesUtil.isEmpty(userDetailsDTO.getLastName())) {
 				detailsDo.setLastName(userDetailsDTO.getLastName());
 			}
-			if(!ServicesUtil.isEmpty(userDetailsDTO.getEmail())){
+			if (!ServicesUtil.isEmpty(userDetailsDTO.getEmail())) {
 				detailsDo.setEmail(userDetailsDTO.getEmail());
 			}
 			if (!ServicesUtil.isEmpty(userDetailsDTO.getName())) {
@@ -51,8 +53,21 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			if (!ServicesUtil.isEmpty(userDetailsDTO.getParentId())) {
 				detailsDo.setParentId(userDetailsDTO.getParentId());
 			}
-			
-			
+
+			// parsing warehouse details
+			if (!ServicesUtil.isEmpty(userDetailsDTO.getWareHouseDetails())) {
+				WareHouseDAO wareHouseDao = new WareHouseDAO();
+				detailsDo.setWareHouseDetails(
+						wareHouseDao.importSet(userDetailsDTO.getWareHouseDetails(), detailsDo.getWareHouseDetails()));
+			}
+
+			// parsing courier details
+			if (!ServicesUtil.isEmpty(userDetailsDTO.getCourierDetails())) {
+				CourierDetailsDAO courierDao = new CourierDetailsDAO();
+				detailsDo.setCourierDetails(
+						courierDao.importSet(userDetailsDTO.getCourierDetails(), detailsDo.getCourierDetails()));
+			}
+
 		}
 		return detailsDo;
 	}
@@ -85,29 +100,42 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			if (!ServicesUtil.isEmpty(detailsDo.getCreatedDate())) {
 				userDetailsDTO.setCreatedDate(detailsDo.getCreatedDate());
 			}
-			
-			if(ServicesUtil.isEmpty(detailsDo.getFirstName())){
+
+			if (ServicesUtil.isEmpty(detailsDo.getFirstName())) {
 				userDetailsDTO.setFirstName(detailsDo.getFirstName());
 			}
-			if(ServicesUtil.isEmpty(detailsDo.getLastName())){
+			if (ServicesUtil.isEmpty(detailsDo.getLastName())) {
 				userDetailsDTO.setLastName(detailsDo.getLastName());
 			}
-			if(ServicesUtil.isEmpty(detailsDo.getEmail())){
+			if (ServicesUtil.isEmpty(detailsDo.getEmail())) {
 				userDetailsDTO.setEmail(detailsDo.getEmail());
 			}
 			if (!ServicesUtil.isEmpty(detailsDo.getParentId())) {
 				userDetailsDTO.setParentId(detailsDo.getParentId());
 			}
-			
+
+			// parsing warehouse details
+			if (!ServicesUtil.isEmpty(userDetailsDTO.getWareHouseDetails())) {
+				WareHouseDAO wareHouseDao = new WareHouseDAO();
+				userDetailsDTO.setWareHouseDetails(
+						wareHouseDao.exportSet(detailsDo.getWareHouseDetails(), new WareHouseComparator()));
+			}
+
+			// parsing courier details
+			if (!ServicesUtil.isEmpty(userDetailsDTO.getCourierDetails())) {
+				CourierDetailsDAO courierDao = new CourierDetailsDAO();
+				userDetailsDTO.setCourierDetails(
+						courierDao.exportSet(detailsDo.getCourierDetails(), new CourierDetailsComparator()));
+			}
 		}
 		return userDetailsDTO;
 	}
 
-	public Boolean updateUserData(UserDetailsDTO userDetailsDTO) {
+	public Boolean updateUserData(UserDetailsDTO userDetailsDTO) throws Exception {
 		UserDetailsDo userDetailsDo = null;
 		try {
 			userDetailsDo = getByKeysForFK(userDetailsDTO);
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

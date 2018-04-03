@@ -1,6 +1,8 @@
 package com.incture.metrodata.dto;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.incture.metrodata.exceptions.InvalidInputFault;
 import com.incture.metrodata.util.DB_Operation;
@@ -26,6 +28,8 @@ public class UserDetailsDTO extends BaseDto  {
 	private Date createdAt;
 	private Date updatedAt;
 	private String parentId;
+	private Set<WareHouseDetailsDTO> wareHouseDetails = new HashSet<WareHouseDetailsDTO>(0);
+	private Set<CourierDetailsDTO> courierDetails = new HashSet<CourierDetailsDTO>(0);
 	
 	@Override
 	public void validate(DB_Operation enOperation) throws InvalidInputFault {

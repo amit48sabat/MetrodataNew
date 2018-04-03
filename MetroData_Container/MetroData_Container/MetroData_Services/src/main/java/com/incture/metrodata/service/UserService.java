@@ -11,7 +11,6 @@ import com.incture.metrodata.constant.Message;
 import com.incture.metrodata.dao.UserDAO;
 import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.UserDetailsDTO;
-import com.incture.metrodata.util.ServicesUtil;
 
 @Service("userService")
 @Transactional
@@ -33,7 +32,6 @@ public class UserService implements UserServiceLocal {
 	public ResponseDto updateUserData(UserDetailsDTO userDetailsDTO) {
 		// TODO Auto-generated method stub
 		ResponseDto responseDto = new ResponseDto();
-		UserDetailsDTO data = null;
 		/*try{
 			 data  = userDAO.findById(userDetailsDTO);
 		}catch (Exception e) {
