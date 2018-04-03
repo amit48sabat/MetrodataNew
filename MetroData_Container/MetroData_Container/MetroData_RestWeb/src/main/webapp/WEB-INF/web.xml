@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	id="WebApp_ID" version="2.5">
+	<display-name>Archetype Created Web Application</display-name>
+
+	<servlet>
+		<servlet-name>spring</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>spring</servlet-name>
+		<url-pattern>/rest/*</url-pattern>
+	</servlet-mapping>
+
+
+	<servlet>
+		<servlet-name>AuthenticationLogoutServlet</servlet-name>
+		<servlet-class>com.incture.controller.AuthenticationLogoutServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AuthenticationLogoutServlet</servlet-name>
+		<url-pattern>/logout</url-pattern>
+	</servlet-mapping>
+	
+	
+	<filter>
+    <display-name>OAuth scope definition for viewing a photo album</display-name>
+    <filter-name>OAuthViewPhotosScopeFilter</filter-name>
+    <filter-class>
+      com.sap.cloud.security.oauth2.OAuthAuthorizationFilter
+    </filter-class>
+</filter>
+<filter-mapping>
+  <filter-name>OAuthViewPhotosScopeFilter</filter-name>
+  <url-pattern>/rest/*</url-pattern>
+</filter-mapping>
+
+	<session-config>
+		<session-timeout>500</session-timeout> <!-- in minutes -->
+	</session-config>
+	<!-- <filter>
+		<filter-name>authenticationfilter</filter-name>
+		<filter-class>com.incture.controller.MyFilter</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>authenticationfilter</filter-name>
+		<url-pattern>/rest/*</url-pattern>
+	</filter-mapping> -->
+
+	<!-- Declare the document store service (SAP Cloud Platform document service) -->
+	<resource-ref>
+		<res-ref-name>EcmService</res-ref-name>
+		<res-type>com.sap.ecm.api.EcmService</res-type>
+	</resource-ref>
+	
+	<security-role>
+		<description>All SAP Cloud Platform users</description>
+		<role-name>Everyone</role-name>
+	</security-role>
+	
+	
+	<login-config>
+		<auth-method>BASIC</auth-method>
+	</login-config>
+
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Protected
+				Area</web-resource-name>
+			<url-pattern>/rest/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>Everyone</role-name>
+		</auth-constraint>
+	</security-constraint>
+
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Logout</web-resource-name>
+			<url-pattern>/rest/logout</url-pattern>
+		</web-resource-collection>
+	</security-constraint>
+
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>PublicArea</web-resource-name>
+			<url-pattern>/*</url-pattern>
+		</web-resource-collection>
+	</security-constraint>
+	
+</web-app>
