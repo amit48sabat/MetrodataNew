@@ -4,9 +4,7 @@ import org.springframework.stereotype.Repository;
 
 import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.entity.UserDetailsDo;
-import com.incture.metrodata.util.CourierDetailsComparator;
 import com.incture.metrodata.util.ServicesUtil;
-import com.incture.metrodata.util.WareHouseComparator;
 
 @Repository("UserDao")
 public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
@@ -32,8 +30,8 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			if (!ServicesUtil.isEmpty(userDetailsDTO.getName())) {
 				detailsDo.setName(userDetailsDTO.getName());
 			}
-			if (!ServicesUtil.isEmpty(userDetailsDTO.getUserType())) {
-				detailsDo.setUserType(userDetailsDTO.getUserType());
+			if (!ServicesUtil.isEmpty(userDetailsDTO.getRoleId())) {
+				detailsDo.setRoleId(userDetailsDTO.getRoleId());
 			}
 			if (!ServicesUtil.isEmpty(userDetailsDTO.getMobileToken())) {
 				detailsDo.setMobileToken(userDetailsDTO.getMobileToken());
@@ -54,7 +52,14 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 				detailsDo.setParentId(userDetailsDTO.getParentId());
 			}
 
-			// parsing warehouse details
+			if (!ServicesUtil.isEmpty(userDetailsDTO.getWareHouseId())) {
+				detailsDo.setWareHouseId(userDetailsDTO.getWareHouseId());
+			}
+			if (!ServicesUtil.isEmpty(userDetailsDTO.getCourierId())) {
+				detailsDo.setCourierId(userDetailsDTO.getCourierId());
+			}
+			
+			/* parsing warehouse details
 			if (!ServicesUtil.isEmpty(userDetailsDTO.getWareHouseDetails())) {
 				WareHouseDAO wareHouseDao = new WareHouseDAO();
 				detailsDo.setWareHouseDetails(
@@ -67,6 +72,7 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 				detailsDo.setCourierDetails(
 						courierDao.importSet(userDetailsDTO.getCourierDetails(), detailsDo.getCourierDetails()));
 			}
+			*/
 
 		}
 		return detailsDo;
@@ -82,8 +88,8 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			if (!ServicesUtil.isEmpty(detailsDo.getName())) {
 				userDetailsDTO.setName(detailsDo.getName());
 			}
-			if (!ServicesUtil.isEmpty(detailsDo.getUserType())) {
-				userDetailsDTO.setUserType(detailsDo.getUserType());
+			if (!ServicesUtil.isEmpty(detailsDo.getRoleId())) {
+				userDetailsDTO.setRoleId(detailsDo.getRoleId());
 			}
 			if (!ServicesUtil.isEmpty(detailsDo.getMobileToken())) {
 				userDetailsDTO.setMobileToken(detailsDo.getMobileToken());
@@ -114,7 +120,14 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 				userDetailsDTO.setParentId(detailsDo.getParentId());
 			}
 
-			// parsing warehouse details
+			if (!ServicesUtil.isEmpty(detailsDo.getWareHouseId())) {
+				userDetailsDTO.setWareHouseId(detailsDo.getWareHouseId());
+			}
+			if (!ServicesUtil.isEmpty(detailsDo.getCourierId())) {
+				userDetailsDTO.setCourierId(detailsDo.getCourierId());
+			}
+			
+			/* parsing warehouse details
 			if (!ServicesUtil.isEmpty(userDetailsDTO.getWareHouseDetails())) {
 				WareHouseDAO wareHouseDao = new WareHouseDAO();
 				userDetailsDTO.setWareHouseDetails(
@@ -126,7 +139,7 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 				CourierDetailsDAO courierDao = new CourierDetailsDAO();
 				userDetailsDTO.setCourierDetails(
 						courierDao.exportSet(detailsDo.getCourierDetails(), new CourierDetailsComparator()));
-			}
+			} */
 		}
 		return userDetailsDTO;
 	}

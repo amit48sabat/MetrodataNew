@@ -10,19 +10,22 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CourierDetailsDTO extends BaseDto{
-	private Long courierId;
-	private String courierName;
+public class RoleDetailsDTO extends BaseDto{
+
+	private Long roleId;
+	private String roleName;
 	private Date createdAt;
 	private Date updatedAt;
+	
 	@Override
 	public void validate(DB_Operation enOperation) throws InvalidInputFault {
-		// TODO Auto-generated method stub
-		
+     		
 	}
+
 	@Override
 	public Object getPrimaryKey() {
-		return courierId;
+		// TODO Auto-generated method stub
+		return roleId;
 	}
-	
+
 }

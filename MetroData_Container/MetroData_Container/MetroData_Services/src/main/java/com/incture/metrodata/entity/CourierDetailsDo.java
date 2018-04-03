@@ -26,7 +26,7 @@ public class CourierDetailsDo implements BaseDo {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "COURIER_ID")
-	private String courierId;
+	private Long courierId;
 
 	@Column(name = "COURIER_NAME", length = 100)
 	private String courierName;

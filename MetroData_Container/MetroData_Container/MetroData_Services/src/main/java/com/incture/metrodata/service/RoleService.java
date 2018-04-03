@@ -8,28 +8,31 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.incture.metrodata.constant.Message;
-import com.incture.metrodata.dao.CourierDetailsDAO;
-import com.incture.metrodata.dto.CourierDetailsDTO;
+import com.incture.metrodata.dao.RoleDetailDAO;
 import com.incture.metrodata.dto.ResponseDto;
-import com.incture.metrodata.entity.CourierDetailsDo;
+import com.incture.metrodata.dto.RoleDetailsDTO;
+import com.incture.metrodata.entity.RoleDetailsDo;
 import com.incture.metrodata.util.ServicesUtil;
 
-
-@Service("courierService")
+/**
+ * @author Lucky.Barkane
+ *
+ */
+@Service("roleService")
 @Transactional
-public class CourierDetailService implements CourierDetailServiceLocal {
+public class RoleService implements RoleServiceLocal{
 
 	@Autowired
-	CourierDetailsDAO courierDao;
-
+	RoleDetailDAO  roleDao;
+	
 	@Override
-	public ResponseDto create(CourierDetailsDTO dto) {
+	public ResponseDto create(RoleDetailsDTO dto) {
 		ResponseDto responseDto = new ResponseDto();
 		try {
 			// setting created at and updated at
 			setCreateAtAndUpdateAt(dto);
-			CourierDetailsDo dos = new CourierDetailsDo();
-			dto = courierDao.create(dto, dos);
+			RoleDetailsDo dos = new RoleDetailsDo();
+			dto = roleDao.create(dto, dos);
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
 			responseDto.setData(dto);
@@ -42,21 +45,23 @@ public class CourierDetailService implements CourierDetailServiceLocal {
 		}
 		return responseDto;
 	}
-
-	private void setCreateAtAndUpdateAt(CourierDetailsDTO dto) {
+	
+	
+	private void setCreateAtAndUpdateAt(RoleDetailsDTO dto) {
 		Date currDate = new Date();
-		if (ServicesUtil.isEmpty(dto.getCourierId()))
+		if (ServicesUtil.isEmpty(dto.getRoleId()))
 			dto.setCreatedAt(currDate);
 		dto.setUpdatedAt(currDate);
 	}
 
+
 	@Override
-	public ResponseDto update(CourierDetailsDTO dto) {
+	public ResponseDto update(RoleDetailsDTO dto) {
 		ResponseDto responseDto = new ResponseDto();
 		try {
 			// setting created at and updated at
 			setCreateAtAndUpdateAt(dto);
-			dto = courierDao.update(dto);
+			dto = roleDao.update(dto);
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
 			responseDto.setData(dto);
@@ -71,10 +76,12 @@ public class CourierDetailService implements CourierDetailServiceLocal {
 	}
 
 	@Override
-	public ResponseDto find(CourierDetailsDTO dto) {
+	public ResponseDto find(RoleDetailsDTO dto) {
 		ResponseDto responseDto = new ResponseDto();
 		try {
-			dto = courierDao.findById(dto);
+			// setting created at and updated at
+			setCreateAtAndUpdateAt(dto);
+			dto = roleDao.findById(dto);
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
 			responseDto.setData(dto);
@@ -92,9 +99,8 @@ public class CourierDetailService implements CourierDetailServiceLocal {
 	public ResponseDto findAll() {
 		ResponseDto responseDto = new ResponseDto();
 		try {
-			CourierDetailsDTO dto = new CourierDetailsDTO();
-
-			Object wareHouseList = courierDao.findAll(dto);
+			RoleDetailsDTO dto = new RoleDetailsDTO();
+			Object wareHouseList = roleDao.findAll(dto);
 
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
@@ -110,10 +116,12 @@ public class CourierDetailService implements CourierDetailServiceLocal {
 	}
 
 	@Override
-	public ResponseDto delete(CourierDetailsDTO dto) {
+	public ResponseDto delete(RoleDetailsDTO dto) {
 		ResponseDto responseDto = new ResponseDto();
 		try {
-			courierDao.deleteById(dto);
+			// setting created at and updated at
+			//setCreateAtAndUpdateAt(dto);
+			roleDao.deleteById(dto);
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
 
@@ -126,5 +134,5 @@ public class CourierDetailService implements CourierDetailServiceLocal {
 		}
 		return responseDto;
 	}
-
+  
 }

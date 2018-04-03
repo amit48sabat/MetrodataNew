@@ -44,7 +44,7 @@ public class WareHouseService implements WareHouseServiceLocal {
 
 	private void setCreateAtAndUpdateAt(WareHouseDetailsDTO dto) {
 		Date currDate = new Date();
-		if (!ServicesUtil.isEmpty(dto.getWareHouseId()))
+		if (ServicesUtil.isEmpty(dto.getWareHouseId()))
 			dto.setCreatedAt(currDate);
 		dto.setUpdatedAt(currDate);
 	}
@@ -74,7 +74,7 @@ public class WareHouseService implements WareHouseServiceLocal {
 		ResponseDto responseDto = new ResponseDto();
 		try {
 			// setting created at and updated at
-			setCreateAtAndUpdateAt(dto);
+			//setCreateAtAndUpdateAt(dto);
 			dto = wareHouseDao.findById(dto);
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
@@ -94,7 +94,7 @@ public class WareHouseService implements WareHouseServiceLocal {
 		ResponseDto responseDto = new ResponseDto();
 		try {
 			// setting created at and updated at
-			setCreateAtAndUpdateAt(dto);
+			//setCreateAtAndUpdateAt(dto);
 			wareHouseDao.deleteById(dto);
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);

@@ -1,18 +1,11 @@
 package com.incture.metrodata.entity;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.Lob;
-import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -42,8 +35,8 @@ public class UserDetailsDo implements BaseDo {
 	@Column(name = "NAME",length=50)
 	private String name;
 	
-	@Column(name = "USER_TYPE",length=50)
-	private String userType;
+	@Column(name = "ROLE_ID")
+	private Long roleId;
 	
 	
 	@Column(name = "MOBILE_TOKEN")
@@ -82,7 +75,7 @@ public class UserDetailsDo implements BaseDo {
 	@Column(name = "LAST_LOGIN_TIME")
 	private Date lastLogedIn;
 	
-	@ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+	/*@ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
 	@JoinTable(name = "USERS_WAREHOUSE_MAPPING", joinColumns = { @JoinColumn(name = "USER_ID") }, inverseJoinColumns = {
 			@JoinColumn(name = "WARE_HOUSE_ID") })
 	private Set<WareHouseDetailsDo> wareHouseDetails = new HashSet<WareHouseDetailsDo>(0);
@@ -90,7 +83,13 @@ public class UserDetailsDo implements BaseDo {
 	@ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
 	@JoinTable(name = "USERS_COURIER_MAPPING", joinColumns = { @JoinColumn(name = "USER_ID") }, inverseJoinColumns = {
 			@JoinColumn(name = "COURIER_ID") })
-	private Set<CourierDetailsDo> courierDetails = new HashSet<CourierDetailsDo>(0);
+	private Set<CourierDetailsDo> courierDetails = new HashSet<CourierDetailsDo>(0);*/
+	
+	@Column(name = "WAREHOUSE_ID")
+	private Long wareHouseId;
+	
+	@Column(name = "COURIER_ID")
+	private Long courierId;
 	
 	@Override
 	public Object getPrimaryKey() {
