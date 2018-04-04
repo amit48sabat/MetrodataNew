@@ -30,13 +30,14 @@ public class WareHouseController {
 
 	
 
-	@RequestMapping(value = "/", method = RequestMethod.GET)
+	@RequestMapping( method = RequestMethod.GET)
 	public ResponseDto findAll() {
 		return wareHouseService.findAll();
 	}
 
-	@RequestMapping(method = RequestMethod.PUT)
-	public ResponseDto update(@RequestBody  WareHouseDetailsDTO dto) {
+	@RequestMapping(value="/{wareHouseId}",method = RequestMethod.PUT)
+	public ResponseDto update(@PathVariable Long wareHouseId, @RequestBody  WareHouseDetailsDTO dto) {
+		dto.setWareHouseId(wareHouseId);
 		return wareHouseService.update(dto);
 	}
 
