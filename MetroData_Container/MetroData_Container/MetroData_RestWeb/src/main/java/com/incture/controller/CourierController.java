@@ -52,7 +52,7 @@ public class CourierController {
 	public ResponseDto find(@PathVariable Long courierId) {
 		CourierDetailsDTO dto = new CourierDetailsDTO();
 		dto.setCourierId(courierId);
-		return courierService.delete(dto);
+		return courierService.find(dto);
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
