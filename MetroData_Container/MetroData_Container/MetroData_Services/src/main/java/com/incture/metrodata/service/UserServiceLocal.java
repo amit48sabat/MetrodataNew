@@ -5,8 +5,15 @@ import com.incture.metrodata.dto.UserDetailsDTO;
 
 public interface UserServiceLocal {
 
-	ResponseDto updateUserData(UserDetailsDTO userDetailsDTO);
 
 
-	ResponseDto findById(String userId);
+	ResponseDto create(UserDetailsDTO dto);
+
+	ResponseDto update(UserDetailsDTO dto);
+
+	ResponseDto find(UserDetailsDTO dto);
+
+	ResponseDto delete(UserDetailsDTO dto);
+
+	ResponseDto findAll();
 }

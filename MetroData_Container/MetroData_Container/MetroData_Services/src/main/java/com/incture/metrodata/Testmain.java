@@ -1,25 +1,23 @@
 package com.incture.metrodata;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.pdf.Barcode128;
-import com.itextpdf.text.pdf.PdfContentByte;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfTemplate;
-import com.itextpdf.text.pdf.PdfWriter;
+import org.apache.commons.codec.binary.Base64;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 
 public class Testmain {
 	
-	public static final String DEST = "results/barcodes/barcode_background.pdf";
 	 
-    public static void main(String[] args) throws IOException, DocumentException {
+   /* public static void main(String[] args) throws IOException, DocumentException {
     	File file = File.createTempFile("temp-file-name", ".pdf"); 
 		
  	   System.err.println("Temp file : " + file.getAbsolutePath());
@@ -27,7 +25,7 @@ public class Testmain {
         new Testmain().createPdf(file.getAbsolutePath());
     }
     public void createPdf(String dest) throws IOException, DocumentException {
-        /*Document document = new Document();
+        Document document = new Document();
         
         PdfPTable table = new PdfPTable(new float[] { 2, 1, 2 });
   	  table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -68,7 +66,7 @@ public class Testmain {
         canvas.fill();
         canvas.restoreState();
         canvas.addTemplate(template, 50, 750);
-        document.close();*/
+        document.close();
         
         
         
@@ -93,10 +91,71 @@ public class Testmain {
             document.add(table);
   	  document.close();
   	  System.out.println("Done");
-    }
+    }*/
  
    
     
-   
+	
+
+
+		// http://localhost:8080/RESTfulExample/json/product/post
+		public static void main(String[] args) {
+
+		  try {
+
+			URL url = new URL("https://metrodata.accounts.ondemand.com/service/scim/Users");
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setDoOutput(true);
+			conn.setRequestMethod("POST");
+			conn.setRequestProperty("Content-Type", "application/scim+json");
+			 String authString = "T000003" + ":" + "Am12345!";
+		        String authStringEnc = new String(Base64.encodeBase64(authString.getBytes()));
+		        conn.setRequestProperty("Authorization", "Basic " + authStringEnc);
+		        JsonObject obj = new JsonObject();
+		        JsonObject name = new  JsonObject();
+		        JsonArray array = new JsonArray();
+		        JsonObject email = new JsonObject();
+		        email.addProperty("value", "luckybarkane54118@gmail.com");
+		        array.add(email);
+		        name.addProperty("familyName", "abcd");
+		       // obj.addProperty("name", name.toString());
+		        obj.add("emails", array);
+		        
+
+
+			OutputStream os = conn.getOutputStream();
+			os.write(obj.toString().getBytes());
+			os.flush();
+
+			if (conn.getResponseCode() != HttpURLConnection.HTTP_CREATED) {
+				throw new RuntimeException("Failed : HTTP error code : "
+					+ conn.getResponseCode());
+			}
+			if(conn.getResponseCode() == HttpURLConnection.HTTP_CONFLICT){
+				throw new RuntimeException("user already exists");
+			}
+
+			BufferedReader br = new BufferedReader(new InputStreamReader(
+					(conn.getInputStream())));
+
+			String output;
+			System.out.println("Output from Server .... \n");
+			while ((output = br.readLine()) != null) {
+				System.out.println(output);
+			}
+
+			conn.disconnect();
+
+		  } catch (MalformedURLException e) {
+
+			e.printStackTrace();
+
+		  } catch (IOException e) {
+
+			e.printStackTrace();
+
+		 }
+
+}
 }
 

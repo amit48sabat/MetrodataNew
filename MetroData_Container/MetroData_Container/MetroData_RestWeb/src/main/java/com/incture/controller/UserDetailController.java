@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.incture.metrodata.dto.ResponseDto;
@@ -28,17 +27,35 @@ public class UserDetailController {
 	TripServiceLocal tripService;
 	
 	@RequestMapping(method = RequestMethod.POST)
-	public @ResponseBody ResponseDto createUser(@RequestBody UserDetailsDTO dto) {
-		return userServiceLocal.updateUserData(dto);
+	public ResponseDto create(@RequestBody UserDetailsDTO dto) {
+		return userServiceLocal.create(dto);
 	}
+
 	
-	@RequestMapping(value = "/{userId}", method = RequestMethod.GET)
-	public  ResponseDto getUser( @PathVariable String userId) 
-	{
-		return userServiceLocal.findById(userId);
-		
+
+	@RequestMapping( method = RequestMethod.GET)
+	public ResponseDto findAll() {
+		return userServiceLocal.findAll();
 	}
-  
+
+	@RequestMapping(value = "/{userId}",method = RequestMethod.PUT)
+	public ResponseDto update(@PathVariable Long wareHouseId,@RequestBody  UserDetailsDTO dto) {
+		return userServiceLocal.update(dto);
+	}
+
+	@RequestMapping(value = "/{userId}", method = RequestMethod.DELETE)
+	public ResponseDto delete(@PathVariable String userId) {
+		UserDetailsDTO dto = new UserDetailsDTO();
+		dto.setUserId(userId);
+		return userServiceLocal.delete(dto);
+	}
+
+	@RequestMapping(value = "/{userId}", method = RequestMethod.GET)
+	public ResponseDto findById(@PathVariable String userId) {
+		UserDetailsDTO dto = new UserDetailsDTO();
+		dto.setUserId(userId);
+		return userServiceLocal.find(dto);
+	}
 	@RequestMapping(value="/dashboard",method = RequestMethod.GET)
 	public  ResponseDto userDashboard(HttpServletRequest request) {
 		String userId  = request.getUserPrincipal().getName();
