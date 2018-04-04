@@ -16,4 +16,7 @@ public interface UserServiceLocal {
 	ResponseDto delete(UserDetailsDTO dto);
 
 	ResponseDto findAll();
+	
+	// for creating metrodata default technical user
+	ResponseDto createDefaultUser(UserDetailsDTO dto);
 }

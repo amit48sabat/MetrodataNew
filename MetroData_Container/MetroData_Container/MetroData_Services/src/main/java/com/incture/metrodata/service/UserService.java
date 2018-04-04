@@ -41,7 +41,7 @@ public class UserService implements UserServiceLocal {
 			array.add(email);
 			name.addProperty("familyName", dto.getLastName());
 			name.addProperty("givenName", dto.getFirstName());
-			//userObj.add("name", name);
+			userObj.add("name", name);
 			userObj.add("emails", array);
 			String respData = restInvoker.postDataToServer("/Users", userObj.toString());
 			if (!ServicesUtil.isEmpty(respData)) {
@@ -143,6 +143,52 @@ public class UserService implements UserServiceLocal {
 			responseDto.setCode(HttpStatus.SC_OK);
 			responseDto.setData(wareHouseList);
 			responseDto.setMessage(Message.SUCCESS.getValue());
+		} catch (Exception e) {
+			responseDto.setStatus(false);
+			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			responseDto.setMessage(Message.FAILED.getValue());
+			e.printStackTrace();
+		}
+		return responseDto;
+	}
+
+	@Override
+	public ResponseDto createDefaultUser(UserDetailsDTO dto) {
+		ResponseDto responseDto = new ResponseDto();
+		try {
+			// setting created at and updated at
+			setCreateAtAndUpdateAt(dto);
+			JsonObject userObj = new JsonObject();
+			JsonObject name = new JsonObject();
+			JsonArray array = new JsonArray();
+			JsonObject email = new JsonObject();
+			email.addProperty("value", dto.getEmail());
+			array.add(email);
+			name.addProperty("familyName", dto.getLastName());
+			name.addProperty("givenName", dto.getFirstName());
+			//userObj.add("name", name);
+			userObj.add("emails", array);
+			userObj.add("name", name);
+			String respData = restInvoker.postDataToServer("/Users", userObj.toString());
+			if (!ServicesUtil.isEmpty(respData)) {
+				JSONObject returnObj = new JSONObject(respData);
+				// if user id is set mean user is created in idp need to create in our db also
+				if(!ServicesUtil.isEmpty(returnObj.getString("id"))){
+					
+					dto.setUserId(returnObj.getString("id"));
+					dto = userDAO.create(dto, new UserDetailsDo());
+					responseDto.setStatus(true);
+					responseDto.setCode(HttpStatus.SC_OK);
+					responseDto.setData(dto);
+					responseDto.setMessage(Message.SUCCESS.getValue());
+				}else
+				{
+				   // no action because user already exists
+				}
+			}
+			else{
+				
+			}
 		} catch (Exception e) {
 			responseDto.setStatus(false);
 			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);

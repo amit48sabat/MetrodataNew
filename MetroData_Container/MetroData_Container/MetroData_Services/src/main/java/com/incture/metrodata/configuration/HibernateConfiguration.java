@@ -28,6 +28,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.google.maps.GeoApiContext;
 import com.incture.metrodata.MyJobTwo;
+import com.incture.metrodata.dto.UserDetailsDTO;
+import com.incture.metrodata.service.UserServiceLocal;
 import com.incture.metrodata.util.RESTInvoker;
 
 @Configuration
@@ -38,6 +40,9 @@ public class HibernateConfiguration {
 
 	@Autowired
 	private Environment environment;
+	
+	@Autowired
+	private UserServiceLocal  userservice;
 
 	@Bean
 	public LocalSessionFactoryBean sessionFactory() {
@@ -92,6 +97,16 @@ public class HibernateConfiguration {
 		return new RESTInvoker(url, username, password);
 	}
 
+	@Bean
+	public Boolean onStartUp() {
+		UserDetailsDTO dto = new UserDetailsDTO();
+		dto.setEmail(environment.getRequiredProperty("metrodata.onstart.tech.username"));
+		dto.setFirstName(environment.getRequiredProperty("metrodata.onstart.tech.firstname"));
+		dto.setLastName(environment.getRequiredProperty("metrodata.onstart.tech.lastname"));
+		userservice.createDefaultUser(dto);
+		return true;
+	}
+	
 	@Bean
 	public JobDetail jobDetailFactoryBean() {
 		JobDetail job = JobBuilder.newJob(MyJobTwo.class).
