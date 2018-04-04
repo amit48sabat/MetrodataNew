@@ -49,7 +49,7 @@ public class WareHouseDAO extends BaseDao<WareHouseDetailsDo, WareHouseDetailsDT
 			dto.setWareHouseName(dos.getWareHouseName());
 		}
 		if (!ServicesUtil.isEmpty(dos.getCreatedAt())) {
-			dto.setCreatedAt(dto.getCreatedAt());
+			dto.setCreatedAt(dos.getCreatedAt());
 		}
 		if (!ServicesUtil.isEmpty(dos.getUpdatedAt())) {
 			dto.setUpdatedAt(dos.getUpdatedAt());
