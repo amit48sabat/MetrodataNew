@@ -8,6 +8,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.Restrictions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.incture.metrodata.constant.DeliveryNoteStatus;
@@ -20,7 +21,9 @@ import com.incture.metrodata.util.ServicesUtil;
 
 @Repository("DeliveryHeaderDao")
 public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderDTO> {
-
+	@Autowired
+	DeliveryItemDAO deliveryItemDAO ;
+	
 	@Override
 	public DeliveryHeaderDo importDto(DeliveryHeaderDTO deliveryHeaderDTO, DeliveryHeaderDo deliveryHeaderDo)
 			throws Exception {
@@ -119,7 +122,7 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			
 			// importing delivery items
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getDeliveryItems())) {
-				DeliveryItemDAO deliveryItemDAO = new DeliveryItemDAO();
+				
 				List<DeliveryItemDo> itemDos = deliveryItemDAO.importList(deliveryHeaderDTO.getDeliveryItems(),
 						deliveryHeaderDo.getDeliveryItems());
 				deliveryHeaderDo.setDeliveryItems(itemDos);
@@ -223,7 +226,6 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			
 			// exporting delivery items
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getDeliveryItems())) {
-				DeliveryItemDAO deliveryItemDAO = new DeliveryItemDAO();
 				List<DeliveryItemDTO> itemDtos = deliveryItemDAO.exportList(deliveryHeaderDo.getDeliveryItems());
 				deliveryHeaderDTO.setDeliveryItems(itemDtos);
 			}

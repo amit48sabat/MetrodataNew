@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SearchMessageVO extends BaseDto {
-	private String userName;
+	private String userId;
 	private String tripId;
 	private String type;
 	private Date startedAt;

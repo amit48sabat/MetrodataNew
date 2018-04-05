@@ -114,13 +114,13 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 				userDetailsDTO.setCreatedDate(detailsDo.getCreatedDate());
 			}
 
-			if (ServicesUtil.isEmpty(detailsDo.getFirstName())) {
+			if (!ServicesUtil.isEmpty(detailsDo.getFirstName())) {
 				userDetailsDTO.setFirstName(detailsDo.getFirstName());
 			}
-			if (ServicesUtil.isEmpty(detailsDo.getLastName())) {
+			if (!ServicesUtil.isEmpty(detailsDo.getLastName())) {
 				userDetailsDTO.setLastName(detailsDo.getLastName());
 			}
-			if (ServicesUtil.isEmpty(detailsDo.getEmail())) {
+			if (!ServicesUtil.isEmpty(detailsDo.getEmail())) {
 				userDetailsDTO.setEmail(detailsDo.getEmail());
 			}
 			if (!ServicesUtil.isEmpty(detailsDo.getParentId())) {

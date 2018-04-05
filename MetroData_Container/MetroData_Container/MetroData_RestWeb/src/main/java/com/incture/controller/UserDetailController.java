@@ -39,7 +39,7 @@ public class UserDetailController {
 	}
 
 	@RequestMapping(value = "/{userId}",method = RequestMethod.PUT)
-	public ResponseDto update(@PathVariable Long wareHouseId,@RequestBody  UserDetailsDTO dto) {
+	public ResponseDto update(@RequestBody  UserDetailsDTO dto) {
 		return userServiceLocal.update(dto);
 	}
 

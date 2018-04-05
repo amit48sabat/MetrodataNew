@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.incture.metrodata.dao.UserDAO;
 import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.service.UserServiceLocal;
@@ -40,7 +41,10 @@ public class AuthenticationController {
 
 	@Autowired
 	UserServiceLocal userService;
-
+	
+	@Autowired
+	UserDAO userDAO;
+	
 	@Autowired
 	RESTInvoker restInvoker;
 
@@ -90,9 +94,9 @@ public class AuthenticationController {
 			// updating user in database
             Date date = new Date();
             user.setLastLogedIn(date);
-			//userService.updateUserData(user);
-
-			responseDto.setData(user);
+			userService.update(user);
+			ResponseDto dto = userService.find(user);
+			responseDto.setData(dto.getData());
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.OK.value());
 		} else {

@@ -36,7 +36,7 @@ import com.incture.metrodata.util.SortDhDTOByDeliveryOrder;
 public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 
 	@Autowired
-	DeliveryHeaderDAO headerDao;
+	DeliveryHeaderDAO deliveryHeaderDAO;
 
 	@Override
 	TripDetailsDo importDto(TripDetailsDTO dto, TripDetailsDo tripDetailsDo) throws Exception {
@@ -93,7 +93,6 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 
 			// importing all the delivery headers
 			if (!ServicesUtil.isEmpty(dto.getDeliveryHeader())) {
-				DeliveryHeaderDAO deliveryHeaderDAO = new DeliveryHeaderDAO();
 				Set<DeliveryHeaderDo> deliveryHeaderList = deliveryHeaderDAO.importSet(dto.getDeliveryHeader(),
 						tripDetailsDo.getDeliveryHeader());
 
@@ -144,7 +143,6 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 
 			// exporting all the delivery headers
 			if (!ServicesUtil.isEmpty(dos.getDeliveryHeader())) {
-				DeliveryHeaderDAO deliveryHeaderDAO = new DeliveryHeaderDAO();
 				Set<DeliveryHeaderDTO> deliveryHeaderList = deliveryHeaderDAO.exportSet(dos.getDeliveryHeader(),
 						new SortDhDTOByDeliveryOrder());
 				dto.setDeliveryHeader(deliveryHeaderList);
