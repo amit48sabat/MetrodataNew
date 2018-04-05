@@ -1,5 +1,6 @@
 package com.incture.metrodata.dao;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.incture.metrodata.dto.UserDetailsDTO;
@@ -8,6 +9,9 @@ import com.incture.metrodata.util.ServicesUtil;
 
 @Repository("UserDao")
 public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
+
+	@Autowired
+	RoleDetailDAO roleDao;
 
 	@Override
 	public UserDetailsDo importDto(UserDetailsDTO userDetailsDTO, UserDetailsDo detailsDo) throws Exception {
@@ -30,8 +34,9 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			if (!ServicesUtil.isEmpty(userDetailsDTO.getName())) {
 				detailsDo.setName(userDetailsDTO.getName());
 			}
-			if (!ServicesUtil.isEmpty(userDetailsDTO.getRoleId())) {
-				detailsDo.setRoleId(userDetailsDTO.getRoleId());
+			if (!ServicesUtil.isEmpty(userDetailsDTO.getRole())) {
+
+				detailsDo.setRole(roleDao.importDto(userDetailsDTO.getRole(), detailsDo.getRole()));
 			}
 			if (!ServicesUtil.isEmpty(userDetailsDTO.getMobileToken())) {
 				detailsDo.setMobileToken(userDetailsDTO.getMobileToken());
@@ -58,21 +63,22 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			if (!ServicesUtil.isEmpty(userDetailsDTO.getCourierId())) {
 				detailsDo.setCourierId(userDetailsDTO.getCourierId());
 			}
-			
-			/* parsing warehouse details
-			if (!ServicesUtil.isEmpty(userDetailsDTO.getWareHouseDetails())) {
-				WareHouseDAO wareHouseDao = new WareHouseDAO();
-				detailsDo.setWareHouseDetails(
-						wareHouseDao.importSet(userDetailsDTO.getWareHouseDetails(), detailsDo.getWareHouseDetails()));
-			}
 
-			// parsing courier details
-			if (!ServicesUtil.isEmpty(userDetailsDTO.getCourierDetails())) {
-				CourierDetailsDAO courierDao = new CourierDetailsDAO();
-				detailsDo.setCourierDetails(
-						courierDao.importSet(userDetailsDTO.getCourierDetails(), detailsDo.getCourierDetails()));
-			}
-			*/
+			/*
+			 * parsing warehouse details if
+			 * (!ServicesUtil.isEmpty(userDetailsDTO.getWareHouseDetails())) {
+			 * WareHouseDAO wareHouseDao = new WareHouseDAO();
+			 * detailsDo.setWareHouseDetails(
+			 * wareHouseDao.importSet(userDetailsDTO.getWareHouseDetails(),
+			 * detailsDo.getWareHouseDetails())); }
+			 * 
+			 * // parsing courier details if
+			 * (!ServicesUtil.isEmpty(userDetailsDTO.getCourierDetails())) {
+			 * CourierDetailsDAO courierDao = new CourierDetailsDAO();
+			 * detailsDo.setCourierDetails(
+			 * courierDao.importSet(userDetailsDTO.getCourierDetails(),
+			 * detailsDo.getCourierDetails())); }
+			 */
 
 		}
 		return detailsDo;
@@ -88,8 +94,9 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			if (!ServicesUtil.isEmpty(detailsDo.getName())) {
 				userDetailsDTO.setName(detailsDo.getName());
 			}
-			if (!ServicesUtil.isEmpty(detailsDo.getRoleId())) {
-				userDetailsDTO.setRoleId(detailsDo.getRoleId());
+			if (!ServicesUtil.isEmpty(userDetailsDTO.getRole())) {
+
+				userDetailsDTO.setRole(roleDao.exportDto(detailsDo.getRole()));
 			}
 			if (!ServicesUtil.isEmpty(detailsDo.getMobileToken())) {
 				userDetailsDTO.setMobileToken(detailsDo.getMobileToken());
@@ -126,20 +133,22 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			if (!ServicesUtil.isEmpty(detailsDo.getCourierId())) {
 				userDetailsDTO.setCourierId(detailsDo.getCourierId());
 			}
-			
-			/* parsing warehouse details
-			if (!ServicesUtil.isEmpty(userDetailsDTO.getWareHouseDetails())) {
-				WareHouseDAO wareHouseDao = new WareHouseDAO();
-				userDetailsDTO.setWareHouseDetails(
-						wareHouseDao.exportSet(detailsDo.getWareHouseDetails(), new WareHouseComparator()));
-			}
 
-			// parsing courier details
-			if (!ServicesUtil.isEmpty(userDetailsDTO.getCourierDetails())) {
-				CourierDetailsDAO courierDao = new CourierDetailsDAO();
-				userDetailsDTO.setCourierDetails(
-						courierDao.exportSet(detailsDo.getCourierDetails(), new CourierDetailsComparator()));
-			} */
+			/*
+			 * parsing warehouse details if
+			 * (!ServicesUtil.isEmpty(userDetailsDTO.getWareHouseDetails())) {
+			 * WareHouseDAO wareHouseDao = new WareHouseDAO();
+			 * userDetailsDTO.setWareHouseDetails(
+			 * wareHouseDao.exportSet(detailsDo.getWareHouseDetails(), new
+			 * WareHouseComparator())); }
+			 * 
+			 * // parsing courier details if
+			 * (!ServicesUtil.isEmpty(userDetailsDTO.getCourierDetails())) {
+			 * CourierDetailsDAO courierDao = new CourierDetailsDAO();
+			 * userDetailsDTO.setCourierDetails(
+			 * courierDao.exportSet(detailsDo.getCourierDetails(), new
+			 * CourierDetailsComparator())); }
+			 */
 		}
 		return userDetailsDTO;
 	}

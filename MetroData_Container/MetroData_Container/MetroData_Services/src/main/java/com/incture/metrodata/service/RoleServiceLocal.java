@@ -10,6 +10,7 @@ public interface RoleServiceLocal {
 	ResponseDto find(RoleDetailsDTO dto);
 	ResponseDto findAll();
 	ResponseDto delete(RoleDetailsDTO dto);
+	RoleDetailsDTO getRoleByRoleName(String roleName);
 	
 	
 }

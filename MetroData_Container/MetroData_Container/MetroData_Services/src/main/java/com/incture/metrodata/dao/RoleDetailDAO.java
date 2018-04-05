@@ -1,5 +1,7 @@
 package com.incture.metrodata.dao;
 
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.incture.metrodata.dto.RoleDetailsDTO;
@@ -58,4 +60,11 @@ public class RoleDetailDAO extends BaseDao<RoleDetailsDo, RoleDetailsDTO> {
 		return dto;
 	}
 
+	
+	public RoleDetailsDTO getRoleByName(String name){
+		Criteria crit = getSession().createCriteria(RoleDetailsDo.class);
+		crit.add(Restrictions.eq("roleName",name).ignoreCase());
+		RoleDetailsDo roleDo = (RoleDetailsDo) crit.uniqueResult();
+		return exportDto(roleDo);
+	}
 }

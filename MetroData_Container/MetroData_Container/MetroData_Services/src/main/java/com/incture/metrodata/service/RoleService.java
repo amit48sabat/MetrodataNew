@@ -134,5 +134,15 @@ public class RoleService implements RoleServiceLocal{
 		}
 		return responseDto;
 	}
-  
+   
+	// for internal use only
+	@Override
+	public RoleDetailsDTO getRoleByRoleName(String roleName){
+		RoleDetailsDTO roleDto = null;
+		if(!ServicesUtil.isEmpty(roleName)){
+			roleDto = roleDao.getRoleByName(roleName);
+		}
+		return roleDto;
+	}
+	
 }

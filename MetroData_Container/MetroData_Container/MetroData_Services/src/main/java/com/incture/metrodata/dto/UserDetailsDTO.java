@@ -19,7 +19,6 @@ public class UserDetailsDTO extends BaseDto {
 	private String mobileToken;
 	private String webToken;
 	//private String userType;
-	private Long roleId;
 	private Double longitude;
 	private Double latitude;
 	private Date lastLogedIn;
@@ -27,6 +26,7 @@ public class UserDetailsDTO extends BaseDto {
 	private Date createdAt;
 	private Date updatedAt;
 	private String parentId;
+	private RoleDetailsDTO role;
 	/*
 	 * private Set<WareHouseDetailsDTO> wareHouseDetails = new
 	 * HashSet<WareHouseDetailsDTO>(0); private Set<CourierDetailsDTO>

@@ -20,6 +20,11 @@ import lombok.Setter;
 @Table(name = "ROLE_DETAILS")
 public class RoleDetailsDo implements BaseDo {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "ROLE_ID")

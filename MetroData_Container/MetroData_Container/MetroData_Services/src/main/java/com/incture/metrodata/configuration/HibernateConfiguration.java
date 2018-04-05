@@ -28,8 +28,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.google.maps.GeoApiContext;
 import com.incture.metrodata.MyJobTwo;
-import com.incture.metrodata.dto.UserDetailsDTO;
-import com.incture.metrodata.service.UserServiceLocal;
+import com.incture.metrodata.dto.DefaultUserDetailsVO;
 import com.incture.metrodata.util.RESTInvoker;
 
 @Configuration
@@ -40,9 +39,10 @@ public class HibernateConfiguration {
 
 	@Autowired
 	private Environment environment;
-	
-	@Autowired
-	private UserServiceLocal  userservice;
+
+	/*
+	 * @Autowired private UserServiceLocal userservice;
+	 */
 
 	@Bean
 	public LocalSessionFactoryBean sessionFactory() {
@@ -98,19 +98,17 @@ public class HibernateConfiguration {
 	}
 
 	@Bean
-	public Boolean onStartUp() {
-		UserDetailsDTO dto = new UserDetailsDTO();
+	public DefaultUserDetailsVO onStartUp() {
+		DefaultUserDetailsVO dto = new DefaultUserDetailsVO();
 		dto.setEmail(environment.getRequiredProperty("metrodata.onstart.tech.username"));
 		dto.setFirstName(environment.getRequiredProperty("metrodata.onstart.tech.firstname"));
 		dto.setLastName(environment.getRequiredProperty("metrodata.onstart.tech.lastname"));
-		userservice.createDefaultUser(dto);
-		return true;
+		return dto;
 	}
-	
+
 	@Bean
 	public JobDetail jobDetailFactoryBean() {
-		JobDetail job = JobBuilder.newJob(MyJobTwo.class).
-				withIdentity("ECCFetchJob", "group1").build();
+		JobDetail job = JobBuilder.newJob(MyJobTwo.class).withIdentity("ECCFetchJob", "group1").build();
 		return job;
 	}
 
@@ -118,8 +116,8 @@ public class HibernateConfiguration {
 	@Bean
 	public CronTrigger cronTriggerFactoryBean() {
 
-		CronTrigger crontrigger = TriggerBuilder.newTrigger()
-				.withIdentity("ECCFetchTrigger", "group1").startAt(new Date())
+		CronTrigger crontrigger = TriggerBuilder.newTrigger().withIdentity("ECCFetchTrigger", "group1")
+				.startAt(new Date())
 				// .startNow()
 				.withSchedule(CronScheduleBuilder.cronSchedule("0/20 * * * * ?")).build();
 		return crontrigger;
