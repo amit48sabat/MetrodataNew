@@ -25,26 +25,22 @@ public class UserDetailController {
 
 	@Autowired
 	TripServiceLocal tripService;
-	
+
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseDto create(@RequestBody UserDetailsDTO dto) {
 		return userServiceLocal.create(dto);
 	}
 
-	
-
-	@RequestMapping( method = RequestMethod.GET)
+	@RequestMapping(method = RequestMethod.GET)
 	public ResponseDto findAll() {
 		return userServiceLocal.findAll();
 	}
 
-	@RequestMapping(value = "/{userId}",method = RequestMethod.PUT)
-<<<<<<< HEAD
-	public ResponseDto update(@PathVariable String userId,@RequestBody  UserDetailsDTO dto) {
-	dto.setUserId(userId);
-=======
-	public ResponseDto update(@RequestBody  UserDetailsDTO dto) {
->>>>>>> branch 'master' of https://github.com/amit48sabat/MetrodataNew.git
+	@RequestMapping(value = "/{userId}", method = RequestMethod.PUT)
+
+	public ResponseDto update(@PathVariable String userId, @RequestBody UserDetailsDTO dto) {
+		dto.setUserId(userId);
+
 		return userServiceLocal.update(dto);
 	}
 
@@ -61,10 +57,11 @@ public class UserDetailController {
 		dto.setUserId(userId);
 		return userServiceLocal.find(dto);
 	}
-	@RequestMapping(value="/dashboard",method = RequestMethod.GET)
-	public  ResponseDto userDashboard(HttpServletRequest request) {
-		String userId  = request.getUserPrincipal().getName();
+
+	@RequestMapping(value = "/dashboard", method = RequestMethod.GET)
+	public ResponseDto userDashboard(HttpServletRequest request) {
+		String userId = request.getUserPrincipal().getName();
 		return tripService.driverDashboardService(userId);
 	}
-	
+
 }
