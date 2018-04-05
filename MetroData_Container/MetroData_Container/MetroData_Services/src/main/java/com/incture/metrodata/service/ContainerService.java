@@ -2,6 +2,7 @@ package com.incture.metrodata.service;
 
 import java.util.Map;
 
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import com.incture.metrodata.dto.ContainerDetailsDTO;
 import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.entity.ContainerDetailsDo;
 import com.incture.metrodata.entity.DeliveryHeaderDo;
+import com.incture.metrodata.util.ServicesUtil;
 
 @Service("containerService")
 @Transactional
@@ -36,22 +38,32 @@ public class ContainerService implements ContainerServiceLocal {
 	@Override
 	public ResponseDto create(ContainerDTO dto) {
 		ResponseDto response = new ResponseDto();
-
-		try {
-			for (ContainerDetailsDTO d : dto.getDELIVERY().getItem()) {
-				containerDao.create(d, new ContainerDetailsDo());
+         
+		if(!ServicesUtil.isEmpty(dto) && !ServicesUtil.isEmpty(dto.getDELIVERY()) ){
+			try {
+				for (ContainerDetailsDTO d : dto.getDELIVERY().getItem()) {
+					containerDao.create(d, new ContainerDetailsDo());
+				}
+				Object data = createEntryInDeliveryHeader(dto);
+				response.setStatus(true);
+				response.setCode(HttpStatus.SC_OK);
+				response.setData(data);
+				response.setMessage(Message.SUCCESS + "");
+			} catch (Exception e) {
+				response.setStatus(false);
+				response.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+				response.setData(dto);
+				response.setMessage(Message.FAILED + " : " + e.toString());
+				e.printStackTrace();
 			}
-			Object data = createEntryInDeliveryHeader(dto);
-			response.setStatus(true);
-			response.setCode(200);
-			response.setData(data);
-			response.setMessage(Message.SUCCESS + "");
-		} catch (Exception e) {
-			response.setStatus(false);
-			response.setCode(417);
-			response.setMessage(Message.FAILED + " : " + e.toString());
 		}
-
+		else{
+			response.setStatus(true);
+			response.setMessage(Message.FAILED.getValue());
+			response.setData(dto);
+			response.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+		}
+		
 		return response;
 	}
 

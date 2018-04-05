@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.gson.Gson;
+import com.incture.metrodata.constant.Message;
 import com.incture.metrodata.dto.ContainerDTO;
 import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.service.ContainerServiceLocal;
@@ -24,9 +25,19 @@ public class ContainerController {
 	
 	@RequestMapping( method = RequestMethod.POST)
 	public ResponseDto create(@RequestBody String controllerJson) {
-		
-		Gson gson = new Gson();
-		ContainerDTO dto = gson.fromJson(controllerJson.toString(), ContainerDTO.class);
-		return containerService.create(dto);
+		ResponseDto response = new ResponseDto();
+	  try{
+		   Gson gson = new Gson();
+			ContainerDTO dto = gson.fromJson(controllerJson.toString(), ContainerDTO.class);
+			 response = containerService.create(dto);
+	   }catch(Exception e){
+		    response.setStatus(true);
+			response.setMessage(Message.FAILED.getValue());
+			response.setData(controllerJson);
+			response.setCode(500);
+			e.printStackTrace();
+	   }
+	 
+		return response;
 	}	
 }
