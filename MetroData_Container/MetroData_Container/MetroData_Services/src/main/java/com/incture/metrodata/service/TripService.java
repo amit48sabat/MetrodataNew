@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,7 +132,13 @@ public class TripService implements TripServiceLocal {
 
 			if (!ServicesUtil.isEmpty(dto.getStatus()))
 				updateTripStatusConstraints(dto);
-
+            
+			// if user/driver is set than add this driver to trip's delivery notes
+			if(!ServicesUtil.isEmpty(dto.getUser()))
+			{
+				setAssignedUserInDeliveryHeader(dto);
+			}
+				
 			dto = tripDao.update(dto);
 
 			responseDto.setStatus(true);
@@ -144,6 +151,16 @@ public class TripService implements TripServiceLocal {
 			responseDto.setMessage(Message.FAILED + " : " + e.getMessage());
 		}
 		return responseDto;
+	}
+
+	private void setAssignedUserInDeliveryHeader(TripDetailsDTO dto) {
+		if(!ServicesUtil.isEmpty(dto.getDeliveryHeader())){
+			 UserDetailsDTO user  = dto.getUser();
+			 Set<DeliveryHeaderDTO> deliveryHeader = dto.getDeliveryHeader();
+			for(DeliveryHeaderDTO d : deliveryHeader){
+				d.setAssignedUser(user.getUserId());
+			}
+		}
 	}
 
 	private void updateTripStatusConstraints(TripDetailsDTO dto) {

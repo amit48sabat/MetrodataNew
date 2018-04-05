@@ -91,6 +91,9 @@ public class DeliveryHeaderDo implements BaseDo {
 
 	@Column(name = "STATUS")
 	private String status;
+	
+	@Column(name = "ASSIGNED_USER")
+	private String assignedUser;
 
 	// expected delivery date
 	@Temporal(TemporalType.TIMESTAMP)

@@ -87,7 +87,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 				 */
 				if (!ServicesUtil.isEmpty(tripDetailsDo.getUser()))
 					tripDetailsDo.setUser(userDAO.importDto(dto.getUser(), tripDetailsDo.getUser()));
-				else
+				else	
 					tripDetailsDo.setUser(userDAO.importDto(dto.getUser(), null));
 			}
 

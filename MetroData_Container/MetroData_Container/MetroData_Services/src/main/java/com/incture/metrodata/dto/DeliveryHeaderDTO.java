@@ -50,7 +50,7 @@ public class DeliveryHeaderDTO extends BaseDto {
 	private String fileName;
 	private Integer rating;
 	private String receiverName;
-	
+	private String assignedUser;
 
 	@Override
 	public void validate(DB_Operation enOperation) throws InvalidInputFault {

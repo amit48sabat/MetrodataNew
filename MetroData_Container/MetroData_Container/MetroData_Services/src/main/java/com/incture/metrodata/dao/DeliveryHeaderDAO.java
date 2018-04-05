@@ -113,6 +113,10 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getUpdatedAt())) {
 				deliveryHeaderDo.setUpdatedAt(deliveryHeaderDTO.getUpdatedAt());
 			}
+			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getAssignedUser())) {
+				deliveryHeaderDo.setAssignedUser(deliveryHeaderDTO.getAssignedUser());
+			}
+			
 			// importing delivery items
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getDeliveryItems())) {
 				DeliveryItemDAO deliveryItemDAO = new DeliveryItemDAO();
@@ -213,6 +217,10 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getUpdatedAt())) {
 				deliveryHeaderDTO.setUpdatedAt(deliveryHeaderDo.getUpdatedAt());
 			}
+			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getAssignedUser())) {
+				deliveryHeaderDTO.setAssignedUser(deliveryHeaderDo.getAssignedUser());
+			}
+			
 			// exporting delivery items
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getDeliveryItems())) {
 				DeliveryItemDAO deliveryItemDAO = new DeliveryItemDAO();
