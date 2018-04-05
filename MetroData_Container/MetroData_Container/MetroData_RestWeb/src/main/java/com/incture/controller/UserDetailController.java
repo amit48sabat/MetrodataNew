@@ -39,8 +39,12 @@ public class UserDetailController {
 	}
 
 	@RequestMapping(value = "/{userId}",method = RequestMethod.PUT)
+<<<<<<< HEAD
 	public ResponseDto update(@PathVariable String userId,@RequestBody  UserDetailsDTO dto) {
 	dto.setUserId(userId);
+=======
+	public ResponseDto update(@RequestBody  UserDetailsDTO dto) {
+>>>>>>> branch 'master' of https://github.com/amit48sabat/MetrodataNew.git
 		return userServiceLocal.update(dto);
 	}
 

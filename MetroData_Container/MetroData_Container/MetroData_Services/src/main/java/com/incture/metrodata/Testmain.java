@@ -1,17 +1,9 @@
 package com.incture.metrodata;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 
-import org.apache.commons.codec.binary.Base64;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.google.android.gcm.server.Message;
+import com.google.android.gcm.server.Sender;
 
 
 public class Testmain {
@@ -98,7 +90,7 @@ public class Testmain {
 	
 
 
-		// http://localhost:8080/RESTfulExample/json/product/post
+		/*// http://localhost:8080/RESTfulExample/json/product/post
 		public static void main(String[] args) {
 
 		  try {
@@ -156,6 +148,20 @@ public class Testmain {
 
 		 }
 
-}
+}*/
+	
+	public static void main(String[] args) {
+		
+		Sender sender = new Sender("AAAALvsOsWI:APA91bHcyMLOehvRvG4PIrjkWcfOrMhMVAT6v4VElu5v45R8amrQuN5zBPFdsAFOUqXyHtzmsM3jrhtopiuzyh9W4KGb5ukTOorOB6X9T-YYb8SAEDQQw8CU06TSQEQJKVq3xBltD_GU");
+		Message message = new Message.Builder()
+				.addData("title", "asdasdd").addData("body", "aasda").collapseKey("type_a")
+				.build();
+		try {
+			sender.send(message, "fLVxRcyd3F4:APA91bE4U7O2d77q3RYKw1H109BZcncU3AyEM80IRJNxzlvTwVo_74S8hv6TdvGjF3l1zxlOHerkNJLgwn5ZYRwI-nFhtcG3tleuKI8dyutISPLDvVdGein7t1fm5Hr7xDBg1jy989Wi", 4);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }
 

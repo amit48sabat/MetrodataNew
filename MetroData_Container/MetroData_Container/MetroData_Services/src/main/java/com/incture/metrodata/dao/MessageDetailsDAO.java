@@ -6,6 +6,7 @@ import java.util.Set;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.incture.metrodata.dto.CommentsDTO;
@@ -22,6 +23,12 @@ import com.incture.metrodata.util.UserComparator;
 @Repository("messageDetailsDAO")
 public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsDTO> {
 
+	@Autowired
+	CommentsDAO commentsDAO ;
+	
+	@Autowired
+	UserDAO userDao;
+	
 	@Override
 	MessageDetailsDo importDto(MessageDetailsDTO dto, MessageDetailsDo dos) throws Exception {
 
@@ -72,14 +79,12 @@ public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsD
 
 			// parsing comments
 			if (!ServicesUtil.isEmpty(dto.getComments())) {
-				CommentsDAO commentsDAO = new CommentsDAO();
 				List<CommentsDetailsDo> comments = commentsDAO.importList(dto.getComments(),dos.getComments());
 				dos.setComments(comments);
 			}
 
 			// parsing users
 			if (!ServicesUtil.isEmpty(dto.getUsers())) {
-				UserDAO userDao = new UserDAO();
 				Set<UserDetailsDo> userDos = userDao.importSet(dto.getUsers(),dos.getUsers());
 				dos.setUsers(userDos);
 			}
@@ -149,7 +154,7 @@ public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsD
 
 			// parsing comments
 			if (!ServicesUtil.isEmpty(dos.getComments())) {
-				CommentsDAO commentsDAO = new CommentsDAO();
+				
 				List<CommentsDTO> comments = commentsDAO.exportList(dos.getComments());
 				dto.setComments(comments);
 				;
@@ -157,7 +162,6 @@ public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsD
 
 			// parsing users
 			if (!ServicesUtil.isEmpty(dos.getUsers())) {
-				UserDAO userDao = new UserDAO();
 				Set<UserDetailsDTO> userDtos = userDao.exportSet(dos.getUsers(), new UserComparator());
 				dto.setUsers(userDtos);
 			}
@@ -201,9 +205,9 @@ public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsD
 		if (!ServicesUtil.isEmpty(dto.getTripId()))
 			criteria.add(Restrictions.eq("tripId", dto.getTripId()));
 
-		if (!ServicesUtil.isEmpty(dto.getUserName())) {
+		if (!ServicesUtil.isEmpty(dto.getUserId())) {
 			Criteria userCriteria = criteria.createCriteria("users");
-			userCriteria.add(Restrictions.eq("name", dto.getUserName()));
+			userCriteria.add(Restrictions.eq("name", dto.getUserId()));
 		}
 
 		if (!ServicesUtil.isEmpty(dto.getStartedAt()))

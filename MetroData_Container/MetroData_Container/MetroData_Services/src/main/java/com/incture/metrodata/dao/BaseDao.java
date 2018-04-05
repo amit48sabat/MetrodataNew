@@ -97,7 +97,6 @@ public abstract class BaseDao<E extends BaseDo, D extends BaseDto> {
 	protected E find(E pojo) throws Exception {
 		E result = null;
 		result = (E) getSession().get(pojo.getClass(), (Serializable) pojo.getPrimaryKey());
-
 		if (ServicesUtil.isEmpty(result))
 			throw new InvalidInputFault(Message.NO_RECORD_FOUND.getValue());
 
@@ -150,7 +149,7 @@ public abstract class BaseDao<E extends BaseDo, D extends BaseDto> {
 		for (D d : dList) {
 			E dos = null;
 			try {
-				//dos = getByKeysForFK(d);
+				dos = getByKeysForFK(d);
 				for(E e : eList){
 				  if( d.getPrimaryKey().equals(e.getPrimaryKey())){
 					  dos = e;
@@ -159,8 +158,6 @@ public abstract class BaseDao<E extends BaseDo, D extends BaseDto> {
 				}
 				
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				//e.printStackTrace();
 			}
 			
 			list.add(importDto(d,dos));
@@ -173,7 +170,7 @@ public abstract class BaseDao<E extends BaseDo, D extends BaseDto> {
 		for (D d : dList) {
 			E dos = null;
 			try {
-				//dos = getByKeysForFK(d);
+				dos = getByKeysForFK(d);
 				for(E e : eList){
 					  if( d.getPrimaryKey().equals(e.getPrimaryKey())){
 						  dos = e;
@@ -189,5 +186,7 @@ public abstract class BaseDao<E extends BaseDo, D extends BaseDto> {
 		}
 		return list;
 	}
+	
+	
 
 }
