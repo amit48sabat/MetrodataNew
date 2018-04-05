@@ -24,7 +24,6 @@ public class WareHouseDetailsDTO extends BaseDto {
 
 	@Override
 	public Object getPrimaryKey() {
-
 		return wareHouseId;
 	}
 }

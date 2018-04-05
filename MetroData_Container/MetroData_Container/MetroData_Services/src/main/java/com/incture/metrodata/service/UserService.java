@@ -31,6 +31,16 @@ public class UserService implements UserServiceLocal {
 	public ResponseDto create(UserDetailsDTO dto) {
 		ResponseDto responseDto = new ResponseDto();
 		try {
+			// error if email id is not set
+			if(ServicesUtil.isEmpty(dto.getEmail()))
+			{
+				responseDto.setStatus(false);
+				responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			    responseDto.setMessage("Email id is required.");
+			    return responseDto;
+			}
+			
+			
 			// setting created at and updated at
 			setCreateAtAndUpdateAt(dto);
 			JsonObject userObj = new JsonObject();
@@ -55,7 +65,9 @@ public class UserService implements UserServiceLocal {
 				responseDto.setMessage(Message.SUCCESS.getValue());
 			}
 			else{
-				
+				responseDto.setStatus(false);
+				responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+				responseDto.setMessage("Email id may be already registred in IDP. Try again with new email id.");
 			}
 		} catch (Exception e) {
 			responseDto.setStatus(false);

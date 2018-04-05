@@ -5,13 +5,21 @@ import org.springframework.stereotype.Repository;
 
 import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.entity.UserDetailsDo;
+import com.incture.metrodata.util.CourierDetailsComparator;
 import com.incture.metrodata.util.ServicesUtil;
+import com.incture.metrodata.util.WareHouseComparator;
 
 @Repository("UserDao")
 public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 
 	@Autowired
 	RoleDetailDAO roleDao;
+
+	@Autowired
+	WareHouseDAO wareHouseDao;
+
+	@Autowired
+	CourierDetailsDAO courierDao;
 
 	@Override
 	public UserDetailsDo importDto(UserDetailsDTO userDetailsDTO, UserDetailsDo detailsDo) throws Exception {
@@ -57,28 +65,26 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 				detailsDo.setParentId(userDetailsDTO.getParentId());
 			}
 
-			if (!ServicesUtil.isEmpty(userDetailsDTO.getWareHouseId())) {
-				detailsDo.setWareHouseId(userDetailsDTO.getWareHouseId());
-			}
-			if (!ServicesUtil.isEmpty(userDetailsDTO.getCourierId())) {
-				detailsDo.setCourierId(userDetailsDTO.getCourierId());
+			/*
+			 * if (!ServicesUtil.isEmpty(userDetailsDTO.getWareHouseId())) {
+			 * detailsDo.setWareHouseId(userDetailsDTO.getWareHouseId()); } if
+			 * (!ServicesUtil.isEmpty(userDetailsDTO.getCourierId())) {
+			 * detailsDo.setCourierId(userDetailsDTO.getCourierId()); }
+			 */
+
+			// parsing warehouse details
+			if (!ServicesUtil.isEmpty(userDetailsDTO.getWareHouseDetails())) {
+
+				detailsDo.setWareHouseDetails(
+						wareHouseDao.importSet(userDetailsDTO.getWareHouseDetails(), detailsDo.getWareHouseDetails()));
 			}
 
-			/*
-			 * parsing warehouse details if
-			 * (!ServicesUtil.isEmpty(userDetailsDTO.getWareHouseDetails())) {
-			 * WareHouseDAO wareHouseDao = new WareHouseDAO();
-			 * detailsDo.setWareHouseDetails(
-			 * wareHouseDao.importSet(userDetailsDTO.getWareHouseDetails(),
-			 * detailsDo.getWareHouseDetails())); }
-			 * 
-			 * // parsing courier details if
-			 * (!ServicesUtil.isEmpty(userDetailsDTO.getCourierDetails())) {
-			 * CourierDetailsDAO courierDao = new CourierDetailsDAO();
-			 * detailsDo.setCourierDetails(
-			 * courierDao.importSet(userDetailsDTO.getCourierDetails(),
-			 * detailsDo.getCourierDetails())); }
-			 */
+			// parsing courier details
+			if (!ServicesUtil.isEmpty(userDetailsDTO.getCourierDetails())) {
+
+				detailsDo.setCourierDetails(
+						courierDao.importSet(userDetailsDTO.getCourierDetails(), detailsDo.getCourierDetails()));
+			}
 
 		}
 		return detailsDo;
@@ -114,41 +120,39 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 				userDetailsDTO.setCreatedDate(detailsDo.getCreatedDate());
 			}
 
-			if (ServicesUtil.isEmpty(detailsDo.getFirstName())) {
+			if (!ServicesUtil.isEmpty(detailsDo.getFirstName())) {
 				userDetailsDTO.setFirstName(detailsDo.getFirstName());
 			}
-			if (ServicesUtil.isEmpty(detailsDo.getLastName())) {
+			if (!ServicesUtil.isEmpty(detailsDo.getLastName())) {
 				userDetailsDTO.setLastName(detailsDo.getLastName());
 			}
-			if (ServicesUtil.isEmpty(detailsDo.getEmail())) {
+			if (!ServicesUtil.isEmpty(detailsDo.getEmail())) {
 				userDetailsDTO.setEmail(detailsDo.getEmail());
 			}
 			if (!ServicesUtil.isEmpty(detailsDo.getParentId())) {
 				userDetailsDTO.setParentId(detailsDo.getParentId());
 			}
-
-			if (!ServicesUtil.isEmpty(detailsDo.getWareHouseId())) {
-				userDetailsDTO.setWareHouseId(detailsDo.getWareHouseId());
-			}
-			if (!ServicesUtil.isEmpty(detailsDo.getCourierId())) {
-				userDetailsDTO.setCourierId(detailsDo.getCourierId());
-			}
-
 			/*
-			 * parsing warehouse details if
-			 * (!ServicesUtil.isEmpty(userDetailsDTO.getWareHouseDetails())) {
-			 * WareHouseDAO wareHouseDao = new WareHouseDAO();
-			 * userDetailsDTO.setWareHouseDetails(
-			 * wareHouseDao.exportSet(detailsDo.getWareHouseDetails(), new
-			 * WareHouseComparator())); }
-			 * 
-			 * // parsing courier details if
-			 * (!ServicesUtil.isEmpty(userDetailsDTO.getCourierDetails())) {
-			 * CourierDetailsDAO courierDao = new CourierDetailsDAO();
-			 * userDetailsDTO.setCourierDetails(
-			 * courierDao.exportSet(detailsDo.getCourierDetails(), new
-			 * CourierDetailsComparator())); }
+			 * if (!ServicesUtil.isEmpty(detailsDo.getWareHouseId())) {
+			 * userDetailsDTO.setWareHouseId(detailsDo.getWareHouseId()); } if
+			 * (!ServicesUtil.isEmpty(detailsDo.getCourierId())) {
+			 * userDetailsDTO.setCourierId(detailsDo.getCourierId()); }
 			 */
+
+			// parsing warehouse details
+			if (!ServicesUtil.isEmpty(userDetailsDTO.getWareHouseDetails())) {
+
+				userDetailsDTO.setWareHouseDetails(
+						wareHouseDao.exportSet(detailsDo.getWareHouseDetails(), new WareHouseComparator()));
+			}
+
+			// parsing courier details
+			if (!ServicesUtil.isEmpty(userDetailsDTO.getCourierDetails())) {
+				
+				userDetailsDTO.setCourierDetails(
+						courierDao.exportSet(detailsDo.getCourierDetails(), new CourierDetailsComparator()));
+			}
+
 		}
 		return userDetailsDTO;
 	}

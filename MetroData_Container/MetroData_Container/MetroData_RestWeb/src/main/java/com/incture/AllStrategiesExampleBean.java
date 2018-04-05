@@ -11,9 +11,11 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import com.incture.metrodata.constant.RoleConstant;
+import com.incture.metrodata.dto.CourierDetailsDTO;
 import com.incture.metrodata.dto.DefaultUserDetailsVO;
 import com.incture.metrodata.dto.RoleDetailsDTO;
 import com.incture.metrodata.dto.UserDetailsDTO;
+import com.incture.metrodata.dto.WareHouseDetailsDTO;
 import com.incture.metrodata.service.RoleServiceLocal;
 import com.incture.metrodata.service.UserServiceLocal;
 import com.incture.metrodata.util.ServicesUtil;
@@ -41,6 +43,10 @@ public class AllStrategiesExampleBean {
 		userDto.setEmail(dto.getEmail());
 		userDto.setFirstName(dto.getFirstName());
 		userDto.setLastName(dto.getLastName());
+		WareHouseDetailsDTO warehouse= new  WareHouseDetailsDTO();
+		warehouse.setWareHouseName("NA");
+		CourierDetailsDTO courier = new CourierDetailsDTO();
+		courier.setCourierName("NA");
 		Date currDate = new Date();
 		RoleDetailsDTO roleDto = roleService.getRoleByRoleName(RoleConstant.SUPER_ADMIN.getValue());
 		if (!ServicesUtil.isEmpty(roleDto.getRoleName())) {
@@ -55,7 +61,7 @@ public class AllStrategiesExampleBean {
 			userDto.setRole(roleDto);
 
 		}
-
+        
 		userService.createDefaultUser(userDto);
 	}
 
