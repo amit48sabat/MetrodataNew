@@ -19,4 +19,6 @@ public interface UserServiceLocal {
 	
 	// for creating metrodata default technical user
 	ResponseDto createDefaultUser(UserDetailsDTO dto);
+
+	UserDetailsDTO getUserByEmail(UserDetailsDTO dto);
 }

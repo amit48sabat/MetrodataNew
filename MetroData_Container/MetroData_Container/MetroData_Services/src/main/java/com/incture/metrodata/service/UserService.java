@@ -1,8 +1,11 @@
 package com.incture.metrodata.service;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Date;
 
 import org.apache.http.HttpStatus;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,15 +35,13 @@ public class UserService implements UserServiceLocal {
 		ResponseDto responseDto = new ResponseDto();
 		try {
 			// error if email id is not set
-			if(ServicesUtil.isEmpty(dto.getEmail()))
-			{
+			if (ServicesUtil.isEmpty(dto.getEmail())) {
 				responseDto.setStatus(false);
 				responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-			    responseDto.setMessage("Email id is required.");
-			    return responseDto;
+				responseDto.setMessage("Email id is required.");
+				return responseDto;
 			}
-			
-			
+
 			// setting created at and updated at
 			setCreateAtAndUpdateAt(dto);
 			JsonObject userObj = new JsonObject();
@@ -63,8 +64,7 @@ public class UserService implements UserServiceLocal {
 				responseDto.setCode(HttpStatus.SC_OK);
 				responseDto.setData(dto);
 				responseDto.setMessage(Message.SUCCESS.getValue());
-			}
-			else{
+			} else {
 				responseDto.setStatus(false);
 				responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 				responseDto.setMessage("Email id may be already registred in IDP. Try again with new email id.");
@@ -178,28 +178,33 @@ public class UserService implements UserServiceLocal {
 			array.add(email);
 			name.addProperty("familyName", dto.getLastName());
 			name.addProperty("givenName", dto.getFirstName());
-			//userObj.add("name", name);
+			// userObj.add("name", name);
 			userObj.add("emails", array);
 			userObj.add("name", name);
 			String respData = restInvoker.postDataToServer("/Users", userObj.toString());
 			if (!ServicesUtil.isEmpty(respData)) {
 				JSONObject returnObj = new JSONObject(respData);
-				// if user id is set mean user is created in idp need to create in our db also
-				if(!ServicesUtil.isEmpty(returnObj.getString("id"))){
-					
+				// if user id is set mean user is created in idp need to create
+				// in our db also
+				if (!ServicesUtil.isEmpty(returnObj.getString("id"))) {
+
 					dto.setUserId(returnObj.getString("id"));
 					dto = userDAO.create(dto, new UserDetailsDo());
 					responseDto.setStatus(true);
 					responseDto.setCode(HttpStatus.SC_OK);
 					responseDto.setData(dto);
 					responseDto.setMessage(Message.SUCCESS.getValue());
-				}else
-				{
-				   // no action because user already exists
+				} else {
+
 				}
-			}
-			else{
-				
+			} else {
+				// user is already in idp we need to create in hana db
+				getUserByEmail(dto);
+				dto = userDAO.create(dto, new UserDetailsDo());
+				responseDto.setStatus(true);
+				responseDto.setCode(HttpStatus.SC_OK);
+				responseDto.setData(dto);
+				responseDto.setMessage(Message.SUCCESS.getValue());
 			}
 		} catch (Exception e) {
 			responseDto.setStatus(false);
@@ -209,4 +214,39 @@ public class UserService implements UserServiceLocal {
 		}
 		return responseDto;
 	}
+
+	@Override
+	public UserDetailsDTO getUserByEmail(UserDetailsDTO dto) {
+		String q = "";
+		try {
+			q = "/Users?filter=" + URLEncoder.encode("emails eq '" + dto.getEmail() + "'", "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String respData = restInvoker.getDataFromServer("/Users?filter=" + q);
+		{
+			if (!ServicesUtil.isEmpty(respData)) {
+				JSONObject returnObj = new JSONObject(respData);
+				// if user id is set mean user is created in idp need to create
+				// in our db also
+
+				if (!ServicesUtil.isEmpty(returnObj.get("Resources"))) {
+					String userId = parseUseridFromIdpResponse(returnObj);
+					dto.setUserId(userId);
+				}
+			}
+		}
+		return dto;
+	}
+
+	private String parseUseridFromIdpResponse(JSONObject resources) {
+		
+		String id = "";
+		JSONArray array =(JSONArray) resources.get("Resources");
+		JSONObject    res=(JSONObject) array.get(0);
+		id = res.get("id").toString();
+		return id;
+	}
+
 }
