@@ -28,7 +28,6 @@ import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.TripDetailsDTO;
 import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.dto.WebLeaderBoardVO;
-import com.incture.metrodata.entity.DeliveryHeaderDo;
 import com.incture.metrodata.entity.TripDetailsDo;
 import com.incture.metrodata.exceptions.ExecutionFault;
 import com.incture.metrodata.util.RESTInvoker;
@@ -70,7 +69,7 @@ public class TripService implements TripServiceLocal {
 			//
 			TripDetailsDo dos = new TripDetailsDo();
 
-			setTripDoForTripCreate(dto, dos);
+			//setTripDoForTripCreate(dto, dos);
 
 			dto = tripDao.create(dto, dos);
 
@@ -87,7 +86,7 @@ public class TripService implements TripServiceLocal {
 		return responseDto;
 	}
 
-	private void setTripDoForTripCreate(TripDetailsDTO dto, TripDetailsDo dos) throws Exception {
+	/*private void setTripDoForTripCreate(TripDetailsDTO dto, TripDetailsDo dos) throws Exception {
 		DeliveryHeaderDo deliveryHeaderDo;
 		// fetching dns dos
 		if (!ServicesUtil.isEmpty(dto.getDeliveryHeader())) {
@@ -101,7 +100,7 @@ public class TripService implements TripServiceLocal {
 		if (!ServicesUtil.isEmpty(dto.getUser()))
 			dos.setUser(userDao.getByKeysForFK(dto.getUser()));
 
-	}
+	}*/
 
 	private void setCreatedAtAndUpdatedAtForDto(TripDetailsDTO dto) {
 		Date currdate = new Date();

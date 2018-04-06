@@ -51,6 +51,7 @@ public class DeliveryHeaderDTO extends BaseDto {
 	private Integer rating;
 	private String receiverName;
 	private String assignedUser;
+	private String airwayBillNo;
 
 	@Override
 	public void validate(DB_Operation enOperation) throws InvalidInputFault {

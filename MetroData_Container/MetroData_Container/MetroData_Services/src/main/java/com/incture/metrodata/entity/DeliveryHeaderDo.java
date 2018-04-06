@@ -108,6 +108,9 @@ public class DeliveryHeaderDo implements BaseDo {
 	@Column(name ="REASON_FOR_CANCELLATION")
 	private String reasonForCancellation;
 	
+	@Column(name ="AIR_WAY_BILL_NO")
+	private String airwayBillNo;
+	
 	@OneToMany(targetEntity = DeliveryItemDo.class, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@Fetch(value = FetchMode.SUBSELECT)
 	private List<DeliveryItemDo> deliveryItems = new ArrayList<DeliveryItemDo>();

@@ -43,8 +43,11 @@ public class UserDetailsDo implements BaseDo {
 	@Column(name = "NAME",length=50)
 	private String name;
 	
-	@ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
 	private RoleDetailsDo role;
+	
+	@Column(name = "TELEPHONE")
+	private String telephone;
 	
 	
 	@Column(name = "MOBILE_TOKEN")

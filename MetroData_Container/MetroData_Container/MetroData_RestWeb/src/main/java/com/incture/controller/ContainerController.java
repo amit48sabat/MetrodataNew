@@ -31,7 +31,7 @@ public class ContainerController {
 			ContainerDTO dto = gson.fromJson(controllerJson.toString(), ContainerDTO.class);
 			 response = containerService.create(dto);
 	   }catch(Exception e){
-		    response.setStatus(true);
+		    response.setStatus(false);
 			response.setMessage(Message.FAILED.getValue());
 			response.setData(controllerJson);
 			response.setCode(500);

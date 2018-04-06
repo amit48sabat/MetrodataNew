@@ -19,6 +19,7 @@ public class UserDetailsDTO extends BaseDto {
 	private String name;
 	private String email;
 	private String mobileToken;
+	private String telephone;
 	private String webToken;
 	// private String userType;
 	private Double longitude;

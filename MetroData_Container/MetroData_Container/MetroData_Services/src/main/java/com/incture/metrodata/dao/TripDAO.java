@@ -37,7 +37,11 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 
 	@Autowired
 	DeliveryHeaderDAO deliveryHeaderDAO;
-
+	
+	@Autowired 
+	UserDAO userDAO;
+	
+	
 	@Override
 	TripDetailsDo importDto(TripDetailsDTO dto, TripDetailsDo tripDetailsDo) throws Exception {
 
@@ -79,7 +83,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 
 			// importing driver details
 			if (!ServicesUtil.isEmpty(dto.getUser())) {
-				UserDAO userDAO = new UserDAO();
+				
 				/*
 				 * UserDetailsDo detailsDo = null; try{ detailsDo =
 				 * userDAO.getByKeysForFK(dto.getUser()); } catch
@@ -137,7 +141,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 
 			// exporting driver details
 			if (!ServicesUtil.isEmpty(dos.getUser())) {
-				UserDAO userDAO = new UserDAO();
+				
 				dto.setUser(userDAO.exportDto(dos.getUser()));
 			}
 

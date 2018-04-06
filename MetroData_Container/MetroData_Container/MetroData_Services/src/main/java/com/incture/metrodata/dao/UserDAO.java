@@ -42,6 +42,9 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			if (!ServicesUtil.isEmpty(userDetailsDTO.getName())) {
 				detailsDo.setName(userDetailsDTO.getName());
 			}
+			if (!ServicesUtil.isEmpty(userDetailsDTO.getTelephone())) {
+				detailsDo.setTelephone(userDetailsDTO.getTelephone());
+			}
 			if (!ServicesUtil.isEmpty(userDetailsDTO.getRole())) {
 
 				detailsDo.setRole(roleDao.importDto(userDetailsDTO.getRole(), detailsDo.getRole()));
@@ -100,7 +103,7 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			if (!ServicesUtil.isEmpty(detailsDo.getName())) {
 				userDetailsDTO.setName(detailsDo.getName());
 			}
-			if (!ServicesUtil.isEmpty(userDetailsDTO.getRole())) {
+			if (!ServicesUtil.isEmpty(detailsDo.getRole())) {
 
 				userDetailsDTO.setRole(roleDao.exportDto(detailsDo.getRole()));
 			}
@@ -132,6 +135,10 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			if (!ServicesUtil.isEmpty(detailsDo.getParentId())) {
 				userDetailsDTO.setParentId(detailsDo.getParentId());
 			}
+
+			if (!ServicesUtil.isEmpty(detailsDo.getTelephone())) {
+				userDetailsDTO.setTelephone(detailsDo.getTelephone());
+			}
 			/*
 			 * if (!ServicesUtil.isEmpty(detailsDo.getWareHouseId())) {
 			 * userDetailsDTO.setWareHouseId(detailsDo.getWareHouseId()); } if
@@ -148,7 +155,7 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 
 			// parsing courier details
 			if (!ServicesUtil.isEmpty(userDetailsDTO.getCourierDetails())) {
-				
+
 				userDetailsDTO.setCourierDetails(
 						courierDao.exportSet(detailsDo.getCourierDetails(), new CourierDetailsComparator()));
 			}

@@ -9,6 +9,7 @@ public enum DeliveryNoteStatus {
 	DELIVERY_NOTE_PARTIALLY_REJECTED("del_note_partially_rejected"),
 	DELIVERY_NOTE_VALIDATED("del_note_validated"),
 	DELIVERY_NOTE_INVALIDATED("del_note_invalidated"),
+	DELIVERY_NOTE_CANCELLED("del_note_cancelled"),
     
 	// leader board screen constant
 	TOTAL_DEL_NOTE("total_delivery_note");
