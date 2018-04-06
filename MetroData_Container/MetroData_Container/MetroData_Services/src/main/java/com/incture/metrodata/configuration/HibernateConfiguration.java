@@ -27,8 +27,9 @@ import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.google.maps.GeoApiContext;
-import com.incture.metrodata.MyJobTwo;
 import com.incture.metrodata.dto.DefaultUserDetailsVO;
+import com.incture.metrodata.service.DNFetchSchedulerService;
+import com.incture.metrodata.util.HciRestInvoker;
 import com.incture.metrodata.util.RESTInvoker;
 
 @Configuration
@@ -93,9 +94,19 @@ public class HibernateConfiguration {
 	public RESTInvoker getRESTInvoker() {
 		String url = environment.getRequiredProperty("idp.base.url");
 		String username = environment.getRequiredProperty("idp.tech.username");
-		String password = environment.getRequiredProperty("jdbc.tech.password");
+		String password = environment.getRequiredProperty("idp.tech.password");
 		return new RESTInvoker(url, username, password);
 	}
+	
+
+	@Bean
+	public HciRestInvoker getHciRestInvoker() {
+		String url = environment.getRequiredProperty("hci.url");
+		String username = environment.getRequiredProperty("hci.username");
+		String password = environment.getRequiredProperty("hci.password");
+		return new HciRestInvoker(url, username, password);
+	}
+
 
 	@Bean
 	public DefaultUserDetailsVO onStartUp() {
@@ -108,18 +119,19 @@ public class HibernateConfiguration {
 
 	@Bean
 	public JobDetail jobDetailFactoryBean() {
-		JobDetail job = JobBuilder.newJob(MyJobTwo.class).withIdentity("ECCFetchJob", "group1").build();
+		JobDetail job = JobBuilder.newJob(DNFetchSchedulerService.class).withIdentity("ECCFetchJob", "group1").build();
+	
 		return job;
 	}
 
 	// Job is scheduled after every 1 minute
 	@Bean
 	public CronTrigger cronTriggerFactoryBean() {
-
+		String expression = environment.getRequiredProperty("hci.job.expression");
 		CronTrigger crontrigger = TriggerBuilder.newTrigger().withIdentity("ECCFetchTrigger", "group1")
 				.startAt(new Date())
-				// .startNow()
-				.withSchedule(CronScheduleBuilder.cronSchedule("0/20 * * * * ?")).build();
+				
+				.withSchedule(CronScheduleBuilder.cronSchedule(expression)).build();
 		return crontrigger;
 	}
 
