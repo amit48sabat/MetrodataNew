@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -24,21 +24,21 @@ import com.incture.metrodata.util.UserComparator;
 public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsDTO> {
 
 	@Autowired
-	CommentsDAO commentsDAO ;
-	
+	CommentsDAO commentsDAO;
+
 	@Autowired
 	UserDAO userDao;
-	
+
 	@Override
 	MessageDetailsDo importDto(MessageDetailsDTO dto, MessageDetailsDo dos) throws Exception {
 
 		if (ServicesUtil.isEmpty(dos))
 			dos = new MessageDetailsDo();
 		if (!ServicesUtil.isEmpty(dto)) {
-            
-			if(!ServicesUtil.isEmpty(dto.getMessageId()))
+
+			if (!ServicesUtil.isEmpty(dto.getMessageId()))
 				dos.setMessageId(dto.getMessageId());
-			
+
 			if (!ServicesUtil.isEmpty(dto.getTripId())) {
 				dos.setTripId(dto.getTripId());
 			}
@@ -75,17 +75,16 @@ public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsD
 			if (!ServicesUtil.isEmpty(dto.getDeliveryNoteId())) {
 				dos.setDeliveryNoteId(dto.getDeliveryNoteId());
 			}
-			
 
 			// parsing comments
 			if (!ServicesUtil.isEmpty(dto.getComments())) {
-				List<CommentsDetailsDo> comments = commentsDAO.importList(dto.getComments(),dos.getComments());
+				List<CommentsDetailsDo> comments = commentsDAO.importList(dto.getComments(), dos.getComments());
 				dos.setComments(comments);
 			}
 
 			// parsing users
 			if (!ServicesUtil.isEmpty(dto.getUsers())) {
-				Set<UserDetailsDo> userDos = userDao.importSet(dto.getUsers(),dos.getUsers());
+				Set<UserDetailsDo> userDos = userDao.importSet(dto.getUsers(), dos.getUsers());
 				dos.setUsers(userDos);
 			}
 		}
@@ -134,18 +133,14 @@ public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsD
 			}
 			// fetching user by id and setting it to created by
 			if (!ServicesUtil.isEmpty(dos.getCreatedBy())) {
-				/*UserDAO userDao = new UserDAO();
-				UserDetailsDTO userDto = new UserDetailsDTO();
-				userDto.setUserId(dos.getCreatedBy());
-				try {
-					userDto = userDao.findById(userDto);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				if(!ServicesUtil.isEmpty(userDto)){
-					dto.setCreatedBy(userDto);
-				}*/
+				/*
+				 * UserDAO userDao = new UserDAO(); UserDetailsDTO userDto = new
+				 * UserDetailsDTO(); userDto.setUserId(dos.getCreatedBy()); try
+				 * { userDto = userDao.findById(userDto); } catch (Exception e)
+				 * { // TODO Auto-generated catch block e.printStackTrace(); }
+				 * if(!ServicesUtil.isEmpty(userDto)){
+				 * dto.setCreatedBy(userDto); }
+				 */
 				dto.setCreatedBy(dos.getCreatedBy());
 			}
 			if (!ServicesUtil.isEmpty(dos.getUpdatedBy())) {
@@ -154,7 +149,7 @@ public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsD
 
 			// parsing comments
 			if (!ServicesUtil.isEmpty(dos.getComments())) {
-				
+
 				List<CommentsDTO> comments = commentsDAO.exportList(dos.getComments());
 				dto.setComments(comments);
 				;
@@ -195,32 +190,40 @@ public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsD
 
 	@SuppressWarnings("unchecked")
 	public List<MessageDetailsDTO> findAllMessages(SearchMessageVO dto) throws InvalidInputFault {
-		Criteria criteria = getSession().createCriteria(MessageDetailsDo.class);
-
+		// Criteria criteria =
+		// getSession().createCriteria(MessageDetailsDo.class);
+		String sql = "SELECT m FROM MessageDetailsDo as m ";
+		
+		if (!ServicesUtil.isEmpty(dto.getUserId())) {
+			sql += " INNER JOIN m.users as u WHERE u.userId = '" + dto.getUserId() + "' ";
+		}else{
+			sql+=" WHERE 1=1 ";
+		}
+		
 		if (ServicesUtil.isEmpty(dto.getType()))
 			throw new InvalidInputFault("'type' is required");
 		else
-			criteria.add(Restrictions.eq("type", dto.getType()).ignoreCase());
-		
+			sql += " AND m.type = '" + dto.getType() + "' ";
+
 		if (!ServicesUtil.isEmpty(dto.getTripId()))
-			criteria.add(Restrictions.eq("tripId", dto.getTripId()));
+			sql += " AND m.tripId = '" + "'dto.getTripId() ";
 
-		if (!ServicesUtil.isEmpty(dto.getUserId())) {
-			Criteria userCriteria = criteria.createCriteria("users");
-			userCriteria.add(Restrictions.eq("name", dto.getUserId()));
-		}
-
-		if (!ServicesUtil.isEmpty(dto.getStartedAt()))
-			criteria.add(Restrictions.ge("createdAt", dto.getStartedAt()));
-		if (!ServicesUtil.isEmpty(dto.getEndedAt()))
-			criteria.add(Restrictions.le("createdAt", dto.getEndedAt()));
-
-		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-		criteria.addOrder(Order.desc("createdAt"));
-		//criteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
 		
-		List<MessageDetailsDo> resultDos = criteria.list();
+		if (!ServicesUtil.isEmpty(dto.getStartedAt()))
+			sql += " AND m.createdAt >= :startedAt ";
+
+		if (!ServicesUtil.isEmpty(dto.getEndedAt()))
+			sql += " AND m.createdAt <= :endedAt ";
+
+		Query query = getSession().createQuery(sql);
+		if (!ServicesUtil.isEmpty(dto.getStartedAt()))
+			query.setDate("startedAt", dto.getStartedAt());
+		if (!ServicesUtil.isEmpty(dto.getEndedAt()))
+			query.setDate("endedAt", dto.getEndedAt());
+		
+		List<MessageDetailsDo> resultDos = query.list();
 		List<MessageDetailsDTO> resultDtos = exportList(resultDos);
+
 		return resultDtos;
 	}
 }

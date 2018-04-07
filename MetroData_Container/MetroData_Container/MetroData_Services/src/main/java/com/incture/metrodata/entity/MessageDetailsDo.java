@@ -9,9 +9,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
@@ -22,7 +21,6 @@ import javax.persistence.TemporalType;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
-import javax.persistence.JoinColumn;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -35,8 +33,8 @@ public class MessageDetailsDo implements BaseDo {
 	private static final long serialVersionUID = -2740507075202872523L;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long messageId;
+	@Column(name = "MESSAGE_ID")
+	private String messageId;
 
 	@Column(name = "TRIP_ID")
 	private String tripId;

@@ -56,7 +56,7 @@ public class MessageController {
 	}
 
 	@RequestMapping(value = "/{messageId}", method = RequestMethod.DELETE)
-	public ResponseDto delete(@PathVariable Long messageId) {
+	public ResponseDto delete(@PathVariable String messageId) {
 		MessageDetailsDTO dto = new MessageDetailsDTO();
 		dto.setMessageId(messageId);
 		return messageService.delete(dto);

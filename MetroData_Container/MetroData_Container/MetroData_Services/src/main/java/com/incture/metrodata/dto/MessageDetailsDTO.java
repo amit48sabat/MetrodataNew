@@ -14,7 +14,7 @@ import lombok.Setter;
 
 @Getter@Setter
 public class MessageDetailsDTO extends BaseDto{
-	private Long messageId;
+	private String messageId;
 	private String tripId;
 	private String title;
 	private String body;

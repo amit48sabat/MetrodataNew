@@ -21,6 +21,7 @@ import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.SearchMessageVO;
 import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.entity.MessageDetailsDo;
+import com.incture.metrodata.exceptions.InvalidInputFault;
 import com.incture.metrodata.firebasenotification.NotificationClass;
 import com.incture.metrodata.util.ServicesUtil;
 
@@ -51,11 +52,18 @@ public class MessageService implements MessageServiceLocal {
 
 			setCreatedAtAndUpdatedAtForDto(dto, createdBy);
 
-			/*if (!ServicesUtil.isEmpty(dto.getComments()))
-				for (CommentsDTO commentsDTO : dto.getComments()) {
-					commentsDTO.setCreatedAt(new Date());
-				}
-*/
+			/*
+			 * if (!ServicesUtil.isEmpty(dto.getComments())) for (CommentsDTO
+			 * commentsDTO : dto.getComments()) { commentsDTO.setCreatedAt(new
+			 * Date()); }
+			 */
+			// set id for the message
+			if (!ServicesUtil.isEmpty(dto.getType())) {
+				setMessageId(dto);
+			} else {
+				throw new InvalidInputFault("Message type is required");
+			}
+
 			dto = messageDetailsDao.create(dto, new MessageDetailsDo());
 			if (!dto.getType().equals(MessageType.INCIDENT.getValue())) {
 				UserDetailsDTO userDto = new UserDetailsDTO();
@@ -84,6 +92,11 @@ public class MessageService implements MessageServiceLocal {
 			response.setCode(HttpStatus.SC_OK);
 			response.setData(dto);
 			response.setMessage(Message.SUCCESS + " : Message created");
+		} catch (InvalidInputFault e) {
+			response.setStatus(false);
+			response.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			response.setMessage(Message.FAILED + " : " + e.toString());
+			e.printStackTrace();
 		} catch (Exception e) {
 			response.setStatus(false);
 			response.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
@@ -91,6 +104,30 @@ public class MessageService implements MessageServiceLocal {
 			e.printStackTrace();
 		}
 		return response;
+	}
+
+	/**
+	 * set the message id FD000.. if feed request, IN000 if incident, NT00.. for
+	 * notification
+	 * 
+	 * @param dto
+	 */
+	private void setMessageId(MessageDetailsDTO dto) {
+		String messageType = dto.getType();
+		String seq = "";
+		if (messageType.equalsIgnoreCase(MessageType.FEED.getValue())) {
+			seq = "FD";
+		} else if (messageType.equalsIgnoreCase(MessageType.NOTIFICATION.getValue())) {
+			seq = "NT";
+		} else if (messageType.equalsIgnoreCase(MessageType.INCIDENT.getValue())) {
+			seq = "IN";
+		}
+
+		if (!ServicesUtil.isEmpty(seq)) {
+			String messageId = SequenceNumberGen.getInstance().getNextSeqNumber(seq, 8, messageDetailsDao.getSession());
+			dto.setMessageId(messageId);
+		}
+
 	}
 
 	private void setCreatedAtAndUpdatedAtForDto(MessageDetailsDTO dto, String createdBy) {
@@ -103,7 +140,7 @@ public class MessageService implements MessageServiceLocal {
 			dto.setCreatedBy(createdBy);
 			dto.setCreatedAt(currdate);
 		}
-		
+
 		if (!ServicesUtil.isEmpty(dto.getComments())) {
 			for (CommentsDTO d : dto.getComments()) {
 
@@ -114,8 +151,8 @@ public class MessageService implements MessageServiceLocal {
 					d.setCreatedBy(createdBy);
 					d.setCreatedAt(currdate);
 				}
-				
-				//d.setUpdatedAt(currdate);
+
+				// d.setUpdatedAt(currdate);
 			}
 		}
 		if (!ServicesUtil.isEmpty(dto.getUsers())) {
@@ -126,21 +163,15 @@ public class MessageService implements MessageServiceLocal {
 		}
 	}
 
-	/*private void setUpdatedAtForDto(MessageDetailsDTO dto, String updatedBy) {
-		Date currdate = new Date();
-		dto.setUpdatedAt(currdate);
-		dto.setUpdatedBy(updatedBy);
-		if (!ServicesUtil.isEmpty(dto.getComments())) {
-			for (CommentsDTO d : dto.getComments()) {
-				d.setUpdatedAt(currdate);
-			}
-		}
-		if (!ServicesUtil.isEmpty(dto.getUsers())) {
-			for (UserDetailsDTO d : dto.getUsers()) {
-				d.setUpdatedAt(currdate);
-			}
-		}
-	}*/
+	/*
+	 * private void setUpdatedAtForDto(MessageDetailsDTO dto, String updatedBy)
+	 * { Date currdate = new Date(); dto.setUpdatedAt(currdate);
+	 * dto.setUpdatedBy(updatedBy); if
+	 * (!ServicesUtil.isEmpty(dto.getComments())) { for (CommentsDTO d :
+	 * dto.getComments()) { d.setUpdatedAt(currdate); } } if
+	 * (!ServicesUtil.isEmpty(dto.getUsers())) { for (UserDetailsDTO d :
+	 * dto.getUsers()) { d.setUpdatedAt(currdate); } } }
+	 */
 
 	/**
 	 * api for finding message by trip id or user id
