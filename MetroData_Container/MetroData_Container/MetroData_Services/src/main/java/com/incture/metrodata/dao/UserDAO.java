@@ -1,9 +1,16 @@
 package com.incture.metrodata.dao;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.hibernate.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.incture.metrodata.constant.RoleConstant;
 import com.incture.metrodata.dto.UserDetailsDTO;
+import com.incture.metrodata.dto.WareHouseDetailsDTO;
 import com.incture.metrodata.entity.UserDetailsDo;
 import com.incture.metrodata.util.CourierDetailsComparator;
 import com.incture.metrodata.util.ServicesUtil;
@@ -147,14 +154,14 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			 */
 
 			// parsing warehouse details
-			if (!ServicesUtil.isEmpty(userDetailsDTO.getWareHouseDetails())) {
+			if (!ServicesUtil.isEmpty(detailsDo.getWareHouseDetails())) {
 
 				userDetailsDTO.setWareHouseDetails(
 						wareHouseDao.exportSet(detailsDo.getWareHouseDetails(), new WareHouseComparator()));
 			}
 
 			// parsing courier details
-			if (!ServicesUtil.isEmpty(userDetailsDTO.getCourierDetails())) {
+			if (!ServicesUtil.isEmpty(detailsDo.getCourierDetails())) {
 
 				userDetailsDTO.setCourierDetails(
 						courierDao.exportSet(detailsDo.getCourierDetails(), new CourierDetailsComparator()));
@@ -177,4 +184,27 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 		return true;
 	}
 
+	@SuppressWarnings("unchecked")
+	public Object getUsersAssociateWithAdmin(String adminId, String roleName,
+			Set<WareHouseDetailsDTO> wareHouseDetails) {
+		List<Long> wareHouseIds = new ArrayList<Long>();
+		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
+			wareHouseIds.add(wareHouse.getWareHouseId());
+		boolean isSuperAdmin = false;
+		String hql = "";
+		// get all the user list if role is super_admin or sales_admin
+		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
+				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
+			hql = "SELECT u FROM UserDetailsDo AS u WHERE u.userId !=:adminId";
+			isSuperAdmin = true;
+		} else
+			hql = "SELECT u FROM UserDetailsDo AS  u inner join u.wareHouseDetails AS w WHERE w.wareHouseId IN (:warehouselist) AND u.userId !=:adminId";
+		Query query = getSession().createQuery(hql);
+		if(!isSuperAdmin)
+		query.setParameterList("warehouselist", wareHouseIds);
+		
+		query.setParameter("adminId", adminId);
+		ArrayList<UserDetailsDo> result = (ArrayList<UserDetailsDo>) query.list();
+		return exportList(result);
+	}
 }
