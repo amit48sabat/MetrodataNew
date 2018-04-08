@@ -14,8 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.incture.metrodata.constant.Message;
+import com.incture.metrodata.constant.RoleConstant;
 import com.incture.metrodata.dao.UserDAO;
 import com.incture.metrodata.dto.ResponseDto;
+import com.incture.metrodata.dto.RoleDetailsDTO;
 import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.entity.UserDetailsDo;
 import com.incture.metrodata.util.RESTInvoker;
@@ -249,4 +251,55 @@ public class UserService implements UserServiceLocal {
 		return id;
 	}
 
+	
+	/***
+	 * Get user list associated with admin and return all the users if role is suoer_admin,sales_admin
+	 */
+	@Override
+	public ResponseDto getUsersAssociatedWithAdmin(UserDetailsDTO dto) {
+		ResponseDto responseDto = new ResponseDto();
+	
+		try {
+			
+             // dto = userDAO.findById(dto);
+			Object userList = userDAO.getUsersAssociateWithAdmin(dto.getUserId(), dto.getRole().getRoleName(), dto.getWareHouseDetails());
+
+			responseDto.setStatus(true);
+			responseDto.setCode(HttpStatus.SC_OK);
+			responseDto.setData(userList);
+			responseDto.setMessage(Message.SUCCESS.getValue());
+		} catch (Exception e) {
+			responseDto.setStatus(false);
+			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			responseDto.setMessage(Message.FAILED.getValue());
+			e.printStackTrace();
+		}
+		return responseDto;
+	}
+
+	@Override
+	public ResponseDto validatedUserRoleByUserId(String userId) {
+		ResponseDto responseDto  = new ResponseDto();
+		try{
+			UserDetailsDTO userDetailsDTO = new  UserDetailsDTO();
+			userDetailsDTO.setUserId(userId);
+			userDetailsDTO = userDAO.findById(userDetailsDTO);
+		   	responseDto.setData(userDetailsDTO);
+		   	responseDto.setStatus(checkUserRole(userDetailsDTO.getRole()));
+		}catch (Exception e) {
+			responseDto  = ServicesUtil.getUnauthorizedResponseDto();
+			responseDto.setStatus(false);
+		}
+		return responseDto;
+	}
+
+	 private boolean checkUserRole(RoleDetailsDTO dto){
+		 String role = dto.getRoleName();
+		 if(role.equals(RoleConstant.ADMIN_INSIDE_JAKARTA.getValue()) ||  role.equals(RoleConstant.ADMIN_OUTSIDE_JAKARTA.getValue())
+			|| role.equals(RoleConstant.SUPER_ADMIN.getValue()) || role.equals(RoleConstant.SALES_ADMIN.getValue())
+			|| role.equals(RoleConstant.COURIER_ADMIN.getValue()))
+			return true;
+		 
+		  return false;
+	 }
 }

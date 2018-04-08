@@ -14,6 +14,7 @@ import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.service.TripServiceLocal;
 import com.incture.metrodata.service.UserServiceLocal;
+import com.incture.metrodata.util.ServicesUtil;
 
 @RestController
 @ComponentScan("com.incture")
@@ -32,8 +33,22 @@ public class UserDetailController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public ResponseDto findAll() {
-		return userServiceLocal.findAll();
+	public ResponseDto findAll(HttpServletRequest request) {
+		ResponseDto res = new ResponseDto();
+		String userId = "";
+		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
+			userId = request.getUserPrincipal().getName();
+		} else {
+			return ServicesUtil.getUnauthorizedResponseDto();
+
+		}
+		// validating user role if action not permitted then return
+		 res = userServiceLocal.validatedUserRoleByUserId(userId);
+		 if(!res.isStatus())
+			 return res;
+		 
+		UserDetailsDTO dto =  (UserDetailsDTO) res.getData();
+		return userServiceLocal.getUsersAssociatedWithAdmin(dto);
 	}
 
 	@RequestMapping(value = "/{userId}", method = RequestMethod.PUT)

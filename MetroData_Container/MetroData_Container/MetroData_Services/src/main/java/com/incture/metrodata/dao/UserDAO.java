@@ -185,7 +185,7 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Object getUsersAssociateWithAdmin(String adminId, String roleName,
+	public List<UserDetailsDTO> getUsersAssociateWithAdmin(String adminId, String roleName,
 			Set<WareHouseDetailsDTO> wareHouseDetails) {
 		List<Long> wareHouseIds = new ArrayList<Long>();
 		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)

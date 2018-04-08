@@ -21,4 +21,8 @@ public interface UserServiceLocal {
 	ResponseDto createDefaultUser(UserDetailsDTO dto);
 
 	UserDetailsDTO getUserByEmail(UserDetailsDTO dto);
+	
+	ResponseDto getUsersAssociatedWithAdmin(UserDetailsDTO dto);
+	
+	ResponseDto validatedUserRoleByUserId(String userId);
 }
