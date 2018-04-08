@@ -1,7 +1,9 @@
 package com.incture.metrodata.dao;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.hibernate.Criteria;
@@ -12,8 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.incture.metrodata.constant.DeliveryNoteStatus;
+import com.incture.metrodata.constant.RoleConstant;
 import com.incture.metrodata.dto.DeliveryHeaderDTO;
 import com.incture.metrodata.dto.DeliveryItemDTO;
+import com.incture.metrodata.dto.WareHouseDetailsDTO;
 import com.incture.metrodata.entity.DeliveryHeaderDo;
 import com.incture.metrodata.entity.DeliveryItemDo;
 import com.incture.metrodata.exceptions.InvalidInputFault;
@@ -22,8 +26,11 @@ import com.incture.metrodata.util.ServicesUtil;
 @Repository("DeliveryHeaderDao")
 public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderDTO> {
 	@Autowired
-	DeliveryItemDAO deliveryItemDAO ;
-	
+	DeliveryItemDAO deliveryItemDAO;
+
+	@Autowired
+	WareHouseDAO wareHouseDetailDao;
+
 	@Override
 	public DeliveryHeaderDo importDto(DeliveryHeaderDTO deliveryHeaderDTO, DeliveryHeaderDo deliveryHeaderDo)
 			throws Exception {
@@ -78,11 +85,11 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getRefNo())) {
 				deliveryHeaderDo.setRefNo(deliveryHeaderDTO.getRefNo());
 			}
-			
+
 			// validate the delivery note status if invalid throw expection
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getStatus())) {
-				if(checkDnStatus(deliveryHeaderDTO.getStatus()))
-				deliveryHeaderDo.setStatus(deliveryHeaderDTO.getStatus());
+				if (checkDnStatus(deliveryHeaderDTO.getStatus()))
+					deliveryHeaderDo.setStatus(deliveryHeaderDTO.getStatus());
 			}
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getStartedAt())) {
 				deliveryHeaderDo.setStartedAt(deliveryHeaderDTO.getStartedAt());
@@ -119,10 +126,15 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getAssignedUser())) {
 				deliveryHeaderDo.setAssignedUser(deliveryHeaderDTO.getAssignedUser());
 			}
-			
+			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getWareHouseDetails())) {
+				deliveryHeaderDo.setWareHouseDetails(wareHouseDetailDao
+						.importDto(deliveryHeaderDTO.getWareHouseDetails(), deliveryHeaderDo.getWareHouseDetails()));
+
+			}
+
 			// importing delivery items
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getDeliveryItems())) {
-				
+
 				List<DeliveryItemDo> itemDos = deliveryItemDAO.importList(deliveryHeaderDTO.getDeliveryItems(),
 						deliveryHeaderDo.getDeliveryItems());
 				deliveryHeaderDo.setDeliveryItems(itemDos);
@@ -223,7 +235,11 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getAssignedUser())) {
 				deliveryHeaderDTO.setAssignedUser(deliveryHeaderDo.getAssignedUser());
 			}
-			
+			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getWareHouseDetails())) {
+				deliveryHeaderDTO
+						.setWareHouseDetails(wareHouseDetailDao.exportDto(deliveryHeaderDo.getWareHouseDetails()));
+
+			}
 			// exporting delivery items
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getDeliveryItems())) {
 				List<DeliveryItemDTO> itemDtos = deliveryItemDAO.exportList(deliveryHeaderDo.getDeliveryItems());
@@ -280,19 +296,44 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 		return map;
 	}
 
-	private boolean checkDnStatus(String status) throws InvalidInputFault{
-		
-		 if(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue().equals(status) ||
-		    DeliveryNoteStatus.DELIVERY_NOTE_INVALIDATED.getValue().equals(status) ||
-			DeliveryNoteStatus.DELIVERY_NOTE_PARTIALLY_REJECTED.getValue().equals(status) ||
-			DeliveryNoteStatus.DELIVERY_NOTE_REJECTED.getValue().equals(status) ||
-			DeliveryNoteStatus.DELIVERY_NOTE_COMPLETED.getValue().equals(status) ||
-			DeliveryNoteStatus.DELIVERY_NOTE_STARTED.getValue().equals(status) ||
-			DeliveryNoteStatus.DELIVERY_NOTE_VALIDATED.getValue().equals(status) 
-		   ){
-			 return true;
-		 }else{
-			 throw new InvalidInputFault("delivery_note status '"+status+"' is invalid status code");
-		 }
+	private boolean checkDnStatus(String status) throws InvalidInputFault {
+
+
+		if (DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue().equals(status)
+				|| DeliveryNoteStatus.DELIVERY_NOTE_INVALIDATED.getValue().equals(status)
+				|| DeliveryNoteStatus.DELIVERY_NOTE_PARTIALLY_REJECTED.getValue().equals(status)
+				|| DeliveryNoteStatus.DELIVERY_NOTE_REJECTED.getValue().equals(status)
+				|| DeliveryNoteStatus.DELIVERY_NOTE_COMPLETED.getValue().equals(status)
+				|| DeliveryNoteStatus.DELIVERY_NOTE_STARTED.getValue().equals(status)
+				|| DeliveryNoteStatus.DELIVERY_NOTE_VALIDATED.getValue().equals(status)) {
+			return true;
+		} else {
+			throw new InvalidInputFault("delivery_note status '" + status + "' is invalid status code");
+		}
 	}
+
+	
+	@SuppressWarnings("unchecked")
+	public List<DeliveryHeaderDTO> getAllDeliveryNoteByAdminsWareHouse(String adminId, String roleName, Set<WareHouseDetailsDTO> wareHouseDetails) {
+		List<Long> wareHouseIds = new ArrayList<Long>();
+		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
+			wareHouseIds.add(wareHouse.getWareHouseId());
+		boolean isSuperAdmin = false;
+		String hql = "";
+		// get all the user list if role is super_admin or sales_admin
+		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
+				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
+			hql = "SELECT d FROM DeliveryHeaderDo AS d  ";
+			isSuperAdmin = true;
+		} else
+			hql = "SELECT d FROM DeliveryHeaderDo AS d inner join d.wareHouseDetails w WHERE w.wareHouseId IN (:warehouselist)";
+		Query query = getSession().createQuery(hql);
+		if(!isSuperAdmin)
+		query.setParameterList("warehouselist", wareHouseIds);
+		
+		ArrayList<DeliveryHeaderDo> result = (ArrayList<DeliveryHeaderDo>) query.list();
+		return exportList(result);
+		
+	}
+
 }

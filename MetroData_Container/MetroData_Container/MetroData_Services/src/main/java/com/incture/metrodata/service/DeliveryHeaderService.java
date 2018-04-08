@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,8 +17,10 @@ import com.incture.metrodata.constant.DeliveryNoteStatus;
 import com.incture.metrodata.constant.Message;
 import com.incture.metrodata.dao.DeliveryHeaderDAO;
 import com.incture.metrodata.dao.TripDAO;
+import com.incture.metrodata.dao.UserDAO;
 import com.incture.metrodata.dto.DeliveryHeaderDTO;
 import com.incture.metrodata.dto.ResponseDto;
+import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.entity.DeliveryHeaderDo;
 import com.incture.metrodata.exceptions.ExecutionFault;
 import com.incture.metrodata.util.ServicesUtil;
@@ -40,6 +43,9 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 
 	@Autowired
 	private TripDAO tripDao;
+	
+	@Autowired
+	private UserDAO userDao;
 
 	/**
 	 * api for creating delivery header
@@ -252,6 +258,31 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 			responseDto.setStatus(false);
 			responseDto.setCode(417);
 			responseDto.setMessage(Message.FAILED + " : " + e.getMessage());
+		}
+		return responseDto;
+	}
+
+	/***
+	 * get admins warehouse delivery note 
+	 */
+	@Override
+	public ResponseDto getAllDeliveryNoteByAdminsWareHouse(UserDetailsDTO adminDto) {
+		ResponseDto responseDto = new ResponseDto();
+		
+		try {
+			
+			adminDto = userDao.findById(adminDto);
+			Object userList = deliveryHeaderDao.getAllDeliveryNoteByAdminsWareHouse(adminDto.getUserId(), adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails());
+
+			responseDto.setStatus(true);
+			responseDto.setCode(HttpStatus.SC_OK);
+			responseDto.setData(userList);
+			responseDto.setMessage(Message.SUCCESS.getValue());
+		} catch (Exception e) {
+			responseDto.setStatus(false);
+			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			responseDto.setMessage(Message.FAILED.getValue());
+			e.printStackTrace();
 		}
 		return responseDto;
 	}

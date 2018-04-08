@@ -3,6 +3,7 @@ package com.incture.metrodata.service;
 
 import com.incture.metrodata.dto.DeliveryHeaderDTO;
 import com.incture.metrodata.dto.ResponseDto;
+import com.incture.metrodata.dto.UserDetailsDTO;
 
 public interface DeliveryHeaderServiceLocal {
 
@@ -25,5 +26,6 @@ public interface DeliveryHeaderServiceLocal {
 
 
 	ResponseDto findById(Long deliveryNoteId);
-
+     
+	ResponseDto getAllDeliveryNoteByAdminsWareHouse(UserDetailsDTO  adminDto);
 }

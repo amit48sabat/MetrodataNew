@@ -10,6 +10,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -130,6 +131,8 @@ public class DeliveryHeaderDo implements BaseDo {
 	@Column(name = "REC_NAME")
 	private String receiverName;
 	
+	@ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+	private WareHouseDetailsDo wareHouseDetails;
 	
 	@Override
 	public Object getPrimaryKey() {
