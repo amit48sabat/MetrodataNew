@@ -1,5 +1,7 @@
 package com.incture.controller;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -12,7 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.incture.metrodata.dto.DeliveryHeaderDTO;
 import com.incture.metrodata.dto.ResponseDto;
+import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.service.DeliveryHeaderServiceLocal;
+import com.incture.metrodata.service.UserServiceLocal;
+import com.incture.metrodata.util.ServicesUtil;
 
 @RestController
 @CrossOrigin
@@ -22,7 +27,10 @@ class DeliveryHeaderController {
 
 	@Autowired
 	DeliveryHeaderServiceLocal deliveryHeaderServiceLocal;
-
+    
+	@Autowired 
+	UserServiceLocal userServiceLocal;
+	
 	@RequestMapping( method = RequestMethod.POST)
 	public  ResponseDto createDeliveryNote(@RequestBody DeliveryHeaderDTO dto) {
 		// LOGGER.info("Inside delivery data creation");
@@ -38,9 +46,23 @@ class DeliveryHeaderController {
 	}
 	
 	@RequestMapping(method = RequestMethod.GET)
-	public @ResponseBody ResponseDto findAllDeliveryHeaders() {
+	public @ResponseBody ResponseDto findAllDeliveryHeaders(HttpServletRequest request) {
+		ResponseDto res = new ResponseDto();
+		String userId = "";
+		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
+			userId = request.getUserPrincipal().getName();
+		} else {
+			return ServicesUtil.getUnauthorizedResponseDto();
+
+		}
+		// validating user role if action not permitted then return
+		 res = userServiceLocal.validatedUserRoleByUserId(userId);
+		 if(!res.isStatus())
+			 return res;
+		 
+		UserDetailsDTO dto =  (UserDetailsDTO) res.getData();
 		// LOGGER.info("Inside delivery data creation");
-		return deliveryHeaderServiceLocal.findAll();
+		return deliveryHeaderServiceLocal.getAllDeliveryNoteByAdminsWareHouse(dto);
 	}
 	
 	@RequestMapping( value="/{deliveryNoteId}",method = RequestMethod.DELETE)

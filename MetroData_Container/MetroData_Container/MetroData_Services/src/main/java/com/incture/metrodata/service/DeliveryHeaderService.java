@@ -271,7 +271,7 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 		
 		try {
 			
-			adminDto = userDao.findById(adminDto);
+			//adminDto = userDao.findById(adminDto);
 			Object userList = deliveryHeaderDao.getAllDeliveryNoteByAdminsWareHouse(adminDto.getUserId(), adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails());
 
 			responseDto.setStatus(true);
