@@ -10,5 +10,5 @@ public interface WareHouseServiceLocal {
 	ResponseDto find(WareHouseDetailsDTO dto);
 	ResponseDto findAll();
 	ResponseDto delete(WareHouseDetailsDTO dto);
-	
+	ResponseDto getWareHouseListByUserId(String userId,String role);
 }

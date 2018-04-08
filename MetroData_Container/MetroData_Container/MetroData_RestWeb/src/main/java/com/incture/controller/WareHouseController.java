@@ -1,5 +1,7 @@
 package com.incture.controller;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -10,8 +12,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.incture.metrodata.dto.ResponseDto;
+import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.dto.WareHouseDetailsDTO;
+import com.incture.metrodata.service.UserServiceLocal;
 import com.incture.metrodata.service.WareHouseServiceLocal;
+import com.incture.metrodata.util.ServicesUtil;
 
 @RestController
 @CrossOrigin
@@ -21,22 +26,35 @@ public class WareHouseController {
 
 	@Autowired
 	WareHouseServiceLocal wareHouseService;
-	
-	
+
+	@Autowired
+	UserServiceLocal userService;
+
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseDto create(@RequestBody WareHouseDetailsDTO dto) {
 		return wareHouseService.create(dto);
 	}
 
-	
+	@RequestMapping(method = RequestMethod.GET)
+	public ResponseDto findAll(HttpServletRequest request) {
+		ResponseDto res = new ResponseDto();
+		String userId = "";
+		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
+			userId = request.getUserPrincipal().getName();
+		} else {
+			return ServicesUtil.getUnauthorizedResponseDto();
 
-	@RequestMapping( method = RequestMethod.GET)
-	public ResponseDto findAll() {
-		return wareHouseService.findAll();
+		}
+		UserDetailsDTO userDto = new UserDetailsDTO();
+		userDto.setUserId(userId);
+		res = userService.find(userDto);
+		userDto = (UserDetailsDTO) res.getData();
+
+		return wareHouseService.getWareHouseListByUserId(userId, userDto.getRole().getRoleName());
 	}
 
-	@RequestMapping(value="/{wareHouseId}",method = RequestMethod.PUT)
-	public ResponseDto update(@PathVariable Long wareHouseId, @RequestBody  WareHouseDetailsDTO dto) {
+	@RequestMapping(value = "/{wareHouseId}", method = RequestMethod.PUT)
+	public ResponseDto update(@PathVariable Long wareHouseId, @RequestBody WareHouseDetailsDTO dto) {
 		dto.setWareHouseId(wareHouseId);
 		return wareHouseService.update(dto);
 	}

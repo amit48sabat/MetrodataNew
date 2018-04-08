@@ -11,9 +11,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.http.HttpStatus;
+
 import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
 import com.google.maps.model.GeocodingResult;
+import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.exceptions.InvalidInputFault;
 
 public class ServicesUtil {
@@ -292,5 +295,13 @@ public class ServicesUtil {
 		}
 			//System.out.println(gson.toJson(results[0].geometry.location.lat));
 	return map;		
+	}
+	
+	public static ResponseDto getUnauthorizedResponseDto(){
+		ResponseDto res = new ResponseDto();
+		res.setCode(HttpStatus.SC_UNAUTHORIZED);
+		res.setMessage("Unauthorzed request");
+		res.setStatus(false);
+		return res;
 	}
 }

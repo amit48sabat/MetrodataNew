@@ -130,4 +130,24 @@ public class WareHouseService implements WareHouseServiceLocal {
 		return responseDto;
 	}
 
+	@Override
+	public ResponseDto getWareHouseListByUserId(String userId, String roleId) {
+		ResponseDto responseDto = new ResponseDto();
+		try {
+			Object data = wareHouseDao.getWarehouseListByUserId(userId,roleId);
+
+			responseDto.setStatus(true);
+			responseDto.setCode(HttpStatus.SC_OK);
+			responseDto.setData(data);
+			responseDto.setMessage(Message.SUCCESS.getValue());
+		} catch (Exception e) {
+			responseDto.setStatus(false);
+			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			responseDto.setMessage(Message.FAILED.getValue());
+			e.printStackTrace();
+		}
+		
+		return responseDto;
+	}
+
 }
