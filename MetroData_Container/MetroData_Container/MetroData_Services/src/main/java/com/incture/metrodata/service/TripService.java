@@ -58,11 +58,11 @@ public class TripService implements TripServiceLocal {
 		try {
 			// setting created at and updated at for dto
 			setCreatedAtAndUpdatedAtForDto(dto);
-			
+
 			// assigning tripId before processing
 			String tripId = SequenceNumberGen.getInstance().getNextSeqNumber("TRIP", 8, tripDao.getSession());
 			dto.setTripId(tripId);
-			
+
 			/*
 			 * Date currDate = new Date(); dto.setCreatedAt(currDate);
 			 * dto.setUpdateAt(currDate);
@@ -71,7 +71,7 @@ public class TripService implements TripServiceLocal {
 			//
 			TripDetailsDo dos = new TripDetailsDo();
 
-			//setTripDoForTripCreate(dto, dos);
+			// setTripDoForTripCreate(dto, dos);
 
 			dto = tripDao.create(dto, dos);
 
@@ -88,21 +88,19 @@ public class TripService implements TripServiceLocal {
 		return responseDto;
 	}
 
-	/*private void setTripDoForTripCreate(TripDetailsDTO dto, TripDetailsDo dos) throws Exception {
-		DeliveryHeaderDo deliveryHeaderDo;
-		// fetching dns dos
-		if (!ServicesUtil.isEmpty(dto.getDeliveryHeader())) {
-			for (DeliveryHeaderDTO d : dto.getDeliveryHeader()) {
-				deliveryHeaderDo = deliveryHeaderDao.getByKeysForFK(d);
-				dos.getDeliveryHeader().add(deliveryHeaderDo);
-			}
-		}
-
-		// fetching user dos
-		if (!ServicesUtil.isEmpty(dto.getUser()))
-			dos.setUser(userDao.getByKeysForFK(dto.getUser()));
-
-	}*/
+	/*
+	 * private void setTripDoForTripCreate(TripDetailsDTO dto, TripDetailsDo
+	 * dos) throws Exception { DeliveryHeaderDo deliveryHeaderDo; // fetching
+	 * dns dos if (!ServicesUtil.isEmpty(dto.getDeliveryHeader())) { for
+	 * (DeliveryHeaderDTO d : dto.getDeliveryHeader()) { deliveryHeaderDo =
+	 * deliveryHeaderDao.getByKeysForFK(d);
+	 * dos.getDeliveryHeader().add(deliveryHeaderDo); } }
+	 * 
+	 * // fetching user dos if (!ServicesUtil.isEmpty(dto.getUser()))
+	 * dos.setUser(userDao.getByKeysForFK(dto.getUser()));
+	 * 
+	 * }
+	 */
 
 	private void setCreatedAtAndUpdatedAtForDto(TripDetailsDTO dto) {
 		Date currdate = new Date();
@@ -133,13 +131,13 @@ public class TripService implements TripServiceLocal {
 
 			if (!ServicesUtil.isEmpty(dto.getStatus()))
 				updateTripStatusConstraints(dto);
-            
-			// if user/driver is set than add this driver to trip's delivery notes
-			if(!ServicesUtil.isEmpty(dto.getUser()))
-			{
+
+			// if user/driver is set than add this driver to trip's delivery
+			// notes
+			if (!ServicesUtil.isEmpty(dto.getUser())) {
 				setAssignedUserInDeliveryHeader(dto);
 			}
-				
+
 			dto = tripDao.update(dto);
 
 			responseDto.setStatus(true);
@@ -155,10 +153,10 @@ public class TripService implements TripServiceLocal {
 	}
 
 	private void setAssignedUserInDeliveryHeader(TripDetailsDTO dto) {
-		if(!ServicesUtil.isEmpty(dto.getDeliveryHeader())){
-			 UserDetailsDTO user  = dto.getUser();
-			 Set<DeliveryHeaderDTO> deliveryHeader = dto.getDeliveryHeader();
-			for(DeliveryHeaderDTO d : deliveryHeader){
+		if (!ServicesUtil.isEmpty(dto.getDeliveryHeader())) {
+			UserDetailsDTO user = dto.getUser();
+			Set<DeliveryHeaderDTO> deliveryHeader = dto.getDeliveryHeader();
+			for (DeliveryHeaderDTO d : deliveryHeader) {
 				d.setAssignedUser(user.getUserId());
 			}
 		}
@@ -392,11 +390,12 @@ public class TripService implements TripServiceLocal {
 	 * Api for getting trip history by driver id
 	 */
 	@Override
-	public ResponseDto getTripHistoryByDriverId(String userId,Long start, Long end) {
+	public ResponseDto getTripHistoryByDriverId(String userId, Long start, Long end) {
 		ResponseDto responseDto = new ResponseDto();
 
 		try {
-			List<TripDetailsDTO> tripReport = (List<TripDetailsDTO>) tripDao.getTripHistoryByDriverId(userId,start,end);
+			List<TripDetailsDTO> tripReport = (List<TripDetailsDTO>) tripDao.getTripHistoryByDriverId(userId, start,
+					end);
 			Map<String, BigInteger> deliveryNoteReport = tripDao.getDriversDeliveryNoteReport(userId);
 			long totalTrips = 0L, totalDeliveryNotes = 0L, avgDnsPerTrip = 0;
 
@@ -438,18 +437,19 @@ public class TripService implements TripServiceLocal {
 	public ResponseDto leaderBoard(WebLeaderBoardVO dto) {
 		ResponseDto responseDto = new ResponseDto();
 		try {
-            
-			if(ServicesUtil.isEmpty(dto.getFirstResult()) || ServicesUtil.isEmpty(dto.getMaxResult()))
-			{
-				dto.setFirstResult(0); dto.setMaxResult(10);
+
+			if (ServicesUtil.isEmpty(dto.getFirstResult()) || ServicesUtil.isEmpty(dto.getMaxResult())) {
+				dto.setFirstResult(0);
+				dto.setMaxResult(10);
 			}
-			
+
 			if (!ServicesUtil.isEmpty(dto.getSortBy()))
 				dto.validateSortBy();
 			else
 				dto.setSortBy(DeliveryNoteStatus.TOTAL_DEL_NOTE.getValue());
 
-			//Set<Map<?, ?>> driverReport = new TreeSet(new LeaderBoardComparator(sortBy));
+			// Set<Map<?, ?>> driverReport = new TreeSet(new
+			// LeaderBoardComparator(sortBy));
 			List<Map<String, Object>> resultSet = null;
 
 			resultSet = tripDao.getWebLeaderBoard(dto);
@@ -469,22 +469,53 @@ public class TripService implements TripServiceLocal {
 		return responseDto;
 	}
 
-	
 	/**
 	 * api for finding all the trip by admin's driver's warehouse ids
 	 */
 	@Override
 	public ResponseDto getAllTripsAssociatedWithAdminsDrivers(UserDetailsDTO adminDto) {
-ResponseDto responseDto = new ResponseDto();
-		
-		try { 
-			
-			//adminDto = userDao.findById(adminDto);
-			Object tripList = tripDao.getAllTripsAssociatedWithAdminsDrivers(adminDto.getUserId(), adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails());
+		ResponseDto responseDto = new ResponseDto();
+
+		try {
+
+			// adminDto = userDao.findById(adminDto);
+			Object tripList = tripDao.getAllTripsAssociatedWithAdminsDrivers(adminDto.getUserId(),
+					adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails());
 
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
 			responseDto.setData(tripList);
+			responseDto.setMessage(Message.SUCCESS.getValue());
+		} catch (Exception e) {
+			responseDto.setStatus(false);
+			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			responseDto.setMessage(Message.FAILED.getValue());
+			e.printStackTrace();
+		}
+		return responseDto;
+	}
+
+	/***
+	 * api for admin dashboard as per admin's warehouse id
+	 */
+	public ResponseDto getAdminDashboardAssociatedWithAdmins(UserDetailsDTO adminDto) {
+		ResponseDto responseDto = new ResponseDto();
+
+		try {
+
+			//adminDto = userDao.findById(adminDto);
+			Map<String, Long> adminReportData = (Map<String, Long>) tripDao.getAdminDashboardAssociatedWithAdmins(
+					adminDto.getUserId(), adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails());
+
+			adminReportData.put("AVG_TRIP_ORDER", 0L);
+			if (adminReportData.get("TOTAL_TRIPS") > 0) {
+				Long avgOrders = adminReportData.get("TOTAL_ORDERS") / adminReportData.get("TOTAL_TRIPS");
+				adminReportData.put("AVG_TRIP_ORDER", avgOrders);
+			}
+
+			responseDto.setStatus(true);
+			responseDto.setCode(HttpStatus.SC_OK);
+			responseDto.setData(adminReportData);
 			responseDto.setMessage(Message.SUCCESS.getValue());
 		} catch (Exception e) {
 			responseDto.setStatus(false);

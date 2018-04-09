@@ -34,4 +34,9 @@ public interface TripServiceLocal {
 	 * api for finding all the trip as per admin's warehouse id
 	 */
 	ResponseDto getAllTripsAssociatedWithAdminsDrivers(UserDetailsDTO adminDto);
+	
+	/***
+	 * api for admin dashboard as per admin's warehouse id
+	 */
+	ResponseDto getAdminDashboardAssociatedWithAdmins(UserDetailsDTO adminDto);
 }
