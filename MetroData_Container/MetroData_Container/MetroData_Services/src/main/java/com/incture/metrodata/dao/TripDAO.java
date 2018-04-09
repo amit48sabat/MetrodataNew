@@ -39,11 +39,10 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 
 	@Autowired
 	DeliveryHeaderDAO deliveryHeaderDAO;
-	
-	@Autowired 
+
+	@Autowired
 	UserDAO userDAO;
-	
-	
+
 	@Override
 	TripDetailsDo importDto(TripDetailsDTO dto, TripDetailsDo tripDetailsDo) throws Exception {
 
@@ -85,7 +84,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 
 			// importing driver details
 			if (!ServicesUtil.isEmpty(dto.getUser())) {
-				
+
 				/*
 				 * UserDetailsDo detailsDo = null; try{ detailsDo =
 				 * userDAO.getByKeysForFK(dto.getUser()); } catch
@@ -93,7 +92,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 				 */
 				if (!ServicesUtil.isEmpty(tripDetailsDo.getUser()))
 					tripDetailsDo.setUser(userDAO.importDto(dto.getUser(), tripDetailsDo.getUser()));
-				else	
+				else
 					tripDetailsDo.setUser(userDAO.importDto(dto.getUser(), null));
 			}
 
@@ -143,7 +142,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 
 			// exporting driver details
 			if (!ServicesUtil.isEmpty(dos.getUser())) {
-				
+
 				dto.setUser(userDAO.exportDto(dos.getUser()));
 			}
 
@@ -270,17 +269,16 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	 * driver trip history of driver
 	 */
 	@SuppressWarnings("unchecked")
-	public List<TripDetailsDTO> getTripHistoryByDriverId(String userId,Long start, Long end) {
+	public List<TripDetailsDTO> getTripHistoryByDriverId(String userId, Long start, Long end) {
 
 		List<TripDetailsDo> tripDoList = null;
 		Criteria criteria = getSession().createCriteria(TripDetailsDo.class);
 		Criteria userCriteria = criteria.createCriteria("user");
 		userCriteria.add(Restrictions.eq("userId", userId));
 		criteria.addOrder(Order.desc("createdAt"));
-		
-		if(!ServicesUtil.isEmpty(start) && !ServicesUtil.isEmpty(end))
-		{
-			criteria.add(Restrictions.ge("endTime", new Date(start))); 
+
+		if (!ServicesUtil.isEmpty(start) && !ServicesUtil.isEmpty(end)) {
+			criteria.add(Restrictions.ge("endTime", new Date(start)));
 			criteria.add(Restrictions.le("endTime", new Date(end)));
 		}
 		criteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
@@ -328,53 +326,51 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 				+ " INNER JOIN trip_details td ON td.trip_id = th.trip_id  WHERE td.user_user_id = user_id AND dh.status = 'del_note_rejected' ";
 
 		String orderBy = dto.getSortBy();
-		if (!ServicesUtil.isEmpty(dto.getFrom())  && !ServicesUtil.isEmpty(dto.getTo())) {
-			java.sql.Date sqlDate = new java.sql.Date(dto.getFrom().getTime()); 
-			String fromDate = sqlDate+" 00:00:00";
-			sqlDate = new java.sql.Date(dto.getTo().getTime()); 
-			String toDate = sqlDate+" 00:00:00";
-			del_note_completed += "  AND dh.UPDATED_AT BETWEEN '"+fromDate+"' AND '"+toDate+"' ";
-			del_note_partially_rejected += "  AND dh.UPDATED_AT BETWEEN '"+fromDate+"' AND '"+toDate+"' ";
-			del_note_rejected += "  AND dh.UPDATED_AT BETWEEN '"+fromDate+"' AND '"+toDate+"' ";
+		if (!ServicesUtil.isEmpty(dto.getFrom()) && !ServicesUtil.isEmpty(dto.getTo())) {
+			java.sql.Date sqlDate = new java.sql.Date(dto.getFrom().getTime());
+			String fromDate = sqlDate + " 00:00:00";
+			sqlDate = new java.sql.Date(dto.getTo().getTime());
+			String toDate = sqlDate + " 00:00:00";
+			del_note_completed += "  AND dh.UPDATED_AT BETWEEN '" + fromDate + "' AND '" + toDate + "' ";
+			del_note_partially_rejected += "  AND dh.UPDATED_AT BETWEEN '" + fromDate + "' AND '" + toDate + "' ";
+			del_note_rejected += "  AND dh.UPDATED_AT BETWEEN '" + fromDate + "' AND '" + toDate + "' ";
 		}
-		/*if (!ServicesUtil.isEmpty(dto.getTo())) {
-			del_note_completed += "  AND dh.UPDATED_AT <= :toCompleted ";
-			del_note_partially_rejected += "  AND dh.UPDATED_AT <= :toPartiallyRejected ";
-			del_note_rejected += "  AND dh.UPDATED_AT >= :toRejected ";
-		}*/
+		/*
+		 * if (!ServicesUtil.isEmpty(dto.getTo())) { del_note_completed +=
+		 * "  AND dh.UPDATED_AT <= :toCompleted "; del_note_partially_rejected
+		 * += "  AND dh.UPDATED_AT <= :toPartiallyRejected "; del_note_rejected
+		 * += "  AND dh.UPDATED_AT >= :toRejected "; }
+		 */
 
 		String sql = " SELECT user_id, email, name, user_type, del_note_completed, del_note_partially_rejected, del_note_rejected, del_note_completed + del_note_partially_rejected+ del_note_rejected AS total_delivery_note "
-				    + " FROM "
-				    + "(SELECT *,"
-				    + " (" + del_note_completed + ") AS del_note_completed, " + ""
-				    + " (" + del_note_rejected + ") AS del_note_rejected, " 
-				    + "	(" + del_note_partially_rejected + ") AS del_note_partially_rejected " 
-				    + "  FROM user_details "
-				    + " ) ORDER BY "+orderBy+" DESC";
+				+ " FROM " + "(SELECT *," + " (" + del_note_completed + ") AS del_note_completed, " + "" + " ("
+				+ del_note_rejected + ") AS del_note_rejected, " + "	(" + del_note_partially_rejected
+				+ ") AS del_note_partially_rejected " + "  FROM user_details " + " ) ORDER BY " + orderBy + " DESC";
 
-		/*if (!orderBy.equals(DeliveryNoteStatus.TOTAL_DEL_NOTE.getValue()))
-			sql += "  ORDER BY " + dto.getSortBy() + " DESC	";*/
+		/*
+		 * if (!orderBy.equals(DeliveryNoteStatus.TOTAL_DEL_NOTE.getValue()))
+		 * sql += "  ORDER BY " + dto.getSortBy() + " DESC	";
+		 */
 
 		SQLQuery query = getSession().createSQLQuery(sql);
 		// apply condition for created at if from and to are given
-		/*if (!ServicesUtil.isEmpty(dto.getFrom())) {
-			query.setParameter("fromCompleted", dto.getFrom());
-			query.setParameter("fromPartiallyRejected", dto.getFrom());
-			query.setParameter("fromRejected", dto.getFrom());
-		}
-		// apply condition for created at if from and to are given
-		if (!ServicesUtil.isEmpty(dto.getTo())) {
-			query.setParameter("toCompleted", dto.getTo());
-			query.setParameter("toPartiallyRejected", dto.getTo());
-			query.setParameter("toRejected", dto.getTo());
-		}
-*/
+		/*
+		 * if (!ServicesUtil.isEmpty(dto.getFrom())) {
+		 * query.setParameter("fromCompleted", dto.getFrom());
+		 * query.setParameter("fromPartiallyRejected", dto.getFrom());
+		 * query.setParameter("fromRejected", dto.getFrom()); } // apply
+		 * condition for created at if from and to are given if
+		 * (!ServicesUtil.isEmpty(dto.getTo())) {
+		 * query.setParameter("toCompleted", dto.getTo());
+		 * query.setParameter("toPartiallyRejected", dto.getTo());
+		 * query.setParameter("toRejected", dto.getTo()); }
+		 */
 		// query.setParameter("fromDate",dto.getFrom(),TemporalType.DATE);
 		query.setFirstResult(dto.getFirstResult());
 		query.setMaxResults(dto.getMaxResult());
 		List<List<Object>> result = (List<List<Object>>) query.setResultTransformer(Transformers.TO_LIST).list();
 		Long totalDns = 0L;
-		String userId, name, userType,email;
+		String userId, name, userType, email;
 		Long delCompleted, delRej, delParRej;
 		for (List<Object> x : result) {
 			Map<String, Object> map = new TreeMap<>();
@@ -393,8 +389,8 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 				delParRej = temp.longValue();
 				temp = (BigInteger) x.get(6); // del note completed
 				delRej = temp.longValue();
-				
-				temp = (BigInteger) x.get(7); // total delivery note 
+
+				temp = (BigInteger) x.get(7); // total delivery note
 				totalDns = temp.longValue();
 
 				map.put("userId", userId);
@@ -447,15 +443,15 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		} else
 			hql = "SELECT t FROM TripDetailsDo AS t INNER JOIN t.user as u  INNER JOIN u.wareHouseDetails as w  WHERE w.wareHouseId IN (:warehouselist) ORDER BY t.createdAt desc";
 		Query query = getSession().createQuery(hql);
-		if(!isSuperAdmin)
-		query.setParameterList("warehouselist", wareHouseIds);
-		
+		if (!isSuperAdmin)
+			query.setParameterList("warehouselist", wareHouseIds);
+
 		ArrayList<TripDetailsDo> result = (ArrayList<TripDetailsDo>) query.list();
 		return exportList(result);
 	}
 
 	@SuppressWarnings("unchecked")
-	public Map<String,Long> getAdminDashboardAssociatedWithAdmins(String userId, String roleName,
+	public Map<String, Long> getAdminDashboardAssociatedWithAdmins(String userId, String roleName,
 			Set<WareHouseDetailsDTO> wareHouseDetails) {
 		List<Long> wareHouseIds = new ArrayList<Long>();
 		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
@@ -465,33 +461,154 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		// get all the user list if role is super_admin or sales_admin
 		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
 				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
-			hql = "SELECT new map("
-					+ " count(t.tripId) as TOTAL_TRIPS ,  "
-				 + " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE tripped = true) as TOTAL_ORDERS, "
-				 + " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_rejected' AND tripped = true) as del_note_rejected, "
-				 + " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_partially_rejected' AND tripped = true) as del_note_partially_rejected, "
-				 + " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_started' AND tripped = true) as del_note_started, "
-				 + " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_invalidated' AND tripped = true) as del_note_invalidated, "
-				 + " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_completed' AND tripped = true) as del_note_completed "
-				 + " ) FROM TripDetailsDo AS t ";
+			hql = "SELECT new map(" + " count(t.tripId) as TOTAL_TRIPS ,  "
+					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE tripped = true) as TOTAL_ORDERS, "
+					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_rejected' AND tripped = true) as del_note_rejected, "
+					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_partially_rejected' AND tripped = true) as del_note_partially_rejected, "
+					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_started' AND tripped = true) as del_note_started, "
+					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_invalidated' AND tripped = true) as del_note_invalidated, "
+					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_completed' AND tripped = true) as del_note_completed "
+					+ " ) FROM TripDetailsDo AS t ";
 			isSuperAdmin = true;
-		} else
-			{
-			  hql = "SELECT new map("
-					+ " count(t.tripId) as TOTAL_TRIPS ,  "
+		} else {
+			hql = "SELECT new map(" + " count(t.tripId) as TOTAL_TRIPS ,  "
 					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as TOTAL_ORDERS, "
 					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_rejected' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_rejected, "
 					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_started' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_started, "
 					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_partially_rejected' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_partially_rejected, "
 					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_invalidated' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_invalidated, "
-				    + " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_completed' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_completed "
-				 + " ) FROM TripDetailsDo AS t INNER JOIN t.deliveryHeader d INNER JOIN d.wareHouseDetails as w WHERE w.wareHouseId IN (:warehouselist)";
-			}
+					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_completed' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_completed "
+					+ " ) FROM TripDetailsDo AS t INNER JOIN t.deliveryHeader d INNER JOIN d.wareHouseDetails as w WHERE w.wareHouseId IN (:warehouselist)";
+		}
 		Query query = getSession().createQuery(hql);
-		if(!isSuperAdmin)
-		query.setParameterList("warehouselist", wareHouseIds);
-		
-		Map<String,Long> result =  (Map<String,Long>)query.uniqueResult();
+		if (!isSuperAdmin)
+			query.setParameterList("warehouselist", wareHouseIds);
+
+		Map<String, Long> result = (Map<String, Long>) query.uniqueResult();
 		return result;
 	}
+
+	/**
+	 * filter api chages as per logged in admin or super_admin
+	 */
+	@SuppressWarnings("unchecked")
+	public Object getFilteredTripsAssociatedWithAdmins(FilterDTO dto, String userId, String roleName,
+			Set<WareHouseDetailsDTO> wareHouseDetails) {
+		List<Long> wareHouseIds = new ArrayList<Long>();
+		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
+			wareHouseIds.add(wareHouse.getWareHouseId());
+
+		String hql = "";
+		// get all the user list if role is super_admin or sales_admin
+		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
+				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
+			// hql = "SELECT t FROM TripDetailsDo AS t where";
+
+			return filterTripsAsSuperAdmin(dto, userId, wareHouseIds);
+
+		} 
+		else {
+			return filterTripsAsAdminOnly(dto, userId, wareHouseIds);
+		}
+
+	}
+
+	/***
+	 * sub part of getFiteredTripAssociated with admin only
+	 * 
+	 * @param dto
+	 * @param userId
+	 * @param wareHouseIds
+	 * @return
+	 */
+	private Object filterTripsAsAdminOnly(FilterDTO dto, String userId, List<Long> wareHouseIds) {
+		String hql = "SELECT t from TripDetailsDo as t  inner join t.user  as u inner join u.wareHouseDetails as w ";
+		String filterBy = dto.getFilterBy();
+		String q = dto.getQuery();
+		boolean isStatus = false;
+		Object data = null;
+		String status = "";
+		if (!ServicesUtil.isEmpty(dto.getStatus())) {
+			status = dto.getStatus();
+			isStatus = true;
+		}
+
+		if (!ServicesUtil.isEmpty(dto)) {
+
+			if (filterBy.equalsIgnoreCase("trip")) {
+				hql += " where t.tripId like :searchParam ";
+			} else if (filterBy.equalsIgnoreCase("driver")) {
+				// hql = " inner join t.user as u where u.firstName like
+				// :searchParam OR u.lastName like :searchParam ";
+				hql += "  inner join u.role as r where  u.userId like :searchParam AND (r.roleName = 'inside_jakarta_driver' Or r.roleName = 'outside_jakarta_driver')";
+			} else if (filterBy.equalsIgnoreCase("delivery_note")) {
+				hql += "  inner join t.deliveryHeader as d where d.deliveryNoteId like :searchParam ";
+			}
+
+			if (isStatus) {
+				hql += " AND t.status = :tripStatus ";
+			}
+
+			hql += " AND w.wareHouseId IN (:warehouselist) order by t.createdAt desc";
+			Query query = getSession().createQuery(hql);
+
+			if (isStatus)
+				query.setParameter("tripStatus", status);
+			query.setParameterList("warehouselist", wareHouseIds);
+			query.setMaxResults(10);
+			query.setString("searchParam", "%" + q + "%");
+			data = query.list();
+		}
+
+		return data;
+	}
+
+	/**
+	 * sub part of getFilteredTripAssociated with super_admins for getting trips
+	 * applying logic for getting all the trips as per super_admin role
+	 * 
+	 * @param userId
+	 * @param wareHouseDetails
+	 */
+	private Object filterTripsAsSuperAdmin(FilterDTO dto, String userId, List<Long> wareHouseDetails) {
+		String hql = "SELECT t from TripDetailsDo as t  ";
+		String filterBy = dto.getFilterBy();
+		String q = dto.getQuery();
+		boolean isStatus = false;
+		Object data = null;
+		String status = "";
+		if (!ServicesUtil.isEmpty(dto.getStatus())) {
+			status = dto.getStatus();
+			isStatus = true;
+		}
+
+		if (!ServicesUtil.isEmpty(dto)) {
+
+			if (filterBy.equalsIgnoreCase("trip")) {
+				hql += " where t.tripId like :searchParam ";
+			} else if (filterBy.equalsIgnoreCase("driver")) {
+				// hql = " inner join t.user as u where u.firstName like
+				// :searchParam OR u.lastName like :searchParam ";
+				hql += "  inner join t.user as u inner join u.role as r where  u.userId like :searchParam AND (r.roleName = 'inside_jakarta_driver' Or r.roleName = 'outside_jakarta_driver')";
+			} else if (filterBy.equalsIgnoreCase("delivery_note")) {
+				hql += "  inner join t.deliveryHeader as d where d.deliveryNoteId like :searchParam ";
+			}
+
+			if (isStatus) {
+				hql += " AND t.status = :tripStatus ";
+			}
+
+			hql += " order by t.createdAt desc";
+			Query query = getSession().createQuery(hql);
+
+			if (isStatus)
+				query.setParameter("tripStatus", status);
+			query.setMaxResults(10);
+			query.setString("searchParam", "%" + q + "%");
+			data = query.list();
+		}
+
+		return data;
+	}
+
 }
