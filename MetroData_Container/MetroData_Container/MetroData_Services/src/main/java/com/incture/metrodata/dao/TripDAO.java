@@ -21,10 +21,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.incture.metrodata.constant.DeliveryNoteStatus;
+import com.incture.metrodata.constant.RoleConstant;
 import com.incture.metrodata.constant.TripStatus;
 import com.incture.metrodata.dto.DeliveryHeaderDTO;
 import com.incture.metrodata.dto.FilterDTO;
 import com.incture.metrodata.dto.TripDetailsDTO;
+import com.incture.metrodata.dto.WareHouseDetailsDTO;
 import com.incture.metrodata.dto.WebLeaderBoardVO;
 import com.incture.metrodata.entity.DeliveryHeaderDo;
 import com.incture.metrodata.entity.TripDetailsDo;
@@ -427,5 +429,28 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		} else {
 			throw new InvalidInputFault("trip status '" + status + "' is invalid status code");
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public Object getAllTripsAssociatedWithAdminsDrivers(String userId, String roleName,
+			Set<WareHouseDetailsDTO> wareHouseDetails) {
+		List<Long> wareHouseIds = new ArrayList<Long>();
+		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
+			wareHouseIds.add(wareHouse.getWareHouseId());
+		boolean isSuperAdmin = false;
+		String hql = "";
+		// get all the user list if role is super_admin or sales_admin
+		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
+				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
+			hql = "SELECT t FROM TripDetailsDo AS t  ORDER BY t.createdAt desc";
+			isSuperAdmin = true;
+		} else
+			hql = "SELECT t FROM TripDetailsDo AS t INNER JOIN t.user as u  INNER JOIN u.wareHouseDetails as w  WHERE w.wareHouseId IN (:warehouselist) ORDER BY t.createdAt desc";
+		Query query = getSession().createQuery(hql);
+		if(!isSuperAdmin)
+		query.setParameterList("warehouselist", wareHouseIds);
+		
+		ArrayList<TripDetailsDo> result = (ArrayList<TripDetailsDo>) query.list();
+		return exportList(result);
 	}
 }

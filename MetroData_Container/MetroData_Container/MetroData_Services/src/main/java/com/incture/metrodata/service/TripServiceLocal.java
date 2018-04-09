@@ -3,6 +3,7 @@ package com.incture.metrodata.service;
 import com.incture.metrodata.dto.FilterDTO;
 import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.TripDetailsDTO;
+import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.dto.WebLeaderBoardVO;
 
 public interface TripServiceLocal {
@@ -28,4 +29,9 @@ public interface TripServiceLocal {
 	ResponseDto getTripHistoryByDriverId(String userDto, Long start, Long end);
 	
 	ResponseDto leaderBoard(WebLeaderBoardVO dto);
+	
+	/***
+	 * api for finding all the trip as per admin's warehouse id
+	 */
+	ResponseDto getAllTripsAssociatedWithAdminsDrivers(UserDetailsDTO adminDto);
 }

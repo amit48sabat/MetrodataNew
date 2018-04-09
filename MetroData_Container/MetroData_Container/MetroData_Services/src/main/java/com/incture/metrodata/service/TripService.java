@@ -56,11 +56,13 @@ public class TripService implements TripServiceLocal {
 	public ResponseDto create(TripDetailsDTO dto) {
 		ResponseDto responseDto = new ResponseDto();
 		try {
+			// setting created at and updated at for dto
+			setCreatedAtAndUpdatedAtForDto(dto);
+			
 			// assigning tripId before processing
 			String tripId = SequenceNumberGen.getInstance().getNextSeqNumber("TRIP", 8, tripDao.getSession());
 			dto.setTripId(tripId);
-			// setting created at and updated at for dto
-			setCreatedAtAndUpdatedAtForDto(dto);
+			
 			/*
 			 * Date currDate = new Date(); dto.setCreatedAt(currDate);
 			 * dto.setUpdateAt(currDate);
@@ -463,6 +465,32 @@ public class TripService implements TripServiceLocal {
 			responseDto.setStatus(false);
 			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			responseDto.setMessage(e.getMessage());
+		}
+		return responseDto;
+	}
+
+	
+	/**
+	 * api for finding all the trip by admin's driver's warehouse ids
+	 */
+	@Override
+	public ResponseDto getAllTripsAssociatedWithAdminsDrivers(UserDetailsDTO adminDto) {
+ResponseDto responseDto = new ResponseDto();
+		
+		try {
+			
+			//adminDto = userDao.findById(adminDto);
+			Object tripList = tripDao.getAllTripsAssociatedWithAdminsDrivers(adminDto.getUserId(), adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails());
+
+			responseDto.setStatus(true);
+			responseDto.setCode(HttpStatus.SC_OK);
+			responseDto.setData(tripList);
+			responseDto.setMessage(Message.SUCCESS.getValue());
+		} catch (Exception e) {
+			responseDto.setStatus(false);
+			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			responseDto.setMessage(Message.FAILED.getValue());
+			e.printStackTrace();
 		}
 		return responseDto;
 	}

@@ -15,8 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.incture.metrodata.dto.FilterDTO;
 import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.TripDetailsDTO;
+import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.dto.WebLeaderBoardVO;
 import com.incture.metrodata.service.TripServiceLocal;
+import com.incture.metrodata.service.UserServiceLocal;
+import com.incture.metrodata.util.ServicesUtil;
 
 @RestController
 @CrossOrigin
@@ -26,7 +29,10 @@ public class TripController {
 
 	@Autowired
 	TripServiceLocal tripService;
-
+     
+	@Autowired
+	UserServiceLocal userServiceLocal;
+	
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseDto create(@RequestBody TripDetailsDTO dto, HttpServletRequest request) {
 		String userId = "";
@@ -39,8 +45,22 @@ public class TripController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public ResponseDto findAllTrips() {
-		return tripService.findAll();
+	public ResponseDto findAllTrips(HttpServletRequest request) {
+		ResponseDto res = new ResponseDto();
+		String userId = "";
+		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
+			userId = request.getUserPrincipal().getName();
+		} else {
+			return ServicesUtil.getUnauthorizedResponseDto();
+
+		}
+		// validating user role if action not permitted then return
+		 res = userServiceLocal.validatedUserRoleByUserId(userId);
+		 if(!res.isStatus())
+			 return res;
+		 
+		UserDetailsDTO adminDto =  (UserDetailsDTO) res.getData();
+		return tripService.getAllTripsAssociatedWithAdminsDrivers(adminDto);
 	}
 
 	@RequestMapping(value = "/search", method = RequestMethod.PUT)
