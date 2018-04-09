@@ -477,7 +477,7 @@ public class TripService implements TripServiceLocal {
 	public ResponseDto getAllTripsAssociatedWithAdminsDrivers(UserDetailsDTO adminDto) {
 ResponseDto responseDto = new ResponseDto();
 		
-		try {
+		try { 
 			
 			//adminDto = userDao.findById(adminDto);
 			Object tripList = tripDao.getAllTripsAssociatedWithAdminsDrivers(adminDto.getUserId(), adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails());
