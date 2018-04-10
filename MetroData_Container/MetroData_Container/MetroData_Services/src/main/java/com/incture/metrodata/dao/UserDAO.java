@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.incture.metrodata.constant.RoleConstant;
+import com.incture.metrodata.dto.TripDetailsDTO;
 import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.dto.WareHouseDetailsDTO;
 import com.incture.metrodata.entity.UserDetailsDo;
@@ -201,7 +202,13 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			hql = "SELECT u FROM UserDetailsDo AS  u inner join u.wareHouseDetails AS w WHERE w.wareHouseId IN (:warehouselist) AND u.userId !=:adminId";
 		Query query = getSession().createQuery(hql);
 		if(!isSuperAdmin)
-		query.setParameterList("warehouselist", wareHouseIds);
+		{
+			// send no data on if warehouse if is empty
+			if (ServicesUtil.isEmpty(wareHouseIds))
+				return new ArrayList<UserDetailsDTO>();
+			
+			query.setParameterList("warehouselist", wareHouseIds);
+		}
 		
 		query.setParameter("adminId", adminId);
 		ArrayList<UserDetailsDo> result = (ArrayList<UserDetailsDo>) query.list();

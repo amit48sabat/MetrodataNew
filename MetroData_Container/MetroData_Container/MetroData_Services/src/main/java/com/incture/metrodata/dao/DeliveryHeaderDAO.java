@@ -298,7 +298,6 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 
 	private boolean checkDnStatus(String status) throws InvalidInputFault {
 
-
 		if (DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue().equals(status)
 				|| DeliveryNoteStatus.DELIVERY_NOTE_INVALIDATED.getValue().equals(status)
 				|| DeliveryNoteStatus.DELIVERY_NOTE_PARTIALLY_REJECTED.getValue().equals(status)
@@ -312,9 +311,9 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 		}
 	}
 
-	
 	@SuppressWarnings("unchecked")
-	public List<DeliveryHeaderDTO> getAllDeliveryNoteByAdminsWareHouse(String adminId, String roleName, Set<WareHouseDetailsDTO> wareHouseDetails) {
+	public List<DeliveryHeaderDTO> getAllDeliveryNoteByAdminsWareHouse(String adminId, String roleName,
+			Set<WareHouseDetailsDTO> wareHouseDetails) {
 		List<Long> wareHouseIds = new ArrayList<Long>();
 		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
 			wareHouseIds.add(wareHouse.getWareHouseId());
@@ -328,12 +327,17 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 		} else
 			hql = "SELECT d FROM DeliveryHeaderDo AS d inner join d.wareHouseDetails w WHERE d.tripped = false AND w.wareHouseId IN (:warehouselist) ORDER BY d.createdAt desc";
 		Query query = getSession().createQuery(hql);
-		if(!isSuperAdmin)
-		query.setParameterList("warehouselist", wareHouseIds);
-		
+		if (!isSuperAdmin) {
+			// send no data on if warehouse if is empty
+			if (ServicesUtil.isEmpty(wareHouseIds))
+				return new ArrayList<DeliveryHeaderDTO>();
+
+			query.setParameterList("warehouselist", wareHouseIds);
+		}
+
 		ArrayList<DeliveryHeaderDo> result = (ArrayList<DeliveryHeaderDo>) query.list();
 		return exportList(result);
-		
+
 	}
 
 }

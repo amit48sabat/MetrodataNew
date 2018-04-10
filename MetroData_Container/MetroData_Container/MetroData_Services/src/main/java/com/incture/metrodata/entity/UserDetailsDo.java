@@ -40,6 +40,7 @@ public class UserDetailsDo implements BaseDo {
 	@Column(name = "LAST_NAME",length=50)
 	private String lastName;
 	
+	//@Formula(value = " concat(FIRST_NAME, ' ', LAST_NAME) ")
 	@Column(name = "NAME",length=50)
 	private String name;
 	

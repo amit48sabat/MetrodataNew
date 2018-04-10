@@ -443,8 +443,12 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		} else
 			hql = "SELECT t FROM TripDetailsDo AS t INNER JOIN t.user as u  INNER JOIN u.wareHouseDetails as w  WHERE w.wareHouseId IN (:warehouselist) ORDER BY t.createdAt desc";
 		Query query = getSession().createQuery(hql);
-		if (!isSuperAdmin)
+		if (!isSuperAdmin) {
+			if (ServicesUtil.isEmpty(wareHouseIds))
+				return new ArrayList<TripDetailsDo>();
+
 			query.setParameterList("warehouselist", wareHouseIds);
+		}
 
 		ArrayList<TripDetailsDo> result = (ArrayList<TripDetailsDo>) query.list();
 		return exportList(result);
@@ -456,35 +460,46 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		List<Long> wareHouseIds = new ArrayList<Long>();
 		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
 			wareHouseIds.add(wareHouse.getWareHouseId());
+
 		boolean isSuperAdmin = false;
 		String hql = "";
 		// get all the user list if role is super_admin or sales_admin
 		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
 				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
-			hql = "SELECT new map(" + " count(t.tripId) as TOTAL_TRIPS ,  "
+			hql = "SELECT new map( count(t.tripId) as TOTAL_TRIPS ,  "
 					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE tripped = true) as TOTAL_ORDERS, "
 					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_rejected' AND tripped = true) as del_note_rejected, "
 					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_partially_rejected' AND tripped = true) as del_note_partially_rejected, "
 					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_started' AND tripped = true) as del_note_started, "
-					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_invalidated' AND tripped = true) as del_note_invalidated, "
+					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_validated' AND tripped = true) as del_note_validated, "
 					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_completed' AND tripped = true) as del_note_completed "
 					+ " ) FROM TripDetailsDo AS t ";
 			isSuperAdmin = true;
 		} else {
-			hql = "SELECT new map(" + " count(t.tripId) as TOTAL_TRIPS ,  "
+			hql = "SELECT new map( count(t.tripId) as TOTAL_TRIPS ,  "
 					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as TOTAL_ORDERS, "
 					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_rejected' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_rejected, "
 					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_started' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_started, "
 					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_partially_rejected' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_partially_rejected, "
-					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_invalidated' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_invalidated, "
+					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_validated' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_validated, "
 					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_completed' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_completed "
 					+ " ) FROM TripDetailsDo AS t INNER JOIN t.deliveryHeader d INNER JOIN d.wareHouseDetails as w WHERE w.wareHouseId IN (:warehouselist)";
 		}
 		Query query = getSession().createQuery(hql);
-		if (!isSuperAdmin)
+		if (!isSuperAdmin) {
+			// send no data on if warehouse if is empty
+			if (ServicesUtil.isEmpty(wareHouseIds))
+				return new HashMap<String, Long>();
+
 			query.setParameterList("warehouselist", wareHouseIds);
+		}
 
 		Map<String, Long> result = (Map<String, Long>) query.uniqueResult();
+		result.put("AVG_TRIP_ORDER", 0L);
+		if (result.get("TOTAL_TRIPS") > 0) {
+			Long avgOrders = result.get("TOTAL_ORDERS") / result.get("TOTAL_TRIPS");
+			result.put("AVG_TRIP_ORDER", avgOrders);
+		}
 		return result;
 	}
 
@@ -497,19 +512,18 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		List<Long> wareHouseIds = new ArrayList<Long>();
 		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
 			wareHouseIds.add(wareHouse.getWareHouseId());
-       List<TripDetailsDo> doList;
-		String hql = "";
+
 		// get all the user list if role is super_admin or sales_admin
 		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
 				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
 			// hql = "SELECT t FROM TripDetailsDo AS t where";
 
-			  doList = filterTripsAsSuperAdmin(dto, userId, wareHouseIds);
+			return filterTripsAsSuperAdmin(dto, userId, wareHouseIds);
 
 		} else {
-			doList = filterTripsAsAdminOnly(dto, userId, wareHouseIds);
+			return filterTripsAsAdminOnly(dto, userId, wareHouseIds);
 		}
-        return exportList(doList);
+
 	}
 
 	/***
@@ -521,7 +535,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	private List<TripDetailsDo> filterTripsAsAdminOnly(FilterDTO dto, String userId, List<Long> wareHouseIds) {
+	private List<TripDetailsDTO> filterTripsAsAdminOnly(FilterDTO dto, String userId, List<Long> wareHouseIds) {
 		String hql = "SELECT t from TripDetailsDo as t  inner join t.user  as u inner join u.wareHouseDetails as w ";
 		String filterBy = dto.getFilterBy();
 		String q = dto.getQuery();
@@ -554,13 +568,18 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 
 			if (isStatus)
 				query.setParameter("tripStatus", status);
+
+			// send no data on if warehouse if is empty
+			if (ServicesUtil.isEmpty(wareHouseIds))
+				return new ArrayList<TripDetailsDTO>();
+
 			query.setParameterList("warehouselist", wareHouseIds);
 			query.setMaxResults(10);
 			query.setString("searchParam", "%" + q + "%");
-			data = (List<TripDetailsDo>)query.list();
+			data = (List<TripDetailsDo>) query.list();
 		}
 
-		return data;
+		return exportList(data);
 	}
 
 	/**
@@ -571,7 +590,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	 * @param wareHouseDetails
 	 */
 	@SuppressWarnings("unchecked")
-	private List<TripDetailsDo> filterTripsAsSuperAdmin(FilterDTO dto, String userId, List<Long> wareHouseDetails) {
+	private List<TripDetailsDTO> filterTripsAsSuperAdmin(FilterDTO dto, String userId, List<Long> wareHouseDetails) {
 		String hql = "SELECT t from TripDetailsDo as t  ";
 		String filterBy = dto.getFilterBy();
 		String q = dto.getQuery();
@@ -606,10 +625,10 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 				query.setParameter("tripStatus", status);
 			query.setMaxResults(10);
 			query.setString("searchParam", "%" + q + "%");
-			data = (List<TripDetailsDo>)query.list();
+			data = (List<TripDetailsDo>) query.list();
 		}
 
-		return data;
+		return exportList(data);
 	}
 
 }

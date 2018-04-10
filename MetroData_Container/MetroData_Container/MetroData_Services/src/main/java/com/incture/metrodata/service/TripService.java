@@ -507,12 +507,6 @@ public class TripService implements TripServiceLocal {
 			Map<String, Long> adminReportData = (Map<String, Long>) tripDao.getAdminDashboardAssociatedWithAdmins(
 					adminDto.getUserId(), adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails());
 
-			adminReportData.put("AVG_TRIP_ORDER", 0L);
-			if (adminReportData.get("TOTAL_TRIPS") > 0) {
-				Long avgOrders = adminReportData.get("TOTAL_ORDERS") / adminReportData.get("TOTAL_TRIPS");
-				adminReportData.put("AVG_TRIP_ORDER", avgOrders);
-			}
-
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
 			responseDto.setData(adminReportData);
