@@ -492,25 +492,24 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	 * filter api chages as per logged in admin or super_admin
 	 */
 	@SuppressWarnings("unchecked")
-	public Object getFilteredTripsAssociatedWithAdmins(FilterDTO dto, String userId, String roleName,
+	public List<TripDetailsDTO> getFilteredTripsAssociatedWithAdmins(FilterDTO dto, String userId, String roleName,
 			Set<WareHouseDetailsDTO> wareHouseDetails) {
 		List<Long> wareHouseIds = new ArrayList<Long>();
 		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
 			wareHouseIds.add(wareHouse.getWareHouseId());
-
+       List<TripDetailsDo> doList;
 		String hql = "";
 		// get all the user list if role is super_admin or sales_admin
 		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
 				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
 			// hql = "SELECT t FROM TripDetailsDo AS t where";
 
-			return filterTripsAsSuperAdmin(dto, userId, wareHouseIds);
+			  doList = filterTripsAsSuperAdmin(dto, userId, wareHouseIds);
 
-		} 
-		else {
-			return filterTripsAsAdminOnly(dto, userId, wareHouseIds);
+		} else {
+			doList = filterTripsAsAdminOnly(dto, userId, wareHouseIds);
 		}
-
+        return exportList(doList);
 	}
 
 	/***
@@ -521,12 +520,13 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	 * @param wareHouseIds
 	 * @return
 	 */
-	private Object filterTripsAsAdminOnly(FilterDTO dto, String userId, List<Long> wareHouseIds) {
+	@SuppressWarnings("unchecked")
+	private List<TripDetailsDo> filterTripsAsAdminOnly(FilterDTO dto, String userId, List<Long> wareHouseIds) {
 		String hql = "SELECT t from TripDetailsDo as t  inner join t.user  as u inner join u.wareHouseDetails as w ";
 		String filterBy = dto.getFilterBy();
 		String q = dto.getQuery();
 		boolean isStatus = false;
-		Object data = null;
+		List<TripDetailsDo> data = null;
 		String status = "";
 		if (!ServicesUtil.isEmpty(dto.getStatus())) {
 			status = dto.getStatus();
@@ -557,7 +557,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			query.setParameterList("warehouselist", wareHouseIds);
 			query.setMaxResults(10);
 			query.setString("searchParam", "%" + q + "%");
-			data = query.list();
+			data = (List<TripDetailsDo>)query.list();
 		}
 
 		return data;
@@ -570,12 +570,13 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	 * @param userId
 	 * @param wareHouseDetails
 	 */
-	private Object filterTripsAsSuperAdmin(FilterDTO dto, String userId, List<Long> wareHouseDetails) {
+	@SuppressWarnings("unchecked")
+	private List<TripDetailsDo> filterTripsAsSuperAdmin(FilterDTO dto, String userId, List<Long> wareHouseDetails) {
 		String hql = "SELECT t from TripDetailsDo as t  ";
 		String filterBy = dto.getFilterBy();
 		String q = dto.getQuery();
 		boolean isStatus = false;
-		Object data = null;
+		List<TripDetailsDo> data = null;
 		String status = "";
 		if (!ServicesUtil.isEmpty(dto.getStatus())) {
 			status = dto.getStatus();
@@ -605,7 +606,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 				query.setParameter("tripStatus", status);
 			query.setMaxResults(10);
 			query.setString("searchParam", "%" + q + "%");
-			data = query.list();
+			data = (List<TripDetailsDo>)query.list();
 		}
 
 		return data;

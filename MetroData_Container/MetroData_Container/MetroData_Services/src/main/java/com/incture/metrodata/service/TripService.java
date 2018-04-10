@@ -503,7 +503,7 @@ public class TripService implements TripServiceLocal {
 
 		try {
 
-			//adminDto = userDao.findById(adminDto);
+			// adminDto = userDao.findById(adminDto);
 			Map<String, Long> adminReportData = (Map<String, Long>) tripDao.getAdminDashboardAssociatedWithAdmins(
 					adminDto.getUserId(), adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails());
 
@@ -525,4 +525,32 @@ public class TripService implements TripServiceLocal {
 		}
 		return responseDto;
 	}
+
+	/***
+	 * api for filtering trip as per logged in admin
+	 */
+	@Override
+	public ResponseDto filterTripsAsPerAdmin(UserDetailsDTO adminDto, FilterDTO filterDto) {
+		ResponseDto responseDto = new ResponseDto();
+
+		try {
+		
+			adminDto = userDao.findById(adminDto);
+			
+			List<TripDetailsDTO> data = tripDao.getFilteredTripsAssociatedWithAdmins(filterDto, adminDto.getUserId(),
+					adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails());
+
+			responseDto.setStatus(true);
+			responseDto.setCode(HttpStatus.SC_OK);
+			responseDto.setData(data);
+			responseDto.setMessage(Message.SUCCESS.getValue());
+		} catch (Exception e) {
+			responseDto.setStatus(false);
+			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			responseDto.setMessage(Message.FAILED.getValue());
+			e.printStackTrace();
+		}
+		return responseDto;
+	}
+
 }
