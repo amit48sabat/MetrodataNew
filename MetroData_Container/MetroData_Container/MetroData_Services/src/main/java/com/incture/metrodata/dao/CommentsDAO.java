@@ -1,15 +1,20 @@
 package com.incture.metrodata.dao;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.incture.metrodata.dto.CommentsDTO;
+import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.entity.CommentsDetailsDo;
 import com.incture.metrodata.exceptions.ExecutionFault;
 import com.incture.metrodata.exceptions.InvalidInputFault;
 import com.incture.metrodata.exceptions.NoResultFault;
 import com.incture.metrodata.util.ServicesUtil;
+
 @Repository("CommentsDAO")
 public class CommentsDAO extends BaseDao<CommentsDetailsDo, CommentsDTO> {
+	@Autowired
+	UserDAO userDao;
 
 	@Override
 	CommentsDTO exportDto(CommentsDetailsDo dos) {
@@ -28,14 +33,20 @@ public class CommentsDAO extends BaseDao<CommentsDetailsDo, CommentsDTO> {
 				dto.setCreatedBy(dos.getCreatedBy());
 			}
 			if (!ServicesUtil.isEmpty(dos.getUpdatedAt())) {
-				dto.setUpdatedAt(dos.getUpdatedAt());
+				UserDetailsDTO userDto = new UserDetailsDTO();
+				userDto.setUserId(dos.getCreatedBy());
+				try {
+					userDto = userDao.findById(userDto);
+				} catch (Exception e) {
+				}
+				if (!ServicesUtil.isEmpty(userDto)) {
+					dto.setCreatedBy(userDto);
+				}
 			}
 			if (!ServicesUtil.isEmpty(dos.getCreatedAt())) {
 				dto.setCreatedAt(dos.getCreatedAt());
 			}
-			
-			
-			
+
 		}
 		return dto;
 	}
@@ -54,7 +65,7 @@ public class CommentsDAO extends BaseDao<CommentsDetailsDo, CommentsDTO> {
 				dos.setComment(dto.getComment());
 			}
 			if (!ServicesUtil.isEmpty(dto.getCreatedBy())) {
-				dos.setCreatedBy(dto.getCreatedBy());
+				dos.setCreatedBy((String) dto.getCreatedBy());
 			}
 			if (!ServicesUtil.isEmpty(dto.getCreatedAt())) {
 				dos.setCreatedAt(dto.getCreatedAt());
@@ -62,7 +73,7 @@ public class CommentsDAO extends BaseDao<CommentsDetailsDo, CommentsDTO> {
 			if (!ServicesUtil.isEmpty(dto.getUpdatedAt())) {
 				dos.setUpdatedAt(dto.getUpdatedAt());
 			}
-			
+
 		}
 
 		return dos;

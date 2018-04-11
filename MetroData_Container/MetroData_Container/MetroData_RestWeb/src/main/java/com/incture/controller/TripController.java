@@ -1,9 +1,19 @@
 package com.incture.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -135,5 +145,24 @@ public class TripController {
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
 		return tripService.getLeaderBoardAssociatedWithAdmin(dto, adminDto);
 		//return tripService.leaderBoard(dto);
+	}
+	
+	@RequestMapping(value = "/manifest/{tripId}", method = RequestMethod.GET)
+	public ResponseEntity<Resource> getTripManifest(@PathVariable String tripId) throws IOException {
+
+	    // ...
+		ResponseDto dto = tripService.printTripManiFest(tripId);
+		File f=(File) dto.getData();
+       
+	    HttpHeaders header = new HttpHeaders();
+	    header.set(HttpHeaders.CONTENT_DISPOSITION,
+	                   "attachment; filename=" + "manifest_"+tripId+".pdf");
+	    
+	    InputStream stream = new FileInputStream(f);
+	    InputStreamResource resource = new InputStreamResource(stream);
+	    return ResponseEntity.ok()
+	            .headers(header)
+	    		.contentType(MediaType.parseMediaType("application/pdf"))
+	            .body(resource);
 	}
 }

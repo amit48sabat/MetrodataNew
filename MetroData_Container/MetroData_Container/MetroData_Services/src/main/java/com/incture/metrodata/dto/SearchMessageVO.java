@@ -2,30 +2,18 @@ package com.incture.metrodata.dto;
 
 import java.util.Date;
 
-import com.incture.metrodata.exceptions.InvalidInputFault;
-import com.incture.metrodata.util.DB_Operation;
-
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class SearchMessageVO extends BaseDto {
+public class SearchMessageVO {
 	private String userId;
 	private String tripId;
 	private String type;
+	private Integer firstResult;
+	private Integer maxResult;
 	private Date startedAt;
 	private Date endedAt;
 
-	@Override
-	public void validate(DB_Operation enOperation) throws InvalidInputFault {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public Object getPrimaryKey() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

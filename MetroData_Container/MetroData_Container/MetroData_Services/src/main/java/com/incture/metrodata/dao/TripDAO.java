@@ -30,6 +30,7 @@ import com.incture.metrodata.dto.WareHouseDetailsDTO;
 import com.incture.metrodata.dto.WebLeaderBoardVO;
 import com.incture.metrodata.entity.DeliveryHeaderDo;
 import com.incture.metrodata.entity.TripDetailsDo;
+import com.incture.metrodata.entity.UserDetailsDo;
 import com.incture.metrodata.exceptions.InvalidInputFault;
 import com.incture.metrodata.util.ServicesUtil;
 import com.incture.metrodata.util.SortDhDTOByDeliveryOrder;
@@ -85,15 +86,14 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			// importing driver details
 			if (!ServicesUtil.isEmpty(dto.getUser())) {
 
-				/*
-				 * UserDetailsDo detailsDo = null; try{ detailsDo =
-				 * userDAO.getByKeysForFK(dto.getUser()); } catch
-				 * (NullPointerException e) { //e.printStackTrace(); }
-				 */
-				if (!ServicesUtil.isEmpty(tripDetailsDo.getUser()))
-					tripDetailsDo.setUser(userDAO.importDto(dto.getUser(), tripDetailsDo.getUser()));
-				else
-					tripDetailsDo.setUser(userDAO.importDto(dto.getUser(), null));
+				UserDetailsDo userDetailsDo = new UserDetailsDo();
+				try {
+					userDetailsDo = userDAO.getByKeysForFK(dto.getUser());
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+				tripDetailsDo.setUser(userDAO.importDto(dto.getUser(), userDetailsDo));
+
 			}
 
 			// importing all the delivery headers
@@ -449,13 +449,14 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			hql = "SELECT t FROM TripDetailsDo AS t  ORDER BY t.createdAt desc";
 			isSuperAdmin = true;
 		} else
-			hql = "SELECT t FROM TripDetailsDo AS t INNER JOIN t.user as u  INNER JOIN u.wareHouseDetails as w  WHERE w.wareHouseId IN (:warehouselist) ORDER BY t.createdAt desc";
+			hql = "SELECT t FROM TripDetailsDo AS t LEFT OUTER JOIN t.user as u  INNER JOIN u.wareHouseDetails as w  WHERE w.wareHouseId IN (:warehouselist) or t.createdBy =:createdBy ORDER BY t.createdAt desc";
 		Query query = getSession().createQuery(hql);
 		if (!isSuperAdmin) {
 			if (ServicesUtil.isEmpty(wareHouseIds))
 				return new ArrayList<TripDetailsDo>();
 
 			query.setParameterList("warehouselist", wareHouseIds);
+			query.setParameter("createdBy", userId);
 		}
 
 		ArrayList<TripDetailsDo> result = (ArrayList<TripDetailsDo>) query.list();
@@ -522,7 +523,6 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	/**
 	 * filter api chages as per logged in admin or super_admin
 	 */
-	@SuppressWarnings("unchecked")
 	public List<TripDetailsDTO> getFilteredTripsAssociatedWithAdmins(FilterDTO dto, String userId, String roleName,
 			Set<WareHouseDetailsDTO> wareHouseDetails) {
 		List<Long> wareHouseIds = new ArrayList<Long>();

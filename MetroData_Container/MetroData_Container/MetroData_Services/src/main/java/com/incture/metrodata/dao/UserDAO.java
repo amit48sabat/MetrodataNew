@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.incture.metrodata.constant.RoleConstant;
-import com.incture.metrodata.dto.TripDetailsDTO;
 import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.dto.WareHouseDetailsDTO;
+import com.incture.metrodata.entity.RoleDetailsDo;
 import com.incture.metrodata.entity.UserDetailsDo;
 import com.incture.metrodata.util.CourierDetailsComparator;
 import com.incture.metrodata.util.ServicesUtil;
@@ -55,8 +55,13 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			}
 			if (!ServicesUtil.isEmpty(userDetailsDTO.getRole())) {
 
-				detailsDo.setRole(roleDao.importDto(userDetailsDTO.getRole(), detailsDo.getRole()));
-			}
+				RoleDetailsDo roleDetailsDo = new RoleDetailsDo();
+				try {
+					roleDetailsDo =roleDao.getByKeysForFK(userDetailsDTO.getRole());
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+				detailsDo.setRole(roleDao.importDto(userDetailsDTO.getRole(),roleDetailsDo));			}
 			if (!ServicesUtil.isEmpty(userDetailsDTO.getMobileToken())) {
 				detailsDo.setMobileToken(userDetailsDTO.getMobileToken());
 			}

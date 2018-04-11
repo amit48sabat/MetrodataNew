@@ -4,6 +4,7 @@
 package com.incture.metrodata.service;
 
 import java.util.Date;
+import java.util.List;
 
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,8 +89,18 @@ public class OrderTrackingService implements OrderTrackingServiceLocal {
 		ResponseDto response = new ResponseDto();
 		try {
 
-			Object data = orderTrackingDao.findByParam(dto);
-
+			List<OrderTrackingDTO> data = orderTrackingDao.findByParam(dto);
+			
+			// added trip location as last updated driver location if driver is idle
+			if(ServicesUtil.isEmpty(data))
+			{
+				OrderTrackingDTO orderTrackingDTO = new OrderTrackingDTO();
+				UserDetailsDTO detailsDTO =new UserDetailsDTO();
+				detailsDTO.setUserId(dto.getDriverId());	
+				detailsDTO =userDao.findById(detailsDTO);
+				orderTrackingDTO.setLatitude(detailsDTO.getLatitude());
+				orderTrackingDTO.setLongitude(detailsDTO.getLongitude());
+			}
 			response.setStatus(true);
 			response.setCode(HttpStatus.SC_OK);
 			response.setData(data);

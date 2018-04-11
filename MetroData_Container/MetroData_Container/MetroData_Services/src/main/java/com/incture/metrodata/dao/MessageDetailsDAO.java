@@ -133,15 +133,19 @@ public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsD
 			}
 			// fetching user by id and setting it to created by
 			if (!ServicesUtil.isEmpty(dos.getCreatedBy())) {
-				/*
-				 * UserDAO userDao = new UserDAO(); UserDetailsDTO userDto = new
-				 * UserDetailsDTO(); userDto.setUserId(dos.getCreatedBy()); try
-				 * { userDto = userDao.findById(userDto); } catch (Exception e)
-				 * { // TODO Auto-generated catch block e.printStackTrace(); }
-				 * if(!ServicesUtil.isEmpty(userDto)){
-				 * dto.setCreatedBy(userDto); }
-				 */
-				dto.setCreatedBy(dos.getCreatedBy());
+
+				UserDetailsDTO userDto = new UserDetailsDTO();
+				userDto.setUserId(dos.getCreatedBy());
+				try {
+					userDto = userDao.findById(userDto);
+				} catch (Exception e) {
+				}
+				// TODO Auto-generated catch block e.printStackTrace(); }
+				if (!ServicesUtil.isEmpty(userDto)) {
+					dto.setCreatedBy(userDto);
+				}
+
+				// 
 			}
 			if (!ServicesUtil.isEmpty(dos.getUpdatedBy())) {
 				dto.setUpdatedBy(dos.getUpdatedBy());
@@ -193,13 +197,13 @@ public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsD
 		// Criteria criteria =
 		// getSession().createCriteria(MessageDetailsDo.class);
 		String sql = "SELECT m FROM MessageDetailsDo as m ";
-		
+
 		if (!ServicesUtil.isEmpty(dto.getUserId())) {
-			sql += " INNER JOIN m.users as u WHERE u.userId = '" + dto.getUserId() + "' ";
-		}else{
-			sql+=" WHERE 1=1 ";
+			sql += " INNER JOIN m.users as u WHERE u.userId = '" + dto.getUserId() + "' or m.createdBy= '"+dto.getUserId() + "'";
+		} else {
+			sql += " WHERE 1=1 ";
 		}
-		
+
 		if (ServicesUtil.isEmpty(dto.getType()))
 			throw new InvalidInputFault("'type' is required");
 		else
@@ -208,19 +212,26 @@ public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsD
 		if (!ServicesUtil.isEmpty(dto.getTripId()))
 			sql += " AND m.tripId = '" + "'dto.getTripId() ";
 
-		
 		if (!ServicesUtil.isEmpty(dto.getStartedAt()))
 			sql += " AND m.createdAt >= :startedAt ";
 
 		if (!ServicesUtil.isEmpty(dto.getEndedAt()))
 			sql += " AND m.createdAt <= :endedAt ";
-
+		
+		
+		sql += "order by m.messageId desc";
 		Query query = getSession().createQuery(sql);
 		if (!ServicesUtil.isEmpty(dto.getStartedAt()))
 			query.setDate("startedAt", dto.getStartedAt());
 		if (!ServicesUtil.isEmpty(dto.getEndedAt()))
 			query.setDate("endedAt", dto.getEndedAt());
+		if(!ServicesUtil.isEmpty(dto.getFirstResult()) && !ServicesUtil.isEmpty(dto.getMaxResult()))
+		{
+			query.setFirstResult(dto.getFirstResult());
+			query.setMaxResults(dto.getMaxResult());
+		}
 		
+
 		List<MessageDetailsDo> resultDos = query.list();
 		List<MessageDetailsDTO> resultDtos = exportList(resultDos);
 

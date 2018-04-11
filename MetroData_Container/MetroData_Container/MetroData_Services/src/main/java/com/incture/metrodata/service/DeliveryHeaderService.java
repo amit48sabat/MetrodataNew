@@ -17,7 +17,6 @@ import com.incture.metrodata.constant.DeliveryNoteStatus;
 import com.incture.metrodata.constant.Message;
 import com.incture.metrodata.dao.DeliveryHeaderDAO;
 import com.incture.metrodata.dao.TripDAO;
-import com.incture.metrodata.dao.UserDAO;
 import com.incture.metrodata.dto.DeliveryHeaderDTO;
 import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.UserDetailsDTO;
@@ -44,8 +43,7 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 	@Autowired
 	private TripDAO tripDao;
 	
-	@Autowired
-	private UserDAO userDao;
+	
 
 	/**
 	 * api for creating delivery header
@@ -57,8 +55,11 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 			// setting lat and long
 			String address = dto.getShipToAddress();
 			Map<String, Double> latAndLong = ServicesUtil.getLatAndLong(address, context);
-			dto.setLatitude(latAndLong.get("lat"));
-			dto.setLongitude(latAndLong.get("lng"));
+			if(!ServicesUtil.isEmpty(latAndLong.get("lat")))
+			{
+				dto.setLatitude(latAndLong.get("lat"));
+				dto.setLongitude(latAndLong.get("lng"));
+			}
 
 			/*
 			 * Date currDate = new Date(); dto.setCreatedDate(currDate);

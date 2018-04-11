@@ -51,6 +51,7 @@ public class MessageService implements MessageServiceLocal {
 		try {
 
 			setCreatedAtAndUpdatedAtForDto(dto, createdBy);
+			List<MessageDetailsDTO> messageDetailsDTOs = new ArrayList<MessageDetailsDTO>();
 
 			/*
 			 * if (!ServicesUtil.isEmpty(dto.getComments())) for (CommentsDTO
@@ -90,7 +91,8 @@ public class MessageService implements MessageServiceLocal {
 			}
 			response.setStatus(true);
 			response.setCode(HttpStatus.SC_OK);
-			response.setData(dto);
+			messageDetailsDTOs.add(dto);
+			response.setData(messageDetailsDTOs);
 			response.setMessage(Message.SUCCESS + " : Message created");
 		} catch (InvalidInputFault e) {
 			response.setStatus(false);
@@ -143,16 +145,10 @@ public class MessageService implements MessageServiceLocal {
 
 		if (!ServicesUtil.isEmpty(dto.getComments())) {
 			for (CommentsDTO d : dto.getComments()) {
-
 				d.setUpdatedAt(currdate);
+				d.setCreatedBy(createdBy);
+				d.setCreatedAt(currdate);
 
-				// setting created by if message id is empty
-				if (ServicesUtil.isEmpty(d.getId())) {
-					d.setCreatedBy(createdBy);
-					d.setCreatedAt(currdate);
-				}
-
-				// d.setUpdatedAt(currdate);
 			}
 		}
 		if (!ServicesUtil.isEmpty(dto.getUsers())) {
@@ -298,12 +294,13 @@ public class MessageService implements MessageServiceLocal {
 		try {
 
 			setCreatedAtAndUpdatedAtForDto(dto, updatedBy);
-
+			List<MessageDetailsDTO> messageDetailsDTOs = new ArrayList<MessageDetailsDTO>();
 			dto = messageDetailsDao.update(dto);
 
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
-			responseDto.setData(dto);
+			messageDetailsDTOs.add(dto);
+			responseDto.setData(messageDetailsDTOs);
 			responseDto.setMessage(Message.SUCCESS.toString());
 		} catch (Exception e) {
 			responseDto.setStatus(false);

@@ -5,7 +5,6 @@ import java.util.Date;
 import org.jboss.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -21,7 +20,6 @@ import com.incture.metrodata.service.UserServiceLocal;
 import com.incture.metrodata.util.ServicesUtil;
 
 @Component
-@Scope(value = "prototype")
 @ComponentScan("com.incture")
 public class AllStrategiesExampleBean {
 

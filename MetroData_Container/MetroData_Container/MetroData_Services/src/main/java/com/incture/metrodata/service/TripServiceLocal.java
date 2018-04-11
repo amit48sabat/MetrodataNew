@@ -52,4 +52,6 @@ public interface TripServiceLocal {
 	 * @return
 	 */
 	ResponseDto getLeaderBoardAssociatedWithAdmin(WebLeaderBoardVO dto, UserDetailsDTO adminDto);
+
+	ResponseDto printTripManiFest(String tripId);
 }

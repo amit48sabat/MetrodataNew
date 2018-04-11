@@ -12,9 +12,9 @@ public interface MessageServiceLocal {
 
 	ResponseDto findAll(SearchMessageVO dto);
 
-	ResponseDto create(MessageDetailsDTO dto, String cretedBy);
+	ResponseDto create(MessageDetailsDTO dto, String createdBy);
 	
-	ResponseDto update(MessageDetailsDTO dto, String cretedBy);
+	ResponseDto update(MessageDetailsDTO dto, String createdBy);
 	
 	ResponseDto delete(MessageDetailsDTO dto);
 }

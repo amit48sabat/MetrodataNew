@@ -42,7 +42,7 @@
 	<session-config>
 		<session-timeout>1</session-timeout> <!-- in minutes -->
 	</session-config>
-	<!-- <filter>
+	 <!-- <filter>
 		<filter-name>authenticationfilter</filter-name>
 		<filter-class>com.incture.controller.MyFilter</filter-class>
 	</filter>
@@ -50,7 +50,7 @@
 	<filter-mapping>
 		<filter-name>authenticationfilter</filter-name>
 		<url-pattern>/rest/*</url-pattern>
-	</filter-mapping> -->
+	</filter-mapping>  -->
 
 	<!-- Declare the document store service (SAP Cloud Platform document service) -->
 	<resource-ref>

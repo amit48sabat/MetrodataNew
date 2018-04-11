@@ -1,6 +1,10 @@
 package com.incture.metrodata.service;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
+import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +36,15 @@ import com.incture.metrodata.entity.TripDetailsDo;
 import com.incture.metrodata.exceptions.ExecutionFault;
 import com.incture.metrodata.util.RESTInvoker;
 import com.incture.metrodata.util.ServicesUtil;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.Barcode128;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfTemplate;
+import com.itextpdf.text.pdf.PdfWriter;
 
 @Transactional
 @Service("tripService")
@@ -578,5 +591,88 @@ public class TripService implements TripServiceLocal {
 			e.printStackTrace();
 		}
 		return responseDto;
+	}
+	
+	@Override
+	public ResponseDto printTripManiFest(String tripId) {
+		ResponseDto responseDto = new ResponseDto();
+		TripDetailsDTO detailsDTO = new TripDetailsDTO();
+		detailsDTO.setTripId(tripId);
+		try {
+			detailsDTO = tripDao.getByKeys(detailsDTO);
+			File file = File.createTempFile("manifest", ".pdf");
+			createTripPdf(file.getAbsolutePath(), detailsDTO);
+			responseDto.setData(file);
+			responseDto.setStatus(true);
+		} catch (Exception e) {
+			responseDto.setStatus(false);
+			e.printStackTrace();
+		}
+
+		return responseDto;
+	}
+
+	private Document createTripPdf(String dest, TripDetailsDTO detailsDTO) throws IOException, DocumentException {
+		Document document = new Document();
+
+		PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(dest));
+		document.open();
+		URL u = TripService.class.getResource("/logo_metrodata.png");
+		System.err.println(u);
+		Image image = Image.getInstance(u);
+		image.scaleAbsoluteWidth(140);
+		image.scaleAbsoluteHeight(70);
+		document.add(image);
+
+		PdfContentByte canvas = writer.getDirectContent();
+		Barcode128 code128 = new Barcode128();
+		code128.setCode(detailsDTO.getTripId());
+		code128.setCodeType(Barcode128.CODE128);
+		code128.setBarHeight(120);
+		code128.setN(25);
+		PdfTemplate template = code128.createTemplateWithBarcode(canvas, BaseColor.BLACK, BaseColor.BLACK);
+		template.setWidth(300);
+		template.setHeight(50);
+		;
+		float x = -300;
+		float y = 750;
+		float w = template.getWidth();
+		float h = template.getHeight();
+		canvas.saveState();
+		canvas.setColorFill(BaseColor.WHITE);
+		canvas.rectangle(x, y, w, h);
+		canvas.fill();
+		canvas.restoreState();
+		canvas.addTemplate(template, 400, 750);
+		document.add(new Paragraph("  "));
+		document.add(new Paragraph("  "));
+
+		for (DeliveryHeaderDTO deliveryHeaderDTO : detailsDTO.getDeliveryHeader()) {
+			Paragraph p = new Paragraph("DELIVERY NOTE : " + deliveryHeaderDTO.getDeliveryNoteId() + " ( "
+					+ deliveryHeaderDTO.getShipToAddress() + " )");
+			document.add(p);
+			document.add(new Paragraph("  "));
+			/*
+			 * PdfPTable table = new PdfPTable(new float[] { 2, 1, 2 ,2,3});
+			 * table.getDefaultCell().setHorizontalAlignment(Element.
+			 * ALIGN_CENTER); table.addCell("Material"); table.addCell("Batch");
+			 * table.addCell("Description"); table.addCell("QTY");
+			 * table.addCell("VOL"); table.setHeaderRows(1); PdfPCell[] cells =
+			 * table.getRow(0).getCells(); for (int j = 0; j < cells.length;
+			 * j++) { cells[j].setBackgroundColor(BaseColor.GRAY); } for
+			 * (DeliveryItemDTO deliveryItemDTO :
+			 * deliveryHeaderDTO.getDeliveryItems()) {
+			 * table.addCell(deliveryItemDTO.getMaterial());
+			 * table.addCell(deliveryItemDTO.getBatch());
+			 * table.addCell(deliveryItemDTO.getDescription());
+			 * table.addCell(deliveryItemDTO.getQuantity());
+			 * table.addCell(deliveryItemDTO.getVolume()); }
+			 * document.add(table);
+			 */
+		}
+		document.addTitle("TRIP Manifest");
+		document.close();
+		return document;
+
 	}
 }

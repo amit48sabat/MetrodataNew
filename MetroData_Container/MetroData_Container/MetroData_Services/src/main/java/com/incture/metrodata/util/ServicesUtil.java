@@ -291,7 +291,7 @@ public class ServicesUtil {
 				map.put("lat", results[0].geometry.location.lat);
 				map.put("lng", results[0].geometry.location.lng);
 		   }catch (Exception e) {
-			throw new InvalidInputFault("Invalid Address");
+			//throw new InvalidInputFault("Invalid Address");
 		}
 			//System.out.println(gson.toJson(results[0].geometry.location.lat));
 	return map;		

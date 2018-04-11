@@ -14,9 +14,10 @@ public class CommentsDTO extends BaseDto {
 
 	private Long id;
 	private String comment;
-	private String createdBy;
 	private Date createdAt;
 	private Date updatedAt;
+	
+	private Object createdBy;
 	// private Long msg_id;
 
 	@Override
