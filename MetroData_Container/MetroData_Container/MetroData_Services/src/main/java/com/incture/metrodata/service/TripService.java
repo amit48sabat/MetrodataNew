@@ -3,7 +3,6 @@ package com.incture.metrodata.service;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
@@ -409,22 +408,23 @@ public class TripService implements TripServiceLocal {
 		try {
 			List<TripDetailsDTO> tripReport = (List<TripDetailsDTO>) tripDao.getTripHistoryByDriverId(userId, start,
 					end);
-			Map<String, BigInteger> deliveryNoteReport = tripDao.getDriversDeliveryNoteReport(userId);
-			long totalTrips = 0L, totalDeliveryNotes = 0L, avgDnsPerTrip = 0;
+			Map<String, Long> deliveryNoteReport = tripDao.getDriversDeliveryNoteReport(userId);
+			long totalTrips = 0L, totalDn=0L, avgDnsPerTrip = 0L;
 
 			if (!ServicesUtil.isEmpty(tripReport))
 				totalTrips = tripReport.size();
-			if (!ServicesUtil.isEmpty(deliveryNoteReport))
-				totalDeliveryNotes = deliveryNoteReport.values().stream().mapToInt(Number::intValue).sum();
+			
 
 			if (totalTrips > 0)
-				avgDnsPerTrip = totalDeliveryNotes / totalTrips;
+				{
+				totalDn = deliveryNoteReport.get("total_delivery_note");
+				avgDnsPerTrip =  totalDn / totalTrips;
+				}
 
 			Map<String, Object> resMap = new HashMap<>();
 			resMap.put("tripReport", tripReport);
 			resMap.put("deliveryNoteReport", deliveryNoteReport);
 			resMap.put("totalTrips", totalTrips);
-			resMap.put("totalDeliveryNotes", totalDeliveryNotes);
 			resMap.put("avgDnsPerTrip", avgDnsPerTrip);
 
 			// setting the response

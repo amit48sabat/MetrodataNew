@@ -292,18 +292,29 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	 * 
 	 */
 	@SuppressWarnings("unchecked")
-	public Map<String, BigInteger> getDriversDeliveryNoteReport(String userId) {
-		Map<String, BigInteger> map = new TreeMap<>();
-		String sql = "SELECT dh.status, count(dh.status) FROM delivery_header dh "
-				+ " INNER JOIN TRIP_DELIVERY_HEADER_MAPPING th ON th.delivery_note_id = dh.delivery_note_id "
-				+ " INNER JOIN trip_details td ON td.trip_id = th.trip_id " + " WHERE td.user_user_id = '" + userId
-				+ "' " + " GROUP  BY dh.status ";
-		SQLQuery query = getSession().createSQLQuery(sql);
-		List<List<Object>> result = (List<List<Object>>) query.setResultTransformer(Transformers.TO_LIST).list();
-		for (List<Object> x : result) {
-			map.put((String) x.get(0), (BigInteger) x.get(1));
-		}
-		return map;
+	public Map<String, Long> getDriversDeliveryNoteReport(String userId) {
+	
+		ArrayList<String> deliveryStatus  = new ArrayList<>();
+		deliveryStatus.add("del_note_completed");
+		deliveryStatus.add("del_note_partially_rejected");
+		deliveryStatus.add("del_note_rejected");
+		deliveryStatus.add("del_note_validated");
+		deliveryStatus.add("del_note_started");
+		
+		String hql = " SELECT new map("
+				+ " (Select count(d.deliveryNoteId) from d where d.status in (:deliverystatus) and d.assignedUser = :driverId) as total_delivery_note, "
+				+ " (Select count(d.deliveryNoteId) from d where d.status='del_note_completed' and d.assignedUser = :driverId) as del_note_completed, "
+				+ " (Select count(d.deliveryNoteId) from d where d.status='del_note_partially_rejected' and d.assignedUser = :driverId) as del_note_partially_rejected, "
+				+ " (Select count(d.deliveryNoteId) from d where d.status='del_note_rejected' and d.assignedUser = :driverId) as del_note_rejected, "
+				+ " (Select count(d.deliveryNoteId) from d where d.status='del_note_validated' and d.assignedUser = :driverId) as del_note_validated, "
+				+ " (Select count(d.deliveryNoteId) from d where d.status='del_note_started' and d.assignedUser = :driverId) as del_note_started "
+				+ ") from DeliveryHeaderDo d where d.assignedUser = :driverId group by d.assignedUser";
+		Query query = getSession().createQuery(hql);
+		query.setParameterList("deliverystatus", deliveryStatus);
+		query.setParameter("driverId", userId);
+		Map<String, Long> result = (Map<String, Long>) query.uniqueResult();
+		
+		return result;
 	}
 
 	@SuppressWarnings("unchecked")

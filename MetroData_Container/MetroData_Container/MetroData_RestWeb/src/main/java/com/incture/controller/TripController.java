@@ -122,9 +122,11 @@ public class TripController {
 	}
 
 	@RequestMapping(value = "/report/{userId}", method = RequestMethod.GET)
-	public ResponseDto driverTripHistory(@PathVariable String userId, HttpServletRequest request,@RequestParam( value = "start") Long start,@RequestParam( value = "end") Long end) {
-
-		return tripService.getTripHistoryByDriverId(userId,start,end);
+	public ResponseDto driverTripHistory(@PathVariable String userId, HttpServletRequest request,@RequestParam( value = "start" ,defaultValue="0") String start,@RequestParam( value = "end", defaultValue="0") String end) {
+         Long s,e;
+         s = Long.parseLong(start);
+         e = Long.parseLong(end);
+		return tripService.getTripHistoryByDriverId(userId,s,e);
 	}
 
 	@RequestMapping(value = "/leaderboard", method = RequestMethod.PUT)
