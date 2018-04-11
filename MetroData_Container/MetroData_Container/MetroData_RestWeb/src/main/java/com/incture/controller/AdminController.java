@@ -44,7 +44,7 @@ public class AdminController {
 		// validating user role if action not permitted then return
 		 res = userServiceLocal.validatedUserRoleByUserId(userId);
 		 if(!res.isStatus())
-			 return res;
+			 return ServicesUtil.getUnauthorizedResponseDto();;
 		 
 		UserDetailsDTO adminDto =  (UserDetailsDTO) res.getData();
 		return tripServiceLocal.getAdminDashboardAssociatedWithAdmins(adminDto);

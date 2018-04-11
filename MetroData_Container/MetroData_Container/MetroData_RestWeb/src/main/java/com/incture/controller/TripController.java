@@ -98,7 +98,7 @@ public class TripController {
 		// validating user role if action not permitted then return
 		res = userServiceLocal.validatedUserRoleByUserId(userId);
 		if (!res.isStatus())
-			return res;
+			return ServicesUtil.getUnauthorizedResponseDto();;
 
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
 		return tripService.filterTripsAsPerAdmin(adminDto,dto);
@@ -118,7 +118,22 @@ public class TripController {
 	}
 
 	@RequestMapping(value = "/leaderboard", method = RequestMethod.PUT)
-	public ResponseDto webLeaderBoard(@RequestBody WebLeaderBoardVO dto) {
-		return tripService.leaderBoard(dto);
+	public ResponseDto webLeaderBoard(@RequestBody WebLeaderBoardVO dto, HttpServletRequest request) {
+		ResponseDto res = new ResponseDto();
+		String userId = "";
+		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
+			userId = request.getUserPrincipal().getName();
+		} else {
+			return ServicesUtil.getUnauthorizedResponseDto();
+
+		}
+		// validating user role if action not permitted then return
+		res = userServiceLocal.validatedUserRoleByUserId(userId);
+		if (!res.isStatus())
+			return ServicesUtil.getUnauthorizedResponseDto();;
+
+		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
+		return tripService.getLeaderBoardAssociatedWithAdmin(dto, adminDto);
+		//return tripService.leaderBoard(dto);
 	}
 }

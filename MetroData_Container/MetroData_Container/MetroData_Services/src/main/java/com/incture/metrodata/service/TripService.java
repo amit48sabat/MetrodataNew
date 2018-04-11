@@ -529,7 +529,7 @@ public class TripService implements TripServiceLocal {
 
 		try {
 		
-			adminDto = userDao.findById(adminDto);
+			//adminDto = userDao.findById(adminDto);
 			
 			List<TripDetailsDTO> data = tripDao.getFilteredTripsAssociatedWithAdmins(filterDto, adminDto.getUserId(),
 					adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails());
@@ -547,4 +547,36 @@ public class TripService implements TripServiceLocal {
 		return responseDto;
 	}
 
+	
+	/**
+	 * api for leaderboard report as per logged in admin or super_admin
+	 * @param dto
+	 * @param adminDto
+	 * @return
+	 */
+	@Override
+	public  ResponseDto getLeaderBoardAssociatedWithAdmin(WebLeaderBoardVO dto, UserDetailsDTO adminDto){
+		ResponseDto responseDto = new ResponseDto();
+
+		try {
+		
+			//adminDto = userDao.findById(adminDto);
+			
+			if(ServicesUtil.isEmpty(dto.getSortBy()))
+				dto.setSortBy(DeliveryNoteStatus.TOTAL_DEL_NOTE.getValue());
+			
+			Object data = tripDao.getLeaderboardAssociatedWithAdminsWarehouse(dto, adminDto.getUserId(), adminDto.getRole().getRoleName(),adminDto.getWareHouseDetails());
+
+			responseDto.setStatus(true);
+			responseDto.setCode(HttpStatus.SC_OK);
+			responseDto.setData(data);
+			responseDto.setMessage(Message.SUCCESS.getValue());
+		} catch (Exception e) {
+			responseDto.setStatus(false);
+			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			responseDto.setMessage(Message.FAILED.getValue());
+			e.printStackTrace();
+		}
+		return responseDto;
+	}
 }

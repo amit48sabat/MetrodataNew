@@ -58,7 +58,7 @@ class DeliveryHeaderController {
 		// validating user role if action not permitted then return
 		 res = userServiceLocal.validatedUserRoleByUserId(userId);
 		 if(!res.isStatus())
-			 return res;
+			 return ServicesUtil.getUnauthorizedResponseDto();;
 		 
 		UserDetailsDTO dto =  (UserDetailsDTO) res.getData();
 		// LOGGER.info("Inside delivery data creation");

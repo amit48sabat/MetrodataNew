@@ -427,6 +427,14 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		}
 	}
 
+	/**
+	 * get all trips as per logged in admin or super_admin
+	 * 
+	 * @param userId
+	 * @param roleName
+	 * @param wareHouseDetails
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public Object getAllTripsAssociatedWithAdminsDrivers(String userId, String roleName,
 			Set<WareHouseDetailsDTO> wareHouseDetails) {
@@ -454,6 +462,14 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		return exportList(result);
 	}
 
+	/***
+	 * admin dashboard service with associated warehouse only
+	 * 
+	 * @param userId
+	 * @param roleName
+	 * @param wareHouseDetails
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public Map<String, Long> getAdminDashboardAssociatedWithAdmins(String userId, String roleName,
 			Set<WareHouseDetailsDTO> wareHouseDetails) {
@@ -631,4 +647,74 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		return exportList(data);
 	}
 
+	/**
+	 * get the leader board drivers report as per logged in admin or super_admin
+	 * 
+	 * @param userId
+	 * @param roleName
+	 * @param wareHouseDetails
+	 * @return
+	 */
+	public Object getLeaderboardAssociatedWithAdminsWarehouse(WebLeaderBoardVO dto, String userId, String roleName,
+			Set<WareHouseDetailsDTO> wareHouseDetails) {
+
+		List<Long> wareHouseIds = new ArrayList<Long>();
+		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
+			wareHouseIds.add(wareHouse.getWareHouseId());
+      
+		List<String> driverRole = new ArrayList<>();
+		driverRole.add(RoleConstant.INSIDE_JAKARTA_DRIVER.getValue());
+		driverRole.add(RoleConstant.OUTSIDE_JAKARTA_DRIVER.getValue());
+		boolean isSuperAdmin = false;
+		String addWarehouseListCriteria ="";
+		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
+				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
+			addWarehouseListCriteria="";
+			isSuperAdmin = true;
+		} else {
+			addWarehouseListCriteria = " AND w.wareHouseId IN (:warehouselist) ";
+		}
+	
+		ArrayList<String> totalStatus  = new ArrayList<>();
+		totalStatus.add("del_note_completed");
+		totalStatus.add("del_note_partially_rejected");
+		totalStatus.add("del_note_rejected");
+		
+		String sDateAndeDate=" AND dh.updatedAt BETWEEN :stDate AND :edDate ";
+		
+		String hql = " select new map(u.userId as userId, u.email as email, u.firstName as firstName, u.lastName as lastName, w.wareHouseId as wareHouseId, w.wareHouseName as wareHouseName, "
+				+ " (select Count(dh.deliveryNoteId) from DeliveryHeaderDo as dh WHERE dh.assignedUser = u.userId AND dh.status IN (:totalstatus)) as total_delivery_note, "
+				+ " (select Count(dh.status) from DeliveryHeaderDo as dh WHERE dh.assignedUser = u.userId AND dh.status ='del_note_completed') as del_note_completed, "
+				+ " (select Count(dh.status) from DeliveryHeaderDo as dh WHERE dh.assignedUser = u.userId AND dh.status ='del_note_partially_rejected') as del_note_partially_rejected, "
+				+ " (select Count(dh.status) from DeliveryHeaderDo as dh WHERE dh.assignedUser = u.userId AND dh.status ='del_note_rejected') as del_note_rejected "
+				+ " ) "
+				+ " from TripDetailsDo as t  inner join t.deliveryHeader as dh inner join t.user as u inner join u.wareHouseDetails as w inner join u.role as r "
+				+ " where r.roleName IN (:driver) "
+				+ addWarehouseListCriteria
+				+" ";
+		
+		if(!ServicesUtil.isEmpty(dto.getFrom()) && !ServicesUtil.isEmpty(dto.getTo())){
+			hql+=sDateAndeDate;
+		}
+		
+		hql+= " GROUP BY u.userId, u.email, u.firstName, u.lastName, w.wareHouseId, w.wareHouseName "
+				+ " ORDER BY " + dto.getSortBy() + " desc ";
+		
+		Query query = getSession().createQuery(hql);
+		query.setParameterList("driver", driverRole);
+		query.setParameterList("totalstatus", totalStatus);
+
+		if(!ServicesUtil.isEmpty(dto.getFrom()) && !ServicesUtil.isEmpty(dto.getTo())){
+			query.setParameter("stDate", dto.getFrom());
+			query.setParameter("edDate", dto.getTo());
+		}
+		
+		if (!isSuperAdmin) {
+			// send no data on if warehouse if is empty
+		    if (ServicesUtil.isEmpty(wareHouseIds))
+			 return new HashMap<String, Long>();
+			 query.setParameterList("warehouselist", wareHouseIds);
+		}
+		return query.list();
+	}
 }

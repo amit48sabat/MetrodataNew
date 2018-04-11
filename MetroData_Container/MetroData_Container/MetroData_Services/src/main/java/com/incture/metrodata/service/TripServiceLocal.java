@@ -44,4 +44,12 @@ public interface TripServiceLocal {
 	 * api for filtering trip as per logged in admin
 	 */
 	ResponseDto filterTripsAsPerAdmin(UserDetailsDTO adminDto, FilterDTO filterDto);
+
+	/**
+	 * api for leaderboard report as per logged in admin or super_admin
+	 * @param dto
+	 * @param adminDto
+	 * @return
+	 */
+	ResponseDto getLeaderBoardAssociatedWithAdmin(WebLeaderBoardVO dto, UserDetailsDTO adminDto);
 }
