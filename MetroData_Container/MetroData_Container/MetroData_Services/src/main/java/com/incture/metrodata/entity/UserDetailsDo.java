@@ -87,6 +87,9 @@ public class UserDetailsDo implements BaseDo {
 	@Column(name = "LAST_LOGIN_TIME")
 	private Date lastLogedIn;
 	
+	@Column(name = "TRACK_FREQ")
+	private Long trackFreq;
+	
 	@ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
 	@JoinTable(name = "USERS_WAREHOUSE_MAPPING", joinColumns = { @JoinColumn(name = "USER_ID") }, inverseJoinColumns = {
 			@JoinColumn(name = "WARE_HOUSE_ID") })

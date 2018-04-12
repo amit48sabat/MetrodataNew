@@ -2,6 +2,7 @@ package com.incture.metrodata.service;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -53,11 +54,7 @@ public class MessageService implements MessageServiceLocal {
 			setCreatedAtAndUpdatedAtForDto(dto, createdBy);
 			List<MessageDetailsDTO> messageDetailsDTOs = new ArrayList<MessageDetailsDTO>();
 
-			/*
-			 * if (!ServicesUtil.isEmpty(dto.getComments())) for (CommentsDTO
-			 * commentsDTO : dto.getComments()) { commentsDTO.setCreatedAt(new
-			 * Date()); }
-			 */
+			
 			// set id for the message
 			if (!ServicesUtil.isEmpty(dto.getType())) {
 				setMessageId(dto);
@@ -65,7 +62,7 @@ public class MessageService implements MessageServiceLocal {
 				throw new InvalidInputFault("Message type is required");
 			}
 
-			dto = messageDetailsDao.create(dto, new MessageDetailsDo());
+			
 			if (!dto.getType().equals(MessageType.INCIDENT.getValue())) {
 				UserDetailsDTO userDto = new UserDetailsDTO();
 				// if no user is set than send the mail to all the users
@@ -76,6 +73,7 @@ public class MessageService implements MessageServiceLocal {
 						if (!ServicesUtil.isEmpty(userDto.getMobileToken()))
 							notification.sendNotification(dto.getTitle(), userDto.getMobileToken(), dto.getBody());
 					}
+					dto = messageDetailsDao.create(dto, new MessageDetailsDo());
 				} else {
 					List<UserDetailsDTO> userList = userDao.findAll(userDto);
 					if (!ServicesUtil.isEmpty(userList)) {
@@ -84,6 +82,8 @@ public class MessageService implements MessageServiceLocal {
 							if (!ServicesUtil.isEmpty(userDto.getMobileToken()))
 								tokens.add(user.getMobileToken());
 						}
+						dto.setUsers(new HashSet<>(userList));
+						dto = messageDetailsDao.create(dto, new MessageDetailsDo());
 						if (!ServicesUtil.isEmpty(tokens))
 							notification.sendNotification(dto.getTitle(), tokens, dto.getBody());
 					}
@@ -137,6 +137,7 @@ public class MessageService implements MessageServiceLocal {
 
 		dto.setUpdatedAt(currdate);
 		dto.setUpdatedBy(createdBy);
+		
 		// setting created by if message id is empty
 		if (ServicesUtil.isEmpty(dto.getMessageId())) {
 			dto.setCreatedBy(createdBy);
@@ -319,7 +320,6 @@ public class MessageService implements MessageServiceLocal {
 		try {
 
 			messageDetailsDao.deleteById(dto);
-
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
 			responseDto.setMessage(Message.SUCCESS.toString());

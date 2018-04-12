@@ -41,7 +41,12 @@ public class MessageController {
 	}
 
 	@RequestMapping(value = "/filter", method = RequestMethod.PUT)
-	public ResponseDto findAll(@RequestBody SearchMessageVO dto) {
+	public ResponseDto findAll(@RequestBody SearchMessageVO dto, HttpServletRequest request) {
+		String userId = "";
+		if (request.getUserPrincipal() != null) {
+			userId = request.getUserPrincipal().getName();
+		}
+		dto.setUserId(userId);
 		return messageService.findAll(dto);
 	}
 
@@ -51,7 +56,7 @@ public class MessageController {
 		if (request.getUserPrincipal() != null) {
 			userId = request.getUserPrincipal().getName();
 		}
-		dto.setCreatedBy(userId);
+		//dto.setCreatedBy(userId);
 		return messageService.update(dto, userId);
 	}
 

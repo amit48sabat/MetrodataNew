@@ -30,7 +30,7 @@ public class UserDetailsDTO extends BaseDto {
 	private Date updatedAt;
 	private String parentId;
 	private RoleDetailsDTO role;
-
+	private Long trackFreq;
 	private Set<WareHouseDetailsDTO> wareHouseDetails = new HashSet<WareHouseDetailsDTO>(0);
 	private Set<CourierDetailsDTO> courierDetails = new HashSet<CourierDetailsDTO>(0);
 
