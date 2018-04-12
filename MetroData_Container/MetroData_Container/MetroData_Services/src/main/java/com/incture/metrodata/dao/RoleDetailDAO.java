@@ -27,6 +27,9 @@ public class RoleDetailDAO extends BaseDao<RoleDetailsDo, RoleDetailsDTO> {
 			if(!ServicesUtil.isEmpty(dto.getRoleName())){
 				dos.setRoleName(dto.getRoleName());
 			}
+			if(!ServicesUtil.isEmpty(dto.getDisplayName())){
+				dos.setDisplayName(dto.getDisplayName());
+			}
 			if(!ServicesUtil.isEmpty(dto.getCreatedAt())){
 				dos.setCreatedAt(dto.getCreatedAt());
 			}
@@ -48,6 +51,9 @@ public class RoleDetailDAO extends BaseDao<RoleDetailsDo, RoleDetailsDTO> {
 			}
 			if(!ServicesUtil.isEmpty(dos.getRoleName())){
 				dto.setRoleName(dos.getRoleName());
+			}
+			if(!ServicesUtil.isEmpty(dos.getDisplayName())){
+				dto.setDisplayName(dos.getDisplayName());
 			}
 			if(!ServicesUtil.isEmpty(dos.getCreatedAt())){
 				dto.setCreatedAt(dos.getCreatedAt());
