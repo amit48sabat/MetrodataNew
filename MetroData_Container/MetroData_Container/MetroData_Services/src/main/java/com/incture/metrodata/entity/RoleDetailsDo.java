@@ -30,7 +30,7 @@ public class RoleDetailsDo implements BaseDo {
 	@Column(name = "ROLE_ID")
 	private Long roleId;
 
-	@Column(name = "ROLE_NAME", length = 100)
+	@Column(name = "ROLE_NAME", length = 100, unique=true)
 	private String roleName;
 
 	@Temporal(TemporalType.TIMESTAMP)

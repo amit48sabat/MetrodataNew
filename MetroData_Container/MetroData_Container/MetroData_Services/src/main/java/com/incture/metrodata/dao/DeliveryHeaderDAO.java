@@ -8,6 +8,7 @@ import java.util.TreeMap;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;
+import org.hibernate.SQLQuery;
 import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -299,7 +300,9 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 	private boolean checkDnStatus(String status) throws InvalidInputFault {
 
 		if (DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue().equals(status)
-				|| DeliveryNoteStatus.DELIVERY_NOTE_INVALIDATED.getValue().equals(status)
+				|| DeliveryNoteStatus.DRIVER_DN_INVALIDATED.getValue().equals(status)
+				|| DeliveryNoteStatus.ADMIN_DN_INVALIDATED.getValue().equals(status)
+				|| DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue().equals(status)
 				|| DeliveryNoteStatus.DELIVERY_NOTE_PARTIALLY_REJECTED.getValue().equals(status)
 				|| DeliveryNoteStatus.DELIVERY_NOTE_REJECTED.getValue().equals(status)
 				|| DeliveryNoteStatus.DELIVERY_NOTE_COMPLETED.getValue().equals(status)
@@ -339,5 +342,13 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 		return exportList(result);
 
 	}
+	
+	
+   public boolean removeTripDeliveryNoteMapping(DeliveryHeaderDTO dto){
+	   String sql = "DELETE FROM TRIP_DELIVERY_HEADER_MAPPING WHERE DELIVERY_NOTE_ID = "+dto.getDeliveryNoteId();
+	   SQLQuery query = getSession().createSQLQuery(sql);
+	   query.executeUpdate();
+	   return false;
+   }
 
 }

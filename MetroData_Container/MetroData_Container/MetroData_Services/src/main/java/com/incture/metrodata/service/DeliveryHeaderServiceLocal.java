@@ -15,7 +15,7 @@ public interface DeliveryHeaderServiceLocal {
 
 	ResponseDto findAll();
 
-	ResponseDto update(DeliveryHeaderDTO Dto);
+	ResponseDto update(DeliveryHeaderDTO Dto, UserDetailsDTO updaingUserDto);
 	
 	/**
 	 * api for admin dashbord

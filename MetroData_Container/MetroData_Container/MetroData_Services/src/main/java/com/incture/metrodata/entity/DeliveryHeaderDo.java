@@ -18,6 +18,7 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.Where;
 
 import lombok.Data;
 
@@ -28,6 +29,7 @@ import lombok.Data;
 @Entity
 @Data
 @Table(name = "DELIVERY_HEADER")
+@Where(clause = "DELETED = 0")
 public class DeliveryHeaderDo implements BaseDo {
 
 	private static final long serialVersionUID = 1L;
@@ -133,6 +135,15 @@ public class DeliveryHeaderDo implements BaseDo {
 	
 	@ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
 	private WareHouseDetailsDo wareHouseDetails;
+	
+	@Column(name = "DELETED")
+    private Integer deleted = 0;
+     
+    // getters and setters
+ 
+    public void setDeleted() {
+        this.deleted = 1;
+    }
 	
 	@Override
 	public Object getPrimaryKey() {

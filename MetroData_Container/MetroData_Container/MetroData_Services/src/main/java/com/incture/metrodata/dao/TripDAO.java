@@ -26,6 +26,7 @@ import com.incture.metrodata.constant.TripStatus;
 import com.incture.metrodata.dto.DeliveryHeaderDTO;
 import com.incture.metrodata.dto.FilterDTO;
 import com.incture.metrodata.dto.TripDetailsDTO;
+import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.dto.WareHouseDetailsDTO;
 import com.incture.metrodata.dto.WebLeaderBoardVO;
 import com.incture.metrodata.entity.DeliveryHeaderDo;
@@ -727,5 +728,14 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			 query.setParameterList("warehouselist", wareHouseIds);
 		}
 		return query.list();
+	}
+	
+	
+	public UserDetailsDTO getDriverFromTripByDN(DeliveryHeaderDTO headerDto){
+		String hql = " SELECT t.user from TripDetailsDo t inner join t.deliveryHeader d where d.deliveryNoteId = :deliveryNoteId ";
+		Query query = getSession().createQuery(hql);
+		query.setParameter("deliveryNoteId", headerDto.getDeliveryNoteId());
+		UserDetailsDo  dos  = (UserDetailsDo) query.uniqueResult();
+		return userDAO.exportDto(dos);
 	}
 }
