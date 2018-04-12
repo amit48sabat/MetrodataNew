@@ -66,10 +66,15 @@ public class UserService implements UserServiceLocal {
 				responseDto.setCode(HttpStatus.SC_OK);
 				responseDto.setData(dto);
 				responseDto.setMessage(Message.SUCCESS.getValue());
-			} else {
-				responseDto.setStatus(false);
-				responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-				responseDto.setMessage("Email id may be already registred in IDP. Try again with new email id.");
+			} 
+			else {
+				// user is already in idp we need to create in hana db
+				getUserByEmail(dto);
+				dto = userDAO.create(dto, new UserDetailsDo());
+				responseDto.setStatus(true);
+				responseDto.setCode(HttpStatus.SC_OK);
+				responseDto.setData(dto);
+				responseDto.setMessage(Message.SUCCESS.getValue());
 			}
 		} catch (Exception e) {
 			responseDto.setStatus(false);
