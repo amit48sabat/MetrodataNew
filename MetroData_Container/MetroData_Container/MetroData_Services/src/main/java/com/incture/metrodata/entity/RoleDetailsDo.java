@@ -21,7 +21,7 @@ import lombok.Setter;
 public class RoleDetailsDo implements BaseDo {
 
 	/**
-	 * 
+	 *  
 	 */
 	private static final long serialVersionUID = 1L;
 
