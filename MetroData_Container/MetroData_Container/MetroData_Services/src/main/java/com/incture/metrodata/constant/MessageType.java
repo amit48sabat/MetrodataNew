@@ -1,7 +1,7 @@
 package com.incture.metrodata.constant;
 
 public enum MessageType {
-  NOTIFICATION("notification"),FEED("feed"),INCIDENT("incident");
+  NOTIFICATION("Notification"),FEED("Feed"),INCIDENT("Incident");
 	
   String value;
   private MessageType(String value){

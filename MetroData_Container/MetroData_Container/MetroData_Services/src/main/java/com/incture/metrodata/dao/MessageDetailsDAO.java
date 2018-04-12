@@ -9,6 +9,7 @@ import org.hibernate.criterion.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.incture.metrodata.constant.MessageType;
 import com.incture.metrodata.dto.CommentsDTO;
 import com.incture.metrodata.dto.MessageDetailsDTO;
 import com.incture.metrodata.dto.SearchMessageVO;
@@ -145,7 +146,7 @@ public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsD
 					dto.setCreatedBy(userDto);
 				}
 
-				// 
+				//
 			}
 			if (!ServicesUtil.isEmpty(dos.getUpdatedBy())) {
 				dto.setUpdatedBy(dos.getUpdatedBy());
@@ -199,7 +200,7 @@ public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsD
 		String sql = "SELECT m FROM MessageDetailsDo as m ";
 
 		if (!ServicesUtil.isEmpty(dto.getUserId())) {
-			sql += " INNER JOIN m.users as u WHERE u.userId = '" + dto.getUserId() + "' or m.createdBy= '"+dto.getUserId() + "'";
+			sql += " INNER JOIN m.users as u WHERE (u.userId = '" + dto.getUserId() + "'"+"OR m.createdBy ='" + dto.getUserId() + "')";
 		} else {
 			sql += " WHERE 1=1 ";
 		}
@@ -217,20 +218,17 @@ public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsD
 
 		if (!ServicesUtil.isEmpty(dto.getEndedAt()))
 			sql += " AND m.createdAt <= :endedAt ";
-		
-		
-		sql += "order by m.messageId desc";
+
+		sql += " order by m.messageId desc";
 		Query query = getSession().createQuery(sql);
 		if (!ServicesUtil.isEmpty(dto.getStartedAt()))
 			query.setDate("startedAt", dto.getStartedAt());
 		if (!ServicesUtil.isEmpty(dto.getEndedAt()))
 			query.setDate("endedAt", dto.getEndedAt());
-		if(!ServicesUtil.isEmpty(dto.getFirstResult()) && !ServicesUtil.isEmpty(dto.getMaxResult()))
-		{
+		if (!ServicesUtil.isEmpty(dto.getFirstResult()) && !ServicesUtil.isEmpty(dto.getMaxResult())) {
 			query.setFirstResult(dto.getFirstResult());
 			query.setMaxResults(dto.getMaxResult());
 		}
-		
 
 		List<MessageDetailsDo> resultDos = query.list();
 		List<MessageDetailsDTO> resultDtos = exportList(resultDos);

@@ -101,6 +101,9 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 				detailsDo.setCourierDetails(
 						courierDao.importSet(userDetailsDTO.getCourierDetails(), detailsDo.getCourierDetails()));
 			}
+			if (!ServicesUtil.isEmpty(userDetailsDTO.getTrackFreq())) {
+				detailsDo.setTrackFreq(userDetailsDTO.getTrackFreq());
+			}
 
 		}
 		return detailsDo;
@@ -171,6 +174,9 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 
 				userDetailsDTO.setCourierDetails(
 						courierDao.exportSet(detailsDo.getCourierDetails(), new CourierDetailsComparator()));
+			}
+			if (!ServicesUtil.isEmpty(detailsDo.getTrackFreq())) {
+				userDetailsDTO.setTrackFreq(detailsDo.getTrackFreq());
 			}
 
 		}

@@ -431,7 +431,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 				|| TripStatus.TRIP_STATUS_DRIVER_ASSIGNED.getValue().equals(status)
 				|| TripStatus.TRIP_STATUS_STARTED.getValue().equals(status)
 				|| TripStatus.TRIP_STATUS_COMPLETED.getValue().equals(status)
-
+				|| TripStatus.TRIP_STATUS_CANCELLED.getValue().equals(status)
 		) {
 			return true;
 		} else {
