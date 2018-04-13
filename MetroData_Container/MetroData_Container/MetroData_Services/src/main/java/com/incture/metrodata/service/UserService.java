@@ -36,7 +36,7 @@ public class UserService implements UserServiceLocal {
 	public ResponseDto create(UserDetailsDTO dto) {
 		ResponseDto responseDto = new ResponseDto();
 		try {
-			// error if email id is not set
+		    // error if email id is not set
 			if (ServicesUtil.isEmpty(dto.getEmail())) {
 				responseDto.setStatus(false);
 				responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
@@ -44,6 +44,14 @@ public class UserService implements UserServiceLocal {
 				return responseDto;
 			}
 
+			if(!ServicesUtil.isEmpty(dto.getUserId())){
+				responseDto.setStatus(false);
+				responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+				responseDto.setMessage("Failed : user with email '"+dto.getEmail()+"' is already exits with user Id "+dto.getUserId());
+				return responseDto;
+			}
+			
+			
 			// setting created at and updated at
 			setCreateAtAndUpdateAt(dto);
 			JsonObject userObj = new JsonObject();
@@ -74,7 +82,7 @@ public class UserService implements UserServiceLocal {
 				responseDto.setStatus(true);
 				responseDto.setCode(HttpStatus.SC_OK);
 				responseDto.setData(dto);
-				responseDto.setMessage(Message.SUCCESS.getValue());
+				responseDto.setMessage(Message.SUCCESS.getValue()+" : User created with id "+dto.getUserId());
 			}
 		} catch (Exception e) {
 			responseDto.setStatus(false);
