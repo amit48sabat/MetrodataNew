@@ -104,6 +104,7 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 	public ResponseDto update(DeliveryHeaderDTO dto, UserDetailsDTO updatingUserDto) {
 		ResponseDto responseDto = new ResponseDto();
 		try {
+			String deliveyNoteStatus  = dto.getStatus();
 			if (!ServicesUtil.isEmpty(dto.getFileContent())) {
 
 				byte[] decodedString;
@@ -116,6 +117,7 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 			}
 			if (!ServicesUtil.isEmpty(dto.getStatus()))
 				updateDeliveryHeaderStatusConstraints(dto, updatingUserDto);
+			
 			// setting lat and long
 			if (!ServicesUtil.isEmpty(dto.getShipToAddress())) {
 				String address = dto.getShipToAddress();
@@ -126,6 +128,7 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 
 			setCreatedAtAndUpdatedAtForDto(dto);
 			dto = deliveryHeaderDao.update(dto);
+			dto.setStatus(deliveyNoteStatus);
 
 			// send notification to driver when admin update the delivery status
 			String roleName = updatingUserDto.getRole().getRoleName();
@@ -171,6 +174,8 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 		// notifying the corresponding trip driver
 		if (status.equalsIgnoreCase(DeliveryNoteStatus.ADMIN_DN_INVALIDATED.getValue())) {
 			dto.setTripped(false);
+			// setting status to create bcz in admin dashboard valid dns have status have status create only
+			dto.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
 			//deliveryHeaderDao.removeTripDeliveryNoteMapping(dto);
 		}
 
@@ -248,7 +253,7 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 	@Override
 	/**
 	 * api for admin dashbord
-	 * 
+	 *  not in use
 	 * @return
 	 */
 	public ResponseDto adminDashboardService() {

@@ -490,31 +490,41 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
 			wareHouseIds.add(wareHouse.getWareHouseId());
 
+		ArrayList<String>	deliveryNoteStatusList = new ArrayList<String>();
+		deliveryNoteStatusList.add("del_note_rejected");
+		deliveryNoteStatusList.add("del_note_partially_rejected");
+		deliveryNoteStatusList.add("del_note_started");
+		deliveryNoteStatusList.add("created"); // as del_note_validated
+		deliveryNoteStatusList.add("del_note_completed");
+		
+		
 		boolean isSuperAdmin = false;
 		String hql = "";
 		// get all the user list if role is super_admin or sales_admin
 		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
 				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
 			hql = "SELECT new map( count(t.tripId) as TOTAL_TRIPS ,  "
-					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE tripped = true) as TOTAL_ORDERS, "
+					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE tripped = true AND status IN (:deliveryNoteStatusList)) as TOTAL_ORDERS, "
 					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_rejected' AND tripped = true) as del_note_rejected, "
 					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_partially_rejected' AND tripped = true) as del_note_partially_rejected, "
 					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_started' AND tripped = true) as del_note_started, "
-					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_validated' AND tripped = true) as del_note_validated, "
+					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'created' AND tripped = true) as del_note_validated, "
 					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_completed' AND tripped = true) as del_note_completed "
 					+ " ) FROM TripDetailsDo AS t ";
 			isSuperAdmin = true;
 		} else {
 			hql = "SELECT new map( count(t.tripId) as TOTAL_TRIPS ,  "
-					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as TOTAL_ORDERS, "
+					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.tripped = true AND status IN (:deliveryNoteStatusList) AND w.wareHouseId IN (:warehouselist)) as TOTAL_ORDERS, "
 					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_rejected' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_rejected, "
 					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_started' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_started, "
 					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_partially_rejected' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_partially_rejected, "
-					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_validated' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_validated, "
+					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'created' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_validated, "
 					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_completed' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_completed "
 					+ " ) FROM TripDetailsDo AS t INNER JOIN t.deliveryHeader d INNER JOIN d.wareHouseDetails as w WHERE w.wareHouseId IN (:warehouselist)";
 		}
 		Query query = getSession().createQuery(hql);
+		query.setParameterList("deliveryNoteStatusList", deliveryNoteStatusList);
+		
 		if (!isSuperAdmin) {
 			// send no data on if warehouse if is empty
 			if (ServicesUtil.isEmpty(wareHouseIds))
