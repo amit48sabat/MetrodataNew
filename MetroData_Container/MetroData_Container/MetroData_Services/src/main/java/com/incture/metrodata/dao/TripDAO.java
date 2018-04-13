@@ -303,13 +303,13 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		deliveryStatus.add("del_note_started");
 		
 		String hql = " SELECT new map("
-				+ " (Select count(d.deliveryNoteId) from d where d.status in (:deliverystatus) and d.assignedUser = :driverId) as total_delivery_note, "
-				+ " (Select count(d.deliveryNoteId) from d where d.status='del_note_completed' and d.assignedUser = :driverId) as del_note_completed, "
-				+ " (Select count(d.deliveryNoteId) from d where d.status='del_note_partially_rejected' and d.assignedUser = :driverId) as del_note_partially_rejected, "
-				+ " (Select count(d.deliveryNoteId) from d where d.status='del_note_rejected' and d.assignedUser = :driverId) as del_note_rejected, "
-				+ " (Select count(d.deliveryNoteId) from d where d.status='created' and d.assignedUser = :driverId) as created, "
-				+ " (Select count(d.deliveryNoteId) from d where d.status='del_note_started' and d.assignedUser = :driverId) as del_note_started "
-				+ ") from DeliveryHeaderDo d where d.assignedUser = :driverId group by d.assignedUser";
+				+ " (Select count(d.deliveryNoteId) from d where d.status in (:deliverystatus) and d.tripped = true and d.assignedUser = :driverId) as total_delivery_note, "
+				+ " (Select count(d.deliveryNoteId) from d where d.status='del_note_completed' and d.tripped = true and d.assignedUser = :driverId) as del_note_completed, "
+				+ " (Select count(d.deliveryNoteId) from d where d.status='del_note_partially_rejected' and d.tripped = true and d.assignedUser = :driverId) as del_note_partially_rejected, "
+				+ " (Select count(d.deliveryNoteId) from d where d.status='del_note_rejected' and d.tripped = true and d.assignedUser = :driverId) as del_note_rejected, "
+				+ " (Select count(d.deliveryNoteId) from d where d.status='created' and d.tripped = true and d.assignedUser = :driverId) as created, "
+				+ " (Select count(d.deliveryNoteId) from d where d.status='del_note_started' and d.tripped = true  and d.assignedUser = :driverId) as del_note_started "
+				+ ") from DeliveryHeaderDo d where d.assignedUser = :driverId and d.tripped = true group by d.assignedUser";
 		Query query = getSession().createQuery(hql);
 		query.setParameterList("deliverystatus", deliveryStatus);
 		query.setParameter("driverId", userId);
