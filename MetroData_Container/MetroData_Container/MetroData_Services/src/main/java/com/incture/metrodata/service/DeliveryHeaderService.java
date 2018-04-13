@@ -1,5 +1,6 @@
 package com.incture.metrodata.service;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,10 +16,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.maps.GeoApiContext;
 import com.incture.metrodata.constant.DeliveryNoteStatus;
 import com.incture.metrodata.constant.Message;
+import com.incture.metrodata.constant.MessageType;
 import com.incture.metrodata.constant.RoleConstant;
 import com.incture.metrodata.dao.DeliveryHeaderDAO;
 import com.incture.metrodata.dao.TripDAO;
 import com.incture.metrodata.dto.DeliveryHeaderDTO;
+import com.incture.metrodata.dto.MessageDetailsDTO;
 import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.entity.DeliveryHeaderDo;
@@ -44,10 +47,12 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 
 	@Autowired
 	private TripDAO tripDao;
-	
+
 	@Autowired
 	NotificationClass notification;
-	
+
+	@Autowired
+	MessageServiceLocal messageService;
 
 	/**
 	 * api for creating delivery header
@@ -59,8 +64,7 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 			// setting lat and long
 			String address = dto.getShipToAddress();
 			Map<String, Double> latAndLong = ServicesUtil.getLatAndLong(address, context);
-			if(!ServicesUtil.isEmpty(latAndLong.get("lat")))
-			{
+			if (!ServicesUtil.isEmpty(latAndLong.get("lat"))) {
 				dto.setLatitude(latAndLong.get("lat"));
 				dto.setLongitude(latAndLong.get("lng"));
 			}
@@ -68,11 +72,11 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 			/*
 			 * Date currDate = new Date(); dto.setCreatedDate(currDate);
 			 */
-           
+
 			DeliveryHeaderDo dos = new DeliveryHeaderDo();
-			
+
 			setCreatedAtAndUpdatedAtForDto(dto);
-			dto = deliveryHeaderDao.create(dto,dos);
+			dto = deliveryHeaderDao.create(dto, dos);
 
 			response.setStatus(true);
 			response.setCode(200);
@@ -89,9 +93,9 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 
 	private void setCreatedAtAndUpdatedAtForDto(DeliveryHeaderDTO dto) {
 		Date currdate = new Date();
-		if(ServicesUtil.isEmpty(dto.getCreatedAt()))
-		dto.setCreatedAt(currdate);
-		
+		if (ServicesUtil.isEmpty(dto.getCreatedAt()))
+			dto.setCreatedAt(currdate);
+
 		dto.setUpdatedAt(currdate);
 
 	}
@@ -111,7 +115,7 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 				dto.setSignatureDocId(fileId);
 			}
 			if (!ServicesUtil.isEmpty(dto.getStatus()))
-				updateDeliveryHeaderStatusConstraints(dto,updatingUserDto);
+				updateDeliveryHeaderStatusConstraints(dto, updatingUserDto);
 			// setting lat and long
 			if (!ServicesUtil.isEmpty(dto.getShipToAddress())) {
 				String address = dto.getShipToAddress();
@@ -122,6 +126,13 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 
 			setCreatedAtAndUpdatedAtForDto(dto);
 			dto = deliveryHeaderDao.update(dto);
+
+			// send notification to driver when admin update the delivery status
+			String roleName = updatingUserDto.getRole().getRoleName();
+			if (!roleName.equalsIgnoreCase(RoleConstant.INSIDE_JAKARTA_DRIVER.getValue())
+					&& !roleName.equalsIgnoreCase(RoleConstant.OUTSIDE_JAKARTA_DRIVER.getValue())) {
+				sendNotificationToDriverWhenAdminUpdateDnStatus(dto, updatingUserDto);
+			}
 
 			responseDto.setStatus(true);
 			responseDto.setCode(200);
@@ -135,28 +146,12 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 		return responseDto;
 	}
 
-	private void updateDeliveryHeaderStatusConstraints(DeliveryHeaderDTO dto, UserDetailsDTO updatingUserDto) throws Exception {
+	private void updateDeliveryHeaderStatusConstraints(DeliveryHeaderDTO dto, UserDetailsDTO updatingUserDto)
+			throws Exception {
 		Date currDate = new Date();
 		DeliveryHeaderDTO tempDTO = new DeliveryHeaderDTO();
 		String status = dto.getStatus();
-         UserDetailsDTO driverDto = null;
-         String roleName = updatingUserDto.getRole().getRoleName();
-		String title = "", body ="";
-		
-		if(!roleName.equalsIgnoreCase(RoleConstant.INSIDE_JAKARTA_DRIVER.getValue())
-			&& !roleName.equalsIgnoreCase(RoleConstant.OUTSIDE_JAKARTA_DRIVER.getValue())	){
-			// getting the corresponding trip driver 
-			driverDto = tripDao.getDriverFromTripByDN(dto);
-			if(!ServicesUtil.isEmpty(driverDto.getMobileToken())){
-				title = "Admin Update";
-				body = " Admin "+updatingUserDto.getFirstName()+" ("+updatingUserDto.getUserId()+") has updated the status of deliveryNote with  id "
-						+ ""+dto.getDeliveryNoteId()+"  to "+dto.getStatus();
-				notification.sendNotification(title, driverDto.getMobileToken(), body);
-			}
-		}
-		
-		
-		
+
 		if (status.equalsIgnoreCase(DeliveryNoteStatus.DELIVERY_NOTE_STARTED.getValue())) {
 			dto.setStartedAt(currDate);
 		}
@@ -171,13 +166,43 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 				dto.setInvalidateIds(tempDTO.getInvalidateIds() + "," + dto.getInvalidateIds());
 			}
 		}
-		
-		// if admin invalidated dn then removing the mapping of trip and dn and notifying the corresponding trip driver
-		if(status.equalsIgnoreCase(DeliveryNoteStatus.ADMIN_DN_INVALIDATED.getValue())){
+
+		// if admin invalidated dn then removing the mapping of trip and dn and
+		// notifying the corresponding trip driver
+		if (status.equalsIgnoreCase(DeliveryNoteStatus.ADMIN_DN_INVALIDATED.getValue())) {
 			dto.setTripped(false);
-			deliveryHeaderDao.removeTripDeliveryNoteMapping(dto);
+			//deliveryHeaderDao.removeTripDeliveryNoteMapping(dto);
 		}
 
+	}
+
+	private void sendNotificationToDriverWhenAdminUpdateDnStatus(DeliveryHeaderDTO headerDto, UserDetailsDTO adminDto)
+			throws IOException {
+
+		// getting the corresponding trip driver
+		UserDetailsDTO driverDto = tripDao.getDriverFromTripByDN(headerDto);
+		if (!ServicesUtil.isEmpty(driverDto.getMobileToken())) {
+			String title = "Admin Update";
+			String body = " Admin " + adminDto.getFirstName() + " (" + adminDto.getUserId()
+					+ ") has updated the status of deliveryNote with  id " + "" + headerDto.getDeliveryNoteId()
+					+ "  to " + headerDto.getStatus();
+			notification.sendNotification(title, driverDto.getMobileToken(), body);
+
+			MessageDetailsDTO messageDto = new MessageDetailsDTO();
+			messageDto.setTitle(title);
+			messageDto.setBody(body);
+			messageDto.getUsers().add(driverDto);
+			messageDto.setCreatedBy(adminDto.getUserId());
+			messageDto.setUpdatedBy(adminDto.getUserId());
+			messageDto.setType(MessageType.NOTIFICATION.getValue());
+			messageService.create(messageDto, adminDto.getUserId());
+		}
+
+		// if admin invalidated dn then removing the mapping of trip and dn and
+		// notifying the corresponding trip driver
+		if (headerDto.getStatus().equalsIgnoreCase(DeliveryNoteStatus.ADMIN_DN_INVALIDATED.getValue())) {
+			deliveryHeaderDao.removeTripDeliveryNoteMapping(headerDto);
+		}
 	}
 
 	@Override
@@ -292,16 +317,17 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 	}
 
 	/***
-	 * get admins warehouse delivery note 
+	 * get admins warehouse delivery note
 	 */
 	@Override
 	public ResponseDto getAllDeliveryNoteByAdminsWareHouse(UserDetailsDTO adminDto) {
 		ResponseDto responseDto = new ResponseDto();
-		
+
 		try {
-			
-			//adminDto = userDao.findById(adminDto);
-			Object userList = deliveryHeaderDao.getAllDeliveryNoteByAdminsWareHouse(adminDto.getUserId(), adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails());
+
+			// adminDto = userDao.findById(adminDto);
+			Object userList = deliveryHeaderDao.getAllDeliveryNoteByAdminsWareHouse(adminDto.getUserId(),
+					adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails());
 
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
