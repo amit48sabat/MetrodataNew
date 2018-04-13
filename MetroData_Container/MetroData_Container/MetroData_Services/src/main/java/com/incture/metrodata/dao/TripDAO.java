@@ -450,7 +450,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	@SuppressWarnings("unchecked")
 	public Object getAllTripsAssociatedWithAdminsDrivers(String userId, String roleName,
 			Set<WareHouseDetailsDTO> wareHouseDetails) {
-		List<Long> wareHouseIds = new ArrayList<Long>();
+		List<String> wareHouseIds = new ArrayList<String>();
 		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
 			wareHouseIds.add(wareHouse.getWareHouseId());
 		boolean isSuperAdmin = false;
@@ -486,7 +486,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	@SuppressWarnings("unchecked")
 	public Map<String, Long> getAdminDashboardAssociatedWithAdmins(String userId, String roleName,
 			Set<WareHouseDetailsDTO> wareHouseDetails) {
-		List<Long> wareHouseIds = new ArrayList<Long>();
+		List<String> wareHouseIds = new ArrayList<String>();
 		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
 			wareHouseIds.add(wareHouse.getWareHouseId());
 
@@ -547,7 +547,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	 */
 	public List<TripDetailsDTO> getFilteredTripsAssociatedWithAdmins(FilterDTO dto, String userId, String roleName,
 			Set<WareHouseDetailsDTO> wareHouseDetails) {
-		List<Long> wareHouseIds = new ArrayList<Long>();
+		List<String> wareHouseIds = new ArrayList<String>();
 		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
 			wareHouseIds.add(wareHouse.getWareHouseId());
 
@@ -573,7 +573,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	private List<TripDetailsDTO> filterTripsAsAdminOnly(FilterDTO dto, String userId, List<Long> wareHouseIds) {
+	private List<TripDetailsDTO> filterTripsAsAdminOnly(FilterDTO dto, String userId, List<String> wareHouseIds) {
 		String hql = "SELECT t from TripDetailsDo as t  inner join t.user  as u inner join u.wareHouseDetails as w ";
 		String filterBy = dto.getFilterBy();
 		String q = dto.getQuery();
@@ -628,7 +628,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	 * @param wareHouseDetails
 	 */
 	@SuppressWarnings("unchecked")
-	private List<TripDetailsDTO> filterTripsAsSuperAdmin(FilterDTO dto, String userId, List<Long> wareHouseDetails) {
+	private List<TripDetailsDTO> filterTripsAsSuperAdmin(FilterDTO dto, String userId, List<String> wareHouseDetails) {
 		String hql = "SELECT t from TripDetailsDo as t  ";
 		String filterBy = dto.getFilterBy();
 		String q = dto.getQuery();
@@ -680,7 +680,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	public Object getLeaderboardAssociatedWithAdminsWarehouse(WebLeaderBoardVO dto, String userId, String roleName,
 			Set<WareHouseDetailsDTO> wareHouseDetails) {
 
-		List<Long> wareHouseIds = new ArrayList<Long>();
+		List<String> wareHouseIds = new ArrayList<String>();
 		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
 			wareHouseIds.add(wareHouse.getWareHouseId());
       

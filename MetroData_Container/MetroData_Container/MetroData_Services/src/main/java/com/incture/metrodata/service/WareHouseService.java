@@ -3,6 +3,8 @@ package com.incture.metrodata.service;
 import java.util.Date;
 
 import org.apache.http.HttpStatus;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +14,7 @@ import com.incture.metrodata.dao.WareHouseDAO;
 import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.WareHouseDetailsDTO;
 import com.incture.metrodata.entity.WareHouseDetailsDo;
+import com.incture.metrodata.util.HciRestInvoker;
 import com.incture.metrodata.util.ServicesUtil;
 
 @Service("wareHouseService")
@@ -20,6 +23,9 @@ public class WareHouseService implements WareHouseServiceLocal {
 
 	@Autowired
 	WareHouseDAO wareHouseDao;
+
+	@Autowired
+	HciRestInvoker hciRestInvoker;
 
 	@Override
 	public ResponseDto create(WareHouseDetailsDTO dto) {
@@ -74,7 +80,7 @@ public class WareHouseService implements WareHouseServiceLocal {
 		ResponseDto responseDto = new ResponseDto();
 		try {
 			// setting created at and updated at
-			//setCreateAtAndUpdateAt(dto);
+			// setCreateAtAndUpdateAt(dto);
 			dto = wareHouseDao.findById(dto);
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
@@ -94,7 +100,7 @@ public class WareHouseService implements WareHouseServiceLocal {
 		ResponseDto responseDto = new ResponseDto();
 		try {
 			// setting created at and updated at
-			//setCreateAtAndUpdateAt(dto);
+			// setCreateAtAndUpdateAt(dto);
 			wareHouseDao.deleteById(dto);
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
@@ -134,7 +140,7 @@ public class WareHouseService implements WareHouseServiceLocal {
 	public ResponseDto getWareHouseListByUserId(String userId, String roleId) {
 		ResponseDto responseDto = new ResponseDto();
 		try {
-			Object data = wareHouseDao.getWarehouseListByUserId(userId,roleId);
+			Object data = wareHouseDao.getWarehouseListByUserId(userId, roleId);
 
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
@@ -146,7 +152,37 @@ public class WareHouseService implements WareHouseServiceLocal {
 			responseDto.setMessage(Message.FAILED.getValue());
 			e.printStackTrace();
 		}
-		
+
+		return responseDto;
+	}
+
+	@Override
+	public ResponseDto refreshWareHouseListFromEcc() {
+		ResponseDto responseDto = new ResponseDto();
+		JSONObject jsonObject = new JSONObject();
+		try {
+			
+			jsonObject.put("MetroReq", new JSONObject().put("PLANT", 5000));
+			String wareHouseString = hciRestInvoker.postDataToServer("/warehouseloc", jsonObject.toString());
+			JSONObject wareHouseReturnObj = new JSONObject(wareHouseString);
+			JSONArray jsonArray = wareHouseReturnObj.getJSONObject("rfc:ZSD_GET_SLOC.Response").getJSONObject("RETURN")
+					.getJSONArray("item");
+			WareHouseDetailsDTO wareHouseDetailsDTO;
+			for (int i = 0; i < jsonArray.length(); i++) {
+				wareHouseDetailsDTO = new WareHouseDetailsDTO();
+
+				wareHouseDetailsDTO.setWareHouseId(jsonArray.getJSONObject(i).getString("LGORT"));
+				wareHouseDetailsDTO.setWareHouseName(jsonArray.getJSONObject(i).getString("LGOBE"));
+				wareHouseDao.create(wareHouseDetailsDTO, null);
+				
+
+			}
+			System.out.println("printed");
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+		}
+
 		return responseDto;
 	}
 

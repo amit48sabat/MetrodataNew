@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class WareHouseDetailsDTO extends BaseDto {
-	private Long wareHouseId;
+	private String wareHouseId;
 	private String wareHouseName;
 	private Date createdAt;
 	private Date updatedAt;

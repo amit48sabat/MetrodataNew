@@ -199,7 +199,7 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 	@SuppressWarnings("unchecked")
 	public List<UserDetailsDTO> getUsersAssociateWithAdmin(String adminId, String roleName,
 			Set<WareHouseDetailsDTO> wareHouseDetails) {
-		List<Long> wareHouseIds = new ArrayList<Long>();
+		List<String> wareHouseIds = new ArrayList<String>();
 		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
 			wareHouseIds.add(wareHouse.getWareHouseId());
 		boolean isSuperAdmin = false;

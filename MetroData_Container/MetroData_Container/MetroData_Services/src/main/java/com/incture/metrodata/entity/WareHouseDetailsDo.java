@@ -4,8 +4,6 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -24,9 +22,8 @@ public class WareHouseDetailsDo implements BaseDo {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "WARE_HOUSE_ID")
-	private Long wareHouseId;
+	private String wareHouseId;
 
 	@Column(name = "WARE_HOUSE_NAME", length = 100)
 	private String wareHouseName;

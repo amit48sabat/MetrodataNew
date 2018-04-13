@@ -317,7 +317,7 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 	@SuppressWarnings("unchecked")
 	public List<DeliveryHeaderDTO> getAllDeliveryNoteByAdminsWareHouse(String adminId, String roleName,
 			Set<WareHouseDetailsDTO> wareHouseDetails) {
-		List<Long> wareHouseIds = new ArrayList<Long>();
+		List<String> wareHouseIds = new ArrayList<String>();
 		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
 			wareHouseIds.add(wareHouse.getWareHouseId());
 		boolean isSuperAdmin = false;
@@ -353,7 +353,7 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 
 @SuppressWarnings("unchecked")
 public Object getDeliveryNoteByStatus(String userId, String roleName, Set<WareHouseDetailsDTO> wareHouseDetails, String deliveryNoteStatus) {
-	List<Long> wareHouseIds = new ArrayList<Long>();
+	List<String> wareHouseIds = new ArrayList<String>();
 	for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
 		wareHouseIds.add(wareHouse.getWareHouseId());
 	boolean isSuperAdmin = false;

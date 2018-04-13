@@ -9,7 +9,6 @@ import org.hibernate.criterion.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.incture.metrodata.constant.MessageType;
 import com.incture.metrodata.dto.CommentsDTO;
 import com.incture.metrodata.dto.MessageDetailsDTO;
 import com.incture.metrodata.dto.SearchMessageVO;
@@ -64,7 +63,7 @@ public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsD
 			if (!ServicesUtil.isEmpty(dto.getLongitude())) {
 				dos.setLongitude(dto.getLongitude());
 			}
-			if (!ServicesUtil.isEmpty(dto.getCreatedBy())) {
+			if (!ServicesUtil.isEmpty(dto.getCreatedBy()) && dto.getCreatedBy() instanceof String) {
 				dos.setCreatedBy(dto.getCreatedBy().toString());
 			}
 			if (!ServicesUtil.isEmpty(dto.getUpdatedBy())) {

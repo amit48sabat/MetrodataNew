@@ -54,23 +54,28 @@ public class WareHouseController {
 	}
 
 	@RequestMapping(value = "/{wareHouseId}", method = RequestMethod.PUT)
-	public ResponseDto update(@PathVariable Long wareHouseId, @RequestBody WareHouseDetailsDTO dto) {
+	public ResponseDto update(@PathVariable String wareHouseId, @RequestBody WareHouseDetailsDTO dto) {
 		dto.setWareHouseId(wareHouseId);
 		return wareHouseService.update(dto);
 	}
 
 	@RequestMapping(value = "/{wareHouseId}", method = RequestMethod.DELETE)
-	public ResponseDto delete(@PathVariable Long wareHouseId) {
+	public ResponseDto delete(@PathVariable String wareHouseId) {
 		WareHouseDetailsDTO dto = new WareHouseDetailsDTO();
 		dto.setWareHouseId(wareHouseId);
 		return wareHouseService.delete(dto);
 	}
 
 	@RequestMapping(value = "/{wareHouseId}", method = RequestMethod.GET)
-	public ResponseDto findById(@PathVariable Long wareHouseId) {
+	public ResponseDto findById(@PathVariable String wareHouseId) {
 		WareHouseDetailsDTO dto = new WareHouseDetailsDTO();
 		dto.setWareHouseId(wareHouseId);
 		return wareHouseService.find(dto);
+	}
+	
+	@RequestMapping(value = "/ecc", method = RequestMethod.GET)
+	public ResponseDto getAllWareHouseFromECC() {
+		return wareHouseService.refreshWareHouseListFromEcc();
 	}
 
 }
