@@ -366,13 +366,15 @@ public class TripService implements TripServiceLocal {
 			dto = tripDao.findById(dto);
 			UserDetailsDTO userDetailsDTO = new UserDetailsDTO();
 			if (ServicesUtil.isEmpty(dto.getUser())) {
-
+				
 				userDetailsDTO.setUserId(userId);
+				
 				try {
 					userDetailsDTO = userDao.getByKeys(userDetailsDTO);
 				} catch (Exception e) {
 					throw new ExecutionFault("Driver details doesn't exist please log in and try again");
 				}
+				setAssignedUserInDeliveryHeader(dto);
 				dto.setStatus(TripStatus.TRIP_STATUS_DRIVER_ASSIGNED.getValue());
 				dto.setUser(userDetailsDTO);
 				tripDao.update(dto);
