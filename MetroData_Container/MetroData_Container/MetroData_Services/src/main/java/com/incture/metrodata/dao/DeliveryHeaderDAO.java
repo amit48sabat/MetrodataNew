@@ -351,4 +351,32 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 	   return false;
    }
 
+@SuppressWarnings("unchecked")
+public Object getDeliveryNoteByStatus(String userId, String roleName, Set<WareHouseDetailsDTO> wareHouseDetails, String deliveryNoteStatus) {
+	List<Long> wareHouseIds = new ArrayList<Long>();
+	for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
+		wareHouseIds.add(wareHouse.getWareHouseId());
+	boolean isSuperAdmin = false;
+	String hql = "";
+	// get all the user list if role is super_admin or sales_admin
+	if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
+			|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
+		hql = "SELECT d FROM DeliveryHeaderDo AS d WHERE d.status = :status  ORDER BY d.createdAt desc";
+		isSuperAdmin = true;
+	} else
+		hql = "SELECT d FROM DeliveryHeaderDo AS d inner join d.wareHouseDetails w WHERE d.status = :status AND w.wareHouseId IN (:warehouselist) ORDER BY d.createdAt desc";
+	Query query = getSession().createQuery(hql);
+	query.setParameter("status", deliveryNoteStatus);
+	if (!isSuperAdmin) {
+		// send no data on if warehouse if is empty
+		if (ServicesUtil.isEmpty(wareHouseIds))
+			return new ArrayList<DeliveryHeaderDTO>();
+
+		query.setParameterList("warehouselist", wareHouseIds);
+	}
+
+	ArrayList<DeliveryHeaderDo> result = (ArrayList<DeliveryHeaderDo>) query.list();
+	return exportList(result);
+}
+
 }

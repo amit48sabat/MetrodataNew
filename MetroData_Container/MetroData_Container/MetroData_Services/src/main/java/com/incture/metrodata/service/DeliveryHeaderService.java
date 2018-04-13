@@ -342,4 +342,27 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 		return responseDto;
 	}
 
+	@Override
+	public ResponseDto getDeliveryNoteByStatus(UserDetailsDTO adminDto,String deliveryNoteStatus) {
+		ResponseDto responseDto = new ResponseDto();
+
+		try {
+
+			// adminDto = userDao.findById(adminDto);
+			Object userList = deliveryHeaderDao.getDeliveryNoteByStatus(adminDto.getUserId(),
+					adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails(),deliveryNoteStatus);
+
+			responseDto.setStatus(true);
+			responseDto.setCode(HttpStatus.SC_OK);
+			responseDto.setData(userList);
+			responseDto.setMessage(Message.SUCCESS.getValue());
+		} catch (Exception e) {
+			responseDto.setStatus(false);
+			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			responseDto.setMessage(Message.FAILED.getValue());
+			e.printStackTrace();
+		}
+		return responseDto;
+	}
+
 }

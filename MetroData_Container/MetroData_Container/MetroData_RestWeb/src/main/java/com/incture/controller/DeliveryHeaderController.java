@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -70,11 +71,31 @@ class DeliveryHeaderController {
 		res = userServiceLocal.validatedUserRoleByUserId(userId);
 		if (!res.isStatus())
 			return ServicesUtil.getUnauthorizedResponseDto();
-		;
 
 		UserDetailsDTO dto = (UserDetailsDTO) res.getData();
 		// LOGGER.info("Inside delivery data creation");
 		return deliveryHeaderServiceLocal.getAllDeliveryNoteByAdminsWareHouse(dto);
+	}
+
+	@RequestMapping(value = "/status", method = RequestMethod.GET)
+	public ResponseDto getDeliveryNoteByStatus(@RequestParam(value = "status") String status,
+			HttpServletRequest request) {
+		ResponseDto res = new ResponseDto();
+		String userId = "";
+		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
+			userId = request.getUserPrincipal().getName();
+		} else {
+			return ServicesUtil.getUnauthorizedResponseDto();
+
+		}
+		// validating user role if action not permitted then return
+		res = userServiceLocal.validatedUserRoleByUserId(userId);
+		if (!res.isStatus())
+			return ServicesUtil.getUnauthorizedResponseDto();
+
+		UserDetailsDTO dto = (UserDetailsDTO) res.getData();
+		// LOGGER.info("Inside delivery data creation");
+		return deliveryHeaderServiceLocal.getDeliveryNoteByStatus(dto,status);
 	}
 
 	@RequestMapping(value = "/{deliveryNoteId}", method = RequestMethod.DELETE)
