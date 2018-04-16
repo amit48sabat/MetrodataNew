@@ -304,4 +304,16 @@ public class ServicesUtil {
 		res.setStatus(false);
 		return res;
 	}
+	
+	public static void setPagination(String firstResult, String maxResult){
+		
+		if (!ServicesUtil.isEmpty(firstResult) && !ServicesUtil.isEmpty(maxResult)) {
+			PaginationUtil.FIRST_RESULT = Integer.parseInt(firstResult);
+			PaginationUtil.MAX_RESULT = Integer.parseInt(maxResult);
+		}else{
+			PaginationUtil.FIRST_RESULT = 0;
+			PaginationUtil.MAX_RESULT = 0;
+		}
+	}
+	
 }

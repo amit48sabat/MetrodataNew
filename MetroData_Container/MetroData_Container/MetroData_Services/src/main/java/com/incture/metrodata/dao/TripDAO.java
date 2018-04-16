@@ -33,6 +33,7 @@ import com.incture.metrodata.entity.DeliveryHeaderDo;
 import com.incture.metrodata.entity.TripDetailsDo;
 import com.incture.metrodata.entity.UserDetailsDo;
 import com.incture.metrodata.exceptions.InvalidInputFault;
+import com.incture.metrodata.util.PaginationUtil;
 import com.incture.metrodata.util.ServicesUtil;
 import com.incture.metrodata.util.SortDhDTOByDeliveryOrder;
 
@@ -471,6 +472,9 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			query.setParameter("createdBy", userId);
 		}
 
+		query.setFirstResult(PaginationUtil.FIRST_RESULT);
+		query.setMaxResults(PaginationUtil.MAX_RESULT);
+		
 		ArrayList<TripDetailsDo> result = (ArrayList<TripDetailsDo>) query.list();
 		return exportList(result);
 	}
@@ -723,6 +727,9 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 				+ " ORDER BY " + dto.getSortBy() + " desc ";
 		
 		Query query = getSession().createQuery(hql);
+		query.setFirstResult(PaginationUtil.FIRST_RESULT);
+		query.setMaxResults(PaginationUtil.MAX_RESULT);
+		
 		query.setParameterList("driver", driverRole);
 		query.setParameterList("totalstatus", totalStatus);
 

@@ -29,6 +29,7 @@ import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.dto.WebLeaderBoardVO;
 import com.incture.metrodata.service.TripServiceLocal;
 import com.incture.metrodata.service.UserServiceLocal;
+import com.incture.metrodata.util.PaginationUtil;
 import com.incture.metrodata.util.ServicesUtil;
 
 @RestController
@@ -39,10 +40,10 @@ public class TripController {
 
 	@Autowired
 	TripServiceLocal tripService;
-     
+
 	@Autowired
 	UserServiceLocal userServiceLocal;
-	
+
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseDto create(@RequestBody TripDetailsDTO dto, HttpServletRequest request) {
 		String userId = "";
@@ -55,7 +56,13 @@ public class TripController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public ResponseDto findAllTrips(HttpServletRequest request) {
+	public ResponseDto findAllTrips(HttpServletRequest request,
+			@RequestParam(value = "firstResult", defaultValue = "0") String firstResult,
+			@RequestParam(value = "maxResult", defaultValue = "0") String maxResult) {
+		
+		// setting pagination
+				ServicesUtil.setPagination(firstResult, maxResult);
+		
 		ResponseDto res = new ResponseDto();
 		String userId = "";
 		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
@@ -65,11 +72,12 @@ public class TripController {
 
 		}
 		// validating user role if action not permitted then return
-		 res = userServiceLocal.validatedUserRoleByUserId(userId);
-		 if(!res.isStatus())
-			 return res;
-		 
-		UserDetailsDTO adminDto =  (UserDetailsDTO) res.getData();
+		res = userServiceLocal.validatedUserRoleByUserId(userId);
+		if (!res.isStatus())
+			return res;
+
+		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
+
 		return tripService.getAllTripsAssociatedWithAdminsDrivers(adminDto);
 	}
 
@@ -79,13 +87,14 @@ public class TripController {
 	}
 
 	@RequestMapping(value = "/{tripId}", method = RequestMethod.PUT)
-	public ResponseDto update(@PathVariable String tripId, @RequestBody TripDetailsDTO dto, HttpServletRequest request) {
+	public ResponseDto update(@PathVariable String tripId, @RequestBody TripDetailsDTO dto,
+			HttpServletRequest request) {
 		String userId = "";
 		if (request.getUserPrincipal() != null) {
 			userId = request.getUserPrincipal().getName();
 		}
 		dto.setUpdatedBy(userId);
-		
+
 		dto.setTripId(tripId);
 		return tripService.update(dto);
 	}
@@ -108,11 +117,12 @@ public class TripController {
 		// validating user role if action not permitted then return
 		res = userServiceLocal.validatedUserRoleByUserId(userId);
 		if (!res.isStatus())
-			return ServicesUtil.getUnauthorizedResponseDto();;
+			return ServicesUtil.getUnauthorizedResponseDto();
+		;
 
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
-		return tripService.filterTripsAsPerAdmin(adminDto,dto);
-		//return tripService.filter(dto);
+		return tripService.filterTripsAsPerAdmin(adminDto, dto);
+		// return tripService.filter(dto);
 	}
 
 	@RequestMapping(value = "/assign/{tripId}", method = RequestMethod.GET)
@@ -122,15 +132,23 @@ public class TripController {
 	}
 
 	@RequestMapping(value = "/report/{userId}", method = RequestMethod.GET)
-	public ResponseDto driverTripHistory(@PathVariable String userId, HttpServletRequest request,@RequestParam( value = "start" ,defaultValue="0") String start,@RequestParam( value = "end", defaultValue="0") String end) {
-         Long s,e;
-         s = Long.parseLong(start);
-         e = Long.parseLong(end);
-		return tripService.getTripHistoryByDriverId(userId,s,e);
+	public ResponseDto driverTripHistory(@PathVariable String userId, HttpServletRequest request,
+			@RequestParam(value = "start", defaultValue = "0") String start,
+			@RequestParam(value = "end", defaultValue = "0") String end) {
+		Long s, e;
+		s = Long.parseLong(start);
+		e = Long.parseLong(end);
+		return tripService.getTripHistoryByDriverId(userId, s, e);
 	}
 
 	@RequestMapping(value = "/leaderboard", method = RequestMethod.PUT)
-	public ResponseDto webLeaderBoard(@RequestBody WebLeaderBoardVO dto, HttpServletRequest request) {
+	public ResponseDto webLeaderBoard(@RequestBody WebLeaderBoardVO dto, HttpServletRequest request,
+			@RequestParam(value = "firstResult", defaultValue = "0") String firstResult,
+			@RequestParam(value = "maxResult", defaultValue = "0") String maxResult) {
+		
+		// setting pagination
+				ServicesUtil.setPagination(firstResult, maxResult);
+				
 		ResponseDto res = new ResponseDto();
 		String userId = "";
 		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
@@ -142,29 +160,27 @@ public class TripController {
 		// validating user role if action not permitted then return
 		res = userServiceLocal.validatedUserRoleByUserId(userId);
 		if (!res.isStatus())
-			return ServicesUtil.getUnauthorizedResponseDto();;
+			return ServicesUtil.getUnauthorizedResponseDto();
+		;
 
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
 		return tripService.getLeaderBoardAssociatedWithAdmin(dto, adminDto);
-		//return tripService.leaderBoard(dto);
+		// return tripService.leaderBoard(dto);
 	}
-	
+
 	@RequestMapping(value = "/manifest/{tripId}", method = RequestMethod.GET)
 	public ResponseEntity<Resource> getTripManifest(@PathVariable String tripId) throws IOException {
 
-	    // ...
+		// ...
 		ResponseDto dto = tripService.printTripManiFest(tripId);
-		File f=(File) dto.getData();
-       
-	    HttpHeaders header = new HttpHeaders();
-	    header.set(HttpHeaders.CONTENT_DISPOSITION,
-	                   "attachment; filename=" + "manifest_"+tripId+".pdf");
-	    
-	    InputStream stream = new FileInputStream(f);
-	    InputStreamResource resource = new InputStreamResource(stream);
-	    return ResponseEntity.ok()
-	            .headers(header)
-	    		.contentType(MediaType.parseMediaType("application/pdf"))
-	            .body(resource);
+		File f = (File) dto.getData();
+
+		HttpHeaders header = new HttpHeaders();
+		header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + "manifest_" + tripId + ".pdf");
+
+		InputStream stream = new FileInputStream(f);
+		InputStreamResource resource = new InputStreamResource(stream);
+		return ResponseEntity.ok().headers(header).contentType(MediaType.parseMediaType("application/pdf"))
+				.body(resource);
 	}
 }
