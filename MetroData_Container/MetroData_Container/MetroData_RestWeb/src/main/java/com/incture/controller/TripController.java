@@ -29,7 +29,6 @@ import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.dto.WebLeaderBoardVO;
 import com.incture.metrodata.service.TripServiceLocal;
 import com.incture.metrodata.service.UserServiceLocal;
-import com.incture.metrodata.util.PaginationUtil;
 import com.incture.metrodata.util.ServicesUtil;
 
 @RestController
@@ -118,7 +117,7 @@ public class TripController {
 		res = userServiceLocal.validatedUserRoleByUserId(userId);
 		if (!res.isStatus())
 			return ServicesUtil.getUnauthorizedResponseDto();
-		;
+		
 
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
 		return tripService.filterTripsAsPerAdmin(adminDto, dto);
@@ -161,7 +160,7 @@ public class TripController {
 		res = userServiceLocal.validatedUserRoleByUserId(userId);
 		if (!res.isStatus())
 			return ServicesUtil.getUnauthorizedResponseDto();
-		;
+		
 
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
 		return tripService.getLeaderBoardAssociatedWithAdmin(dto, adminDto);

@@ -11,6 +11,7 @@ import com.incture.metrodata.entity.WareHouseDetailsDo;
 import com.incture.metrodata.exceptions.ExecutionFault;
 import com.incture.metrodata.exceptions.InvalidInputFault;
 import com.incture.metrodata.exceptions.NoResultFault;
+import com.incture.metrodata.util.PaginationUtil;
 import com.incture.metrodata.util.ServicesUtil;
 
 @Repository("WareHouseDAO")
@@ -64,6 +65,7 @@ public class WareHouseDAO extends BaseDao<WareHouseDetailsDo, WareHouseDetailsDT
 	}
 
 	// get the warehouse list as per user user
+	@SuppressWarnings("unchecked")
 	public Object getWarehouseListByUserId(String userId, String role) {
 		String hql = "";
 		// get all the warehouse list if role is super admin or sales admin
@@ -73,6 +75,9 @@ public class WareHouseDAO extends BaseDao<WareHouseDetailsDo, WareHouseDetailsDT
 			hql = "SELECT u.wareHouseDetails from UserDetailsDo as  u inner join u.wareHouseDetails as w where u.userId = '"
 					+ userId + "'";
 		Query query = getSession().createQuery(hql);
+		query.setFirstResult(PaginationUtil.FIRST_RESULT);
+		query.setMaxResults(PaginationUtil.MAX_RESULT);
+		
 		ArrayList<WareHouseDetailsDo> result = (ArrayList<WareHouseDetailsDo>) query.list();
 		return exportList(result);
 

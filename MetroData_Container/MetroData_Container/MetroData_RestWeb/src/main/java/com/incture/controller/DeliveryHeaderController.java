@@ -58,7 +58,13 @@ class DeliveryHeaderController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public @ResponseBody ResponseDto findAllDeliveryHeaders(HttpServletRequest request) {
+	public @ResponseBody ResponseDto findAllDeliveryHeaders(HttpServletRequest request,
+			@RequestParam(value = "firstResult", defaultValue = "0") String firstResult,
+			@RequestParam(value = "maxResult", defaultValue = "0") String maxResult) {
+
+		// setting pagination
+		ServicesUtil.setPagination(firstResult, maxResult);
+
 		ResponseDto res = new ResponseDto();
 		String userId = "";
 		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {

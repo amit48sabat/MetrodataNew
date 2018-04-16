@@ -22,6 +22,7 @@ import com.incture.metrodata.dto.WareHouseDetailsDTO;
 import com.incture.metrodata.entity.DeliveryHeaderDo;
 import com.incture.metrodata.entity.DeliveryItemDo;
 import com.incture.metrodata.exceptions.InvalidInputFault;
+import com.incture.metrodata.util.PaginationUtil;
 import com.incture.metrodata.util.ServicesUtil;
 
 @Repository("DeliveryHeaderDao")
@@ -330,6 +331,8 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 		} else
 			hql = "SELECT d FROM DeliveryHeaderDo AS d inner join d.wareHouseDetails w WHERE d.tripped = false AND w.wareHouseId IN (:warehouselist) ORDER BY d.createdAt desc";
 		Query query = getSession().createQuery(hql);
+		query.setFirstResult(PaginationUtil.FIRST_RESULT);
+		query.setMaxResults(PaginationUtil.MAX_RESULT);
 		if (!isSuperAdmin) {
 			// send no data on if warehouse if is empty
 			if (ServicesUtil.isEmpty(wareHouseIds))
