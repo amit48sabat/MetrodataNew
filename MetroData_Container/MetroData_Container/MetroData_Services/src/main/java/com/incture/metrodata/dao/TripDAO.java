@@ -704,7 +704,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		
 		String sDateAndeDate=" AND dh.updatedAt BETWEEN :stDate AND :edDate ";
 		
-		String hql = " select new map(u.userId as userId, u.email as email, u.firstName as firstName, u.lastName as lastName, w.wareHouseId as wareHouseId, w.wareHouseName as wareHouseName, "
+		String hql = " select new map(u.userId as userId, u.email as email, u.firstName as firstName, u.lastName as lastName,"
 				+ " (select Count(dh.deliveryNoteId) from DeliveryHeaderDo as dh WHERE dh.assignedUser = u.userId AND dh.status IN (:totalstatus)) as total_delivery_note, "
 				+ " (select Count(dh.status) from DeliveryHeaderDo as dh WHERE dh.assignedUser = u.userId AND dh.status ='del_note_completed') as del_note_completed, "
 				+ " (select Count(dh.status) from DeliveryHeaderDo as dh WHERE dh.assignedUser = u.userId AND dh.status ='del_note_partially_rejected') as del_note_partially_rejected, "
@@ -719,7 +719,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			hql+=sDateAndeDate;
 		}
 		
-		hql+= " GROUP BY u.userId, u.email, u.firstName, u.lastName, w.wareHouseId, w.wareHouseName "
+		hql+= " GROUP BY u.userId, u.email, u.firstName, u.lastName"
 				+ " ORDER BY " + dto.getSortBy() + " desc ";
 		
 		Query query = getSession().createQuery(hql);
