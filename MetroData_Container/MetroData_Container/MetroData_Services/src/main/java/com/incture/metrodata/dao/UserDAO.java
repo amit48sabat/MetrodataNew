@@ -14,6 +14,7 @@ import com.incture.metrodata.dto.WareHouseDetailsDTO;
 import com.incture.metrodata.entity.RoleDetailsDo;
 import com.incture.metrodata.entity.UserDetailsDo;
 import com.incture.metrodata.util.CourierDetailsComparator;
+import com.incture.metrodata.util.PaginationUtil;
 import com.incture.metrodata.util.ServicesUtil;
 import com.incture.metrodata.util.WareHouseComparator;
 
@@ -212,6 +213,8 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 		} else
 			hql = "SELECT u FROM UserDetailsDo AS  u inner join u.wareHouseDetails AS w WHERE w.wareHouseId IN (:warehouselist) AND u.userId !=:adminId";
 		Query query = getSession().createQuery(hql);
+		query.setFirstResult(PaginationUtil.FIRST_RESULT);
+		query.setMaxResults(PaginationUtil.MAX_RESULT);
 		if(!isSuperAdmin)
 		{
 			// send no data on if warehouse if is empty
