@@ -46,11 +46,25 @@ public class TripController {
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseDto create(@RequestBody TripDetailsDTO dto, HttpServletRequest request) {
 		String userId = "";
-		if (request.getUserPrincipal() != null) {
+		ResponseDto res = new ResponseDto();
+		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
 			userId = request.getUserPrincipal().getName();
+		} else {
+			return ServicesUtil.getUnauthorizedResponseDto();
+
 		}
+		// validating user role if action not permitted then return
+		res = userServiceLocal.validatedUserRoleByUserId(userId);
+		if (!res.isStatus())
+			return res;
+
+		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
+
 		dto.setCreatedBy(userId);
 		dto.setUpdatedBy(userId);
+		// setting tracking feq for trip as per admin frq.
+		dto.setTrackFreq(adminDto.getTrackFreq());
+		
 		return tripService.create(dto);
 	}
 
