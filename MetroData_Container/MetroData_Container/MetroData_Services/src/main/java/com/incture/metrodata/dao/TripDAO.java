@@ -84,6 +84,9 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			if (!ServicesUtil.isEmpty(dto.getReasonForCancellation())) {
 				tripDetailsDo.setReasonForCancellation(dto.getReasonForCancellation());
 			}
+			if (!ServicesUtil.isEmpty(dto.getTrackFreq())) {
+				tripDetailsDo.setTrackFreq(dto.getTrackFreq());
+			}
 
 			// importing driver details
 			if (!ServicesUtil.isEmpty(dto.getUser())) {
@@ -140,6 +143,9 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			}
 			if (!ServicesUtil.isEmpty(dos.getReasonForCancellation())) {
 				dto.setReasonForCancellation(dos.getReasonForCancellation());
+			}
+			if (!ServicesUtil.isEmpty(dos.getTrackFreq())) {
+				dto.setTrackFreq(dos.getTrackFreq());
 			}
 
 			// exporting driver details
@@ -295,14 +301,14 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	 */
 	@SuppressWarnings("unchecked")
 	public Map<String, Long> getDriversDeliveryNoteReport(String userId) {
-	
-		ArrayList<String> deliveryStatus  = new ArrayList<>();
+
+		ArrayList<String> deliveryStatus = new ArrayList<>();
 		deliveryStatus.add("del_note_completed");
 		deliveryStatus.add("del_note_partially_rejected");
 		deliveryStatus.add("del_note_rejected");
 		deliveryStatus.add("created");
 		deliveryStatus.add("del_note_started");
-		
+
 		String hql = " SELECT new map("
 				+ " (Select count(d.deliveryNoteId) from d where d.status in (:deliverystatus) and d.tripped = true and d.assignedUser = :driverId) as total_delivery_note, "
 				+ " (Select count(d.deliveryNoteId) from d where d.status='del_note_completed' and d.tripped = true and d.assignedUser = :driverId) as del_note_completed, "
@@ -315,7 +321,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		query.setParameterList("deliverystatus", deliveryStatus);
 		query.setParameter("driverId", userId);
 		Map<String, Long> result = (Map<String, Long>) query.uniqueResult();
-		
+
 		return result;
 	}
 
@@ -432,8 +438,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 				|| TripStatus.TRIP_STATUS_DRIVER_ASSIGNED.getValue().equals(status)
 				|| TripStatus.TRIP_STATUS_STARTED.getValue().equals(status)
 				|| TripStatus.TRIP_STATUS_COMPLETED.getValue().equals(status)
-				|| TripStatus.TRIP_STATUS_CANCELLED.getValue().equals(status)
-		) {
+				|| TripStatus.TRIP_STATUS_CANCELLED.getValue().equals(status)) {
 			return true;
 		} else {
 			throw new InvalidInputFault("trip status '" + status + "' is invalid status code");
@@ -474,7 +479,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 
 		query.setFirstResult(PaginationUtil.FIRST_RESULT);
 		query.setMaxResults(PaginationUtil.MAX_RESULT);
-		
+
 		ArrayList<TripDetailsDo> result = (ArrayList<TripDetailsDo>) query.list();
 		return exportList(result);
 	}
@@ -494,14 +499,13 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
 			wareHouseIds.add(wareHouse.getWareHouseId());
 
-		ArrayList<String>	deliveryNoteStatusList = new ArrayList<String>();
+		ArrayList<String> deliveryNoteStatusList = new ArrayList<String>();
 		deliveryNoteStatusList.add("del_note_rejected");
 		deliveryNoteStatusList.add("del_note_partially_rejected");
 		deliveryNoteStatusList.add("del_note_started");
 		deliveryNoteStatusList.add("created"); // as del_note_validated
 		deliveryNoteStatusList.add("del_note_completed");
-		
-		
+
 		boolean isSuperAdmin = false;
 		String hql = "";
 		// get all the user list if role is super_admin or sales_admin
@@ -528,7 +532,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		}
 		Query query = getSession().createQuery(hql);
 		query.setParameterList("deliveryNoteStatusList", deliveryNoteStatusList);
-		
+
 		if (!isSuperAdmin) {
 			// send no data on if warehouse if is empty
 			if (ServicesUtil.isEmpty(wareHouseIds))
@@ -687,27 +691,27 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		List<String> wareHouseIds = new ArrayList<String>();
 		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
 			wareHouseIds.add(wareHouse.getWareHouseId());
-      
+
 		List<String> driverRole = new ArrayList<>();
 		driverRole.add(RoleConstant.INSIDE_JAKARTA_DRIVER.getValue());
 		driverRole.add(RoleConstant.OUTSIDE_JAKARTA_DRIVER.getValue());
 		boolean isSuperAdmin = false;
-		String addWarehouseListCriteria ="";
+		String addWarehouseListCriteria = "";
 		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
 				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
-			addWarehouseListCriteria="";
+			addWarehouseListCriteria = "";
 			isSuperAdmin = true;
 		} else {
 			addWarehouseListCriteria = " AND w.wareHouseId IN (:warehouselist) ";
 		}
-	
-		ArrayList<String> totalStatus  = new ArrayList<>();
+
+		ArrayList<String> totalStatus = new ArrayList<>();
 		totalStatus.add("del_note_completed");
 		totalStatus.add("del_note_partially_rejected");
 		totalStatus.add("del_note_rejected");
-		
-		String sDateAndeDate=" AND dh.updatedAt BETWEEN :stDate AND :edDate ";
-		
+
+		String sDateAndeDate = " AND dh.updatedAt BETWEEN :stDate AND :edDate ";
+
 		String hql = " select new map(u.userId as userId, u.email as email, u.firstName as firstName, u.lastName as lastName,"
 				+ " (select Count(dh.deliveryNoteId) from DeliveryHeaderDo as dh WHERE dh.assignedUser = u.userId AND dh.status IN (:totalstatus)) as total_delivery_note, "
 				+ " (select Count(dh.status) from DeliveryHeaderDo as dh WHERE dh.assignedUser = u.userId AND dh.status ='del_note_completed') as del_note_completed, "
@@ -715,44 +719,40 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 				+ " (select Count(dh.status) from DeliveryHeaderDo as dh WHERE dh.assignedUser = u.userId AND dh.status ='del_note_rejected') as del_note_rejected "
 				+ " ) "
 				+ " from TripDetailsDo as t  inner join t.deliveryHeader as dh inner join t.user as u inner join u.wareHouseDetails as w inner join u.role as r "
-				+ " where r.roleName IN (:driver) "
-				+ addWarehouseListCriteria
-				+" ";
-		
-		if(!ServicesUtil.isEmpty(dto.getFrom()) && !ServicesUtil.isEmpty(dto.getTo())){
-			hql+=sDateAndeDate;
+				+ " where r.roleName IN (:driver) " + addWarehouseListCriteria + " ";
+
+		if (!ServicesUtil.isEmpty(dto.getFrom()) && !ServicesUtil.isEmpty(dto.getTo())) {
+			hql += sDateAndeDate;
 		}
-		
-		hql+= " GROUP BY u.userId, u.email, u.firstName, u.lastName"
-				+ " ORDER BY " + dto.getSortBy() + " desc ";
-		
+
+		hql += " GROUP BY u.userId, u.email, u.firstName, u.lastName" + " ORDER BY " + dto.getSortBy() + " desc ";
+
 		Query query = getSession().createQuery(hql);
 		query.setFirstResult(PaginationUtil.FIRST_RESULT);
 		query.setMaxResults(PaginationUtil.MAX_RESULT);
-		
+
 		query.setParameterList("driver", driverRole);
 		query.setParameterList("totalstatus", totalStatus);
 
-		if(!ServicesUtil.isEmpty(dto.getFrom()) && !ServicesUtil.isEmpty(dto.getTo())){
+		if (!ServicesUtil.isEmpty(dto.getFrom()) && !ServicesUtil.isEmpty(dto.getTo())) {
 			query.setParameter("stDate", dto.getFrom());
 			query.setParameter("edDate", dto.getTo());
 		}
-		
+
 		if (!isSuperAdmin) {
 			// send no data on if warehouse if is empty
-		    if (ServicesUtil.isEmpty(wareHouseIds))
-			 return new HashMap<String, Long>();
-			 query.setParameterList("warehouselist", wareHouseIds);
+			if (ServicesUtil.isEmpty(wareHouseIds))
+				return new HashMap<String, Long>();
+			query.setParameterList("warehouselist", wareHouseIds);
 		}
 		return query.list();
 	}
-	
-	
-	public UserDetailsDTO getDriverFromTripByDN(DeliveryHeaderDTO headerDto){
+
+	public UserDetailsDTO getDriverFromTripByDN(DeliveryHeaderDTO headerDto) {
 		String hql = " SELECT t.user from TripDetailsDo t inner join t.deliveryHeader d where d.deliveryNoteId = :deliveryNoteId ";
 		Query query = getSession().createQuery(hql);
 		query.setParameter("deliveryNoteId", headerDto.getDeliveryNoteId());
-		UserDetailsDo  dos  = (UserDetailsDo) query.uniqueResult();
+		UserDetailsDo dos = (UserDetailsDo) query.uniqueResult();
 		return userDAO.exportDto(dos);
 	}
 }

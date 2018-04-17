@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.incture.metrodata.dto.ResponseDto;
@@ -33,7 +34,13 @@ public class UserDetailController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public ResponseDto findAll(HttpServletRequest request) {
+	public ResponseDto findAll(HttpServletRequest request,
+			@RequestParam(value = "firstResult", defaultValue = "0") String firstResult,
+			@RequestParam(value = "maxResult", defaultValue = "0") String maxResult) {
+
+		// setting pagination
+		ServicesUtil.setPagination(firstResult, maxResult);
+		
 		ResponseDto res = new ResponseDto();
 		String userId = "";
 		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {

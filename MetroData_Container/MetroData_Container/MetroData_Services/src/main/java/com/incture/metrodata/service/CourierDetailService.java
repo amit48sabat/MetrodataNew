@@ -11,9 +11,9 @@ import com.incture.metrodata.constant.Message;
 import com.incture.metrodata.dao.CourierDetailsDAO;
 import com.incture.metrodata.dto.CourierDetailsDTO;
 import com.incture.metrodata.dto.ResponseDto;
+import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.entity.CourierDetailsDo;
 import com.incture.metrodata.util.ServicesUtil;
-
 
 @Service("courierService")
 @Transactional
@@ -89,16 +89,16 @@ public class CourierDetailService implements CourierDetailServiceLocal {
 	}
 
 	@Override
-	public ResponseDto findAll() {
+	public ResponseDto findAll(UserDetailsDTO userDto) {
 		ResponseDto responseDto = new ResponseDto();
 		try {
-			CourierDetailsDTO dto = new CourierDetailsDTO();
-
-			Object wareHouseList = courierDao.findAll(dto);
+			
+			Object courierList = courierDao.getAllCouriersAssociatedWithUser(userDto.getUserId(),
+					userDto.getRole().getRoleName(), userDto.getWareHouseDetails());
 
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
-			responseDto.setData(wareHouseList);
+			responseDto.setData(courierList);
 			responseDto.setMessage(Message.SUCCESS.getValue());
 		} catch (Exception e) {
 			responseDto.setStatus(false);

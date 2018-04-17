@@ -57,18 +57,21 @@ public class TripDetailsDo implements BaseDo {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date endTime;
 
-	@Column(name ="REASON_FOR_CANCELLATION")
+	@Column(name = "REASON_FOR_CANCELLATION")
 	private String reasonForCancellation;
-	
-	//@OneToMany(targetEntity = DeliveryHeaderDo.class, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
-	@JoinTable(name = "TRIP_DELIVERY_HEADER_MAPPING", joinColumns = { @JoinColumn(name = "TRIP_ID") }, inverseJoinColumns = {
-			@JoinColumn(name = "DELIVERY_NOTE_ID") })
-	private Set<DeliveryHeaderDo> deliveryHeader = new TreeSet<DeliveryHeaderDo>( new SortDHDoByDeliveryOrder());
+
+	// @OneToMany(targetEntity = DeliveryHeaderDo.class, fetch =
+	// FetchType.EAGER, cascade = CascadeType.ALL)
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinTable(name = "TRIP_DELIVERY_HEADER_MAPPING", joinColumns = {
+			@JoinColumn(name = "TRIP_ID") }, inverseJoinColumns = { @JoinColumn(name = "DELIVERY_NOTE_ID") })
+	private Set<DeliveryHeaderDo> deliveryHeader = new TreeSet<DeliveryHeaderDo>(new SortDHDoByDeliveryOrder());
+
+	@Column(name = "TRACK_FREQ")
+	private Long trackFreq;
 
 	/*
-	 * need to be clear with one to one
-	 * or one to many btw driver to trips
+	 * need to be clear with one to one or one to many btw driver to trips
 	 */
 	@OneToOne(targetEntity = UserDetailsDo.class, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	private UserDetailsDo user;
@@ -77,6 +80,5 @@ public class TripDetailsDo implements BaseDo {
 	public Object getPrimaryKey() {
 		return tripId;
 	}
-
 
 }

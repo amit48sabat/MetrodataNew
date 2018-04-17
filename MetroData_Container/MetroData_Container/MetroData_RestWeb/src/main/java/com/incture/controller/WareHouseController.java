@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.incture.metrodata.dto.ResponseDto;
@@ -36,7 +37,13 @@ public class WareHouseController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public ResponseDto findAll(HttpServletRequest request) {
+	public ResponseDto findAll(HttpServletRequest request,
+			@RequestParam(value = "firstResult", defaultValue = "0") String firstResult,
+			@RequestParam(value = "maxResult", defaultValue = "0") String maxResult) {
+
+		// setting pagination
+		ServicesUtil.setPagination(firstResult, maxResult);
+
 		ResponseDto res = new ResponseDto();
 		String userId = "";
 		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
@@ -45,12 +52,15 @@ public class WareHouseController {
 			return ServicesUtil.getUnauthorizedResponseDto();
 
 		}
-		UserDetailsDTO userDto = new UserDetailsDTO();
-		userDto.setUserId(userId);
-		res = userService.find(userDto);
-		userDto = (UserDetailsDTO) res.getData();
 
-		return wareHouseService.getWareHouseListByUserId(userId, userDto.getRole().getRoleName());
+		// validating user role if action not permitted then return
+		res = userService.validatedUserRoleByUserId(userId);
+		if (!res.isStatus())
+			return ServicesUtil.getUnauthorizedResponseDto();
+
+		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
+		
+		return wareHouseService.getWareHouseListByUserId(userId, adminDto.getRole().getRoleName());
 	}
 
 	@RequestMapping(value = "/{wareHouseId}", method = RequestMethod.PUT)
@@ -72,7 +82,7 @@ public class WareHouseController {
 		dto.setWareHouseId(wareHouseId);
 		return wareHouseService.find(dto);
 	}
-	
+
 	@RequestMapping(value = "/ecc", method = RequestMethod.GET)
 	public ResponseDto getAllWareHouseFromECC() {
 		return wareHouseService.refreshWareHouseListFromEcc();

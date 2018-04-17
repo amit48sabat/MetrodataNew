@@ -25,6 +25,7 @@ public class TripDetailsDTO extends BaseDto {
 	private String reasonForCancellation;
 	private Set<DeliveryHeaderDTO> deliveryHeader = new TreeSet<DeliveryHeaderDTO>(new  SortDhDTOByDeliveryOrder());
 	private UserDetailsDTO user;
+	private Long trackFreq;
 
 	@Override
 	public void validate(DB_Operation enOperation) throws InvalidInputFault {
