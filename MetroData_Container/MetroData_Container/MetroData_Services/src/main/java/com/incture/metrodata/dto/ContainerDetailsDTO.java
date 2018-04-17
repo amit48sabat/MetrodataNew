@@ -31,6 +31,7 @@ public class ContainerDetailsDTO extends BaseDto{
 	private String DESC;
 	private String QTY;
 	private String VOL;
+	private String STAT;
 	@Override
 	public void validate(DB_Operation enOperation) throws InvalidInputFault {
 		// TODO Auto-generated method stub

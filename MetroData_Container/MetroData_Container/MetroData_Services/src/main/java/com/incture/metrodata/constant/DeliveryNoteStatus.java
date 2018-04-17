@@ -16,8 +16,12 @@ public enum DeliveryNoteStatus {
 	//invalidate dn changes
 	ADMIN_DN_INVALIDATED("admin_del_note_invalidated"),
 	DRIVER_DN_INVALIDATED("driver_del_note_invalidated"),
-	RFC_DN_INVALIDATED("rfc_del_note_invalidated");
+	RFC_DN_INVALIDATED("rfc_del_note_invalidated"),
 	
+	
+	// STAT = X when delivery note got cancelled 
+	// used in container to delivery header conversion
+	STAT("X");
 	String value;
 
 	private DeliveryNoteStatus(String value) {

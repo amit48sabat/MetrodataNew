@@ -83,6 +83,9 @@ public class ContainerDAO extends BaseDao<ContainerDetailsDo, ContainerDetailsDT
 			if(!ServicesUtil.isEmpty(dto.getVOL())){
 				dos.setVOL(dto.getVOL());
 			}
+			if(!ServicesUtil.isEmpty(dto.getSTAT())){
+				dos.setSTAT(dto.getSTAT());
+			}
 		}
 		
 		return dos;
@@ -156,6 +159,9 @@ public class ContainerDAO extends BaseDao<ContainerDetailsDo, ContainerDetailsDT
 			}
 			if(!ServicesUtil.isEmpty(dos.getVOL())){
 				dto.setVOL(dos.getVOL());
+			}
+			if(!ServicesUtil.isEmpty(dto.getSTAT())){
+				dos.setSTAT(dto.getSTAT());
 			}
 		}
 		

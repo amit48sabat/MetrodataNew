@@ -94,7 +94,7 @@ public abstract class BaseDao<E extends BaseDo, D extends BaseDto> {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected E find(E pojo) throws Exception {
+	public E find(E pojo) throws Exception {
 		E result = null;
 		result = (E) getSession().get(pojo.getClass(), (Serializable) pojo.getPrimaryKey());
 		if (ServicesUtil.isEmpty(result))

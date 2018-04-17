@@ -326,10 +326,10 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 		// get all the user list if role is super_admin or sales_admin
 		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
 				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
-			hql = "SELECT d FROM DeliveryHeaderDo AS d WHERE d.tripped = false  ORDER BY d.createdAt desc";
+			hql = "SELECT d FROM DeliveryHeaderDo AS d WHERE d.tripped = false AND d.status != 'rfc_del_note_invalidated' ORDER BY d.createdAt desc";
 			isSuperAdmin = true;
 		} else
-			hql = "SELECT d FROM DeliveryHeaderDo AS d inner join d.wareHouseDetails w WHERE d.tripped = false AND w.wareHouseId IN (:warehouselist) ORDER BY d.createdAt desc";
+			hql = "SELECT d FROM DeliveryHeaderDo AS d inner join d.wareHouseDetails w WHERE d.tripped = false  AND d.status != 'rfc_del_note_invalidated' AND w.wareHouseId IN (:warehouselist) ORDER BY d.createdAt desc";
 		Query query = getSession().createQuery(hql);
 		query.setFirstResult(PaginationUtil.FIRST_RESULT);
 		query.setMaxResults(PaginationUtil.MAX_RESULT);

@@ -88,6 +88,9 @@ public class ContainerDetailsDo implements BaseDo {
 
 	@Column(name = "VOL")
 	private String VOL;
+	
+	@Column(name = "STAT")
+	private String STAT;
 
 	@Override
 	public Object getPrimaryKey() {

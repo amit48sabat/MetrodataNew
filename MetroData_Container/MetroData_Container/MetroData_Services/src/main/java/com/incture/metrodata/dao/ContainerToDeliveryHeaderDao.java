@@ -1,30 +1,42 @@
 package com.incture.metrodata.dao;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.google.maps.GeoApiContext;
 import com.incture.metrodata.constant.DeliveryNoteStatus;
+import com.incture.metrodata.constant.MessageType;
 import com.incture.metrodata.dto.ContainerDetailsDTO;
 import com.incture.metrodata.dto.ContainerItemsDTO;
+import com.incture.metrodata.dto.DefaultUserDetailsVO;
+import com.incture.metrodata.dto.DeliveryHeaderDTO;
+import com.incture.metrodata.dto.MessageDetailsDTO;
+import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.entity.DeliveryHeaderDo;
 import com.incture.metrodata.entity.DeliveryItemDo;
+import com.incture.metrodata.entity.WareHouseDetailsDo;
 import com.incture.metrodata.exceptions.ExecutionFault;
 import com.incture.metrodata.exceptions.InvalidInputFault;
 import com.incture.metrodata.exceptions.NoResultFault;
+import com.incture.metrodata.firebasenotification.NotificationClass;
+import com.incture.metrodata.service.MessageServiceLocal;
+import com.incture.metrodata.service.UserService;
 import com.incture.metrodata.util.ServicesUtil;
 
 @Repository("containerToDeliveryHeaderDao")
 public class ContainerToDeliveryHeaderDao {
 
-	public Map importDto(ContainerItemsDTO dto, GeoApiContext context)
+	
+	
+	/*public Map<Long, DeliveryHeaderDo> importDto(ContainerItemsDTO dto, GeoApiContext context)
 			throws InvalidInputFault, ExecutionFault, NoResultFault, Exception {
-		List<DeliveryHeaderDo> headerList = new ArrayList<DeliveryHeaderDo>();
+		//List<DeliveryHeaderDo> headerList = new ArrayList<DeliveryHeaderDo>();
 		Map<Long, DeliveryHeaderDo>  map  =  new HashMap<>();
 		DeliveryHeaderDo dos = null;
 		//Multimap<DeliveryHeaderDo, DeliveryItemDo> map = ArrayListMultimap.create();
@@ -32,15 +44,15 @@ public class ContainerToDeliveryHeaderDao {
 		if (!ServicesUtil.isEmpty(dto)) {
 			List<ContainerDetailsDTO> items = dto.getItem();
 			Date currDate = new Date();
-			/*ContainerDetailsDTO t = items.get(0);
-			visitedHeaders.add(t.getDELIVNO());*/
-           Long id;
+			ContainerDetailsDTO t = items.get(0);
+			visitedHeaders.add(t.getDELIVNO());
+           //Long id;
 			for (ContainerDetailsDTO d : items) {
 
-				/*if (isVisited.add(d.getDELIVNO())) {
+				if (isVisited.add(d.getDELIVNO())) {
 					dos = new DeliveryHeaderDo();
 					headerList.add(dos);
-				}*/
+				}
 		      if(ServicesUtil.isEmpty(map.get(d.getDELIVNO())))
 		      {   dos = new DeliveryHeaderDo();
 		    	  map.put(d.getDELIVNO(), dos);
@@ -82,6 +94,16 @@ public class ContainerToDeliveryHeaderDao {
 				if (!ServicesUtil.isEmpty(d.getINSTDELV()))
 					dos.setInstructionForDelivery(d.getINSTDELV());
                 
+				// setting warehouse from sloc
+				if (!ServicesUtil.isEmpty(d.getSLOC()))
+				{
+					WareHouseDetailsDo warehouseDo = new WareHouseDetailsDo();
+					warehouseDo.setWareHouseId(d.getSLOC());
+					// find warehouse by id and assigned to delivery note
+					warehouseDo = wareHouseDao.find(warehouseDo);
+					dos.setWareHouseDetails(warehouseDo);
+				}
+				
 				// set other params
 				dos.setCreatedDate(currDate);
 				dos.setCreatedAt(currDate);
@@ -89,6 +111,26 @@ public class ContainerToDeliveryHeaderDao {
 				dos.setTripped(false);
 				dos.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
 
+				// if STAT = X means order is cancelled and we need to remove the mapping of trip and this delivery note and 
+				// set status as RFC_invalidated
+				if(!ServicesUtil.isEmpty(d.getSTAT()) && d.getSTAT().equals(DeliveryNoteStatus.STAT.getValue())){
+				    UserDetailsDTO adminDto = new UserDetailsDTO();
+				    adminDto.setEmail(defaultUserVo.getEmail());
+				    adminDto = userService.getUserByEmail(adminDto);
+					
+					
+					DeliveryHeaderDTO headerDto = deliveryHeaderDao.exportDto(dos);
+				    
+					sendNotificationToDriverWhenAdminUpdateDnStatus(headerDto, adminDto);
+					
+					// deleting the mapping btw trip and delivery note if exits
+					deliveryHeaderDao.removeTripDeliveryNoteMapping(headerDto);
+					
+					// setting delivery note status as RFC_Invaidated and set tripped to false again
+					dos.setStatus(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue()); 
+					dos.setTripped(false);
+				}
+				
 				// parsing item do
 				if (!ServicesUtil.isEmpty(d.getSERNUM()))
 					itemDo.setSerialNum(d.getSERNUM());
@@ -110,6 +152,8 @@ public class ContainerToDeliveryHeaderDao {
 		}
 
 		return map;
-	}
+	}*/
 
+	
+	
 }
