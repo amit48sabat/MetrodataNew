@@ -196,7 +196,7 @@ public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsD
 	public List<MessageDetailsDTO> findAllMessages(SearchMessageVO dto) throws InvalidInputFault {
 		// Criteria criteria =
 		// getSession().createCriteria(MessageDetailsDo.class);
-		String sql = "SELECT m FROM MessageDetailsDo as m ";
+		String sql = "SELECT distinct m FROM MessageDetailsDo as m ";
 
 		if (!ServicesUtil.isEmpty(dto.getUserId())) {
 			sql += " INNER JOIN m.users as u WHERE (u.userId = '" + dto.getUserId() + "'"+"OR m.createdBy ='" + dto.getUserId() + "')";
