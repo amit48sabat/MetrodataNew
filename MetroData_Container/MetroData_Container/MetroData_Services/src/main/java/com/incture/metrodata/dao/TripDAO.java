@@ -189,7 +189,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 
 		Criteria criteria = getSession().createCriteria(TripDetailsDo.class);
 		Criteria deliveryHeaderCriteria = criteria.createCriteria("deliveryHeader");
-		criteria.add(Restrictions.eq("tripId", dto.getTripId()));
+		criteria.add(Restrictions.eq("tripId", dto.getTripId()).ignoreCase());
 		deliveryHeaderCriteria.addOrder(Order.asc("deliveryOrder"));
 		TripDetailsDo resultDos = (TripDetailsDo) criteria.uniqueResult();
 		return exportDto(resultDos);
