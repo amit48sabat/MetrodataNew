@@ -177,9 +177,11 @@ public class WareHouseService implements WareHouseServiceLocal {
 				
 
 			}
-			System.out.println("printed");
+			responseDto.setCode(HttpStatus.SC_OK);
+			responseDto.setStatus(true);
 		} catch (Exception e) {
-			
+			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			responseDto.setStatus(false);
 			e.printStackTrace();
 		}
 
