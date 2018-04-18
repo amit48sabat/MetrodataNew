@@ -10,7 +10,6 @@ import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
-import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
@@ -119,11 +118,16 @@ public class HibernateConfiguration {
 	}
 
 	@Bean
-	public JobKey jobDetailFactoryBean() {
-		JobKey jobKey = JobKey.jobKey("ECCFetchJob", "group1");  
-		return jobKey;
+	public JobDetail jobDetailFactoryBean() {
+		/*JobKey jobKey = JobKey.jobKey("ECCFetchJob", "group1");  
+		return jobKey;*/
+		JobDetail job = JobBuilder.newJob(DNFetchSchedulerService.class).
+				withIdentity("ECCFetchJob", "group1").build();
+		return job;
 	}
 
+
+	
 	// Job is scheduled after every 1 minute
 	@Bean
 	public CronTrigger cronTriggerFactoryBean() {
@@ -140,8 +144,7 @@ public class HibernateConfiguration {
 		SchedulerFactory sf = new StdSchedulerFactory();
 		try {
 			Scheduler scheduler = sf.getScheduler();
-			scheduler.deleteJob(jobDetailFactoryBean());
-			scheduler.scheduleJob(cronTriggerFactoryBean());
+			scheduler.scheduleJob(jobDetailFactoryBean(), cronTriggerFactoryBean());
 			scheduler.start();
 		} catch (SchedulerException e) {
 			// TODO Auto-generated catch block

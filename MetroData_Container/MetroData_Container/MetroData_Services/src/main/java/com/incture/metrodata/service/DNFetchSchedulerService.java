@@ -3,19 +3,17 @@ package com.incture.metrodata.service;
 import java.util.Date;
 
 import org.joda.time.DateTime;
+import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.AbstractApplicationContext;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.incture.metrodata.configuration.AppConfig;
 import com.incture.metrodata.util.HciRestInvoker;
 
-@Service("dnFetchService")
-@Transactional
-public class DNFetchSchedulerService implements DNFetchSchedulerServiceLocal {
+
+public class DNFetchSchedulerService implements DNFetchSchedulerServiceLocal,Job {
 
 	static AbstractApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
 
@@ -34,9 +32,9 @@ public class DNFetchSchedulerService implements DNFetchSchedulerServiceLocal {
         String year = datetime.toString("YYYY");
 		String data = year+month+day;
 		String payload = "{ \"DELIVERY\": { \"GI_DATE\": \""+data+"\" } }";
-		System.err.println("Hci service request payload=>  "+payload);
+		System.err.println("Hci service request payload => "+payload);
 		String response = invoker.postDataToServer("/metrodatadetails", payload);
-		System.err.println("Hci service response =>" +response);
+		System.err.println("Hci service response <= " +response);
 
 	}
 
