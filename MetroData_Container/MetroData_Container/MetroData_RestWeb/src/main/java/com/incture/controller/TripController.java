@@ -95,8 +95,23 @@ public class TripController {
 	}
 
 	@RequestMapping(value = "/search", method = RequestMethod.PUT)
-	public ResponseDto find(@RequestBody TripDetailsDTO dto) {
-		return tripService.findByParam(dto);
+	public ResponseDto find(@RequestBody TripDetailsDTO dto, HttpServletRequest request) {
+		ResponseDto res = new ResponseDto();
+		String userId = "";
+		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
+			userId = request.getUserPrincipal().getName();
+		} else {
+			return ServicesUtil.getUnauthorizedResponseDto();
+
+		}
+		// validating user role if action not permitted then return
+		res = userServiceLocal.validatedUserRoleByUserId(userId);
+		if (!res.isStatus())
+			return ServicesUtil.getUnauthorizedResponseDto();
+		
+
+		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
+		return tripService.findByParam(dto,adminDto);
 	}
 
 	@RequestMapping(value = "/{tripId}", method = RequestMethod.PUT)

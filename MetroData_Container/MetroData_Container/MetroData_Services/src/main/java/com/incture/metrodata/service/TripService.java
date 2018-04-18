@@ -194,7 +194,7 @@ public class TripService implements TripServiceLocal {
 	 */
 
 	@Override
-	public ResponseDto findByParam(TripDetailsDTO dto) {
+	public ResponseDto findByParam(TripDetailsDTO dto, UserDetailsDTO adminDto) {
 		ResponseDto responseDto = new ResponseDto();
 		try {
 			// find by trip id if trip ID is set or else by trip status
@@ -216,7 +216,7 @@ public class TripService implements TripServiceLocal {
 					}
 				responseDto.setData(trip);
 			} else {
-				List<TripDetailsDTO> tripList = tripDao.findTripByParam(dto);
+				List<TripDetailsDTO> tripList = tripDao.findTripByParam(dto, adminDto);
 				responseDto.setData(tripList);
 			}
 

@@ -12,7 +12,7 @@ public interface TripServiceLocal {
 
 //	ResponseDto findById(String requestNo);
 	
-	ResponseDto findByParam(TripDetailsDTO dto);
+	ResponseDto findByParam(TripDetailsDTO dto, UserDetailsDTO adminDto);
     
 	ResponseDto delete(String tripId);
 

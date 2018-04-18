@@ -70,9 +70,9 @@ public class WareHouseDAO extends BaseDao<WareHouseDetailsDo, WareHouseDetailsDT
 		String hql = "";
 		// get all the warehouse list if role is super admin or sales admin
 		if (role.equals(RoleConstant.SUPER_ADMIN.getValue()) || role.equals(RoleConstant.SALES_ADMIN.getValue()))
-			hql = "SELECT w from WareHouseDetailsDo as w ";
+			hql = "SELECT distinct w from WareHouseDetailsDo as w ";
 		else
-			hql = "SELECT u.wareHouseDetails from UserDetailsDo as  u inner join u.wareHouseDetails as w where u.userId = '"
+			hql = "SELECT distinct u.wareHouseDetails from UserDetailsDo as  u inner join u.wareHouseDetails as w where u.userId = '"
 					+ userId + "'";
 		Query query = getSession().createQuery(hql);
 		query.setFirstResult(PaginationUtil.FIRST_RESULT);

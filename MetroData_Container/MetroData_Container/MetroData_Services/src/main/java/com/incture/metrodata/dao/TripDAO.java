@@ -168,15 +168,35 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	 * for filtering the trip as per trip status
 	 */
 	@SuppressWarnings("unchecked")
-	public List<TripDetailsDTO> findTripByParam(TripDetailsDTO dto) throws InvalidInputFault {
+	public List<TripDetailsDTO> findTripByParam(TripDetailsDTO dto, UserDetailsDTO adminDto) throws InvalidInputFault {
 
 		if (ServicesUtil.isEmpty(dto.getStatus()))
 			throw new InvalidInputFault("Trip Status is required.");
 
+		List<String> wareHouseIds = new ArrayList<String>();
+		for (WareHouseDetailsDTO wareHouse : adminDto.getWareHouseDetails())
+			wareHouseIds.add(wareHouse.getWareHouseId());
+		
+		String roleName = adminDto.getRole().getRoleName();
+		
 		Criteria criteria = getSession().createCriteria(TripDetailsDo.class);
 		if (!ServicesUtil.isEmpty(dto.getStatus()))
 			criteria.add(Restrictions.eq("status", dto.getStatus()));
 
+		// if not a super admin or sales admin than show trips that are created by him only
+		if (roleName.equals(RoleConstant.ADMIN_INSIDE_JAKARTA.getValue())
+				|| roleName.equals(RoleConstant.ADMIN_OUTSIDE_JAKARTA.getValue())) {
+			criteria.add(Restrictions.eq("createdBy", adminDto.getUserId()));
+		}
+		// else if role is courier admin than show trips where the driver and courier
+		// admin belong to same warehouse
+		else if(roleName.equals(RoleConstant.COURIER_ADMIN.getValue())){
+			Criteria userCriteria = criteria.createCriteria("user");
+			Criteria wareHouseCriteria = userCriteria.createCriteria("wareHouseDetails");
+			wareHouseCriteria.add(Restrictions.in("wareHouseId", wareHouseIds));
+		}
+		
+		criteria.addOrder(Order.desc("createdAt"));
 		criteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
 
 		List<TripDetailsDo> resultDos = criteria.list();
@@ -464,10 +484,10 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		// get all the user list if role is super_admin or sales_admin
 		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
 				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
-			hql = "SELECT t FROM TripDetailsDo AS t  ORDER BY t.createdAt desc";
+			hql = "SELECT distinct t FROM TripDetailsDo AS t  ORDER BY t.createdAt desc";
 			isSuperAdmin = true;
 		} else
-			hql = "SELECT t FROM TripDetailsDo AS t LEFT OUTER JOIN t.user as u  INNER JOIN u.wareHouseDetails as w  WHERE w.wareHouseId IN (:warehouselist) or t.createdBy =:createdBy ORDER BY t.createdAt desc";
+			hql = "SELECT distinct t FROM TripDetailsDo AS t LEFT OUTER JOIN t.user as u  INNER JOIN u.wareHouseDetails as w  WHERE w.wareHouseId IN (:warehouselist) or t.createdBy =:createdBy ORDER BY t.createdAt desc";
 		Query query = getSession().createQuery(hql);
 		if (!isSuperAdmin) {
 			if (ServicesUtil.isEmpty(wareHouseIds))
@@ -475,6 +495,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 
 			query.setParameterList("warehouselist", wareHouseIds);
 			query.setParameter("createdBy", userId);
+			//[1051, 1101, 11S1] 	
 		}
 
 		query.setFirstResult(PaginationUtil.FIRST_RESULT);
@@ -521,14 +542,14 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 					+ " ) FROM TripDetailsDo AS t ";
 			isSuperAdmin = true;
 		} else {
-			hql = "SELECT new map( count(t.tripId) as TOTAL_TRIPS ,  "
-					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.tripped = true AND status IN (:deliveryNoteStatusList) AND w.wareHouseId IN (:warehouselist)) as TOTAL_ORDERS, "
-					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_rejected' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_rejected, "
-					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_started' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_started, "
-					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_partially_rejected' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_partially_rejected, "
-					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'created' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as created, "
-					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_completed' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_completed "
-					+ " ) FROM TripDetailsDo AS t INNER JOIN t.deliveryHeader d INNER JOIN d.wareHouseDetails as w WHERE w.wareHouseId IN (:warehouselist)";
+			hql = "SELECT new map( count(distinct t.tripId) as TOTAL_TRIPS ,  "
+					+ " (SELECT COUNT(distinct dh.deliveryNoteId) FROM dh WHERE dh.tripped = true AND status IN (:deliveryNoteStatusList)) as TOTAL_ORDERS, "
+					+ " (SELECT COUNT(distinct dh.deliveryNoteId) FROM dh WHERE dh.status = 'del_note_rejected' ANd dh.tripped = true ) as del_note_rejected, "
+					+ " (SELECT COUNT(distinct dh.deliveryNoteId) FROM dh WHERE dh.status = 'del_note_started' ANd dh.tripped = true) as del_note_started, "
+					+ " (SELECT COUNT(distinct dh.deliveryNoteId) FROM dh WHERE dh.status = 'del_note_partially_rejected' ANd dh.tripped = true) as del_note_partially_rejected, "
+					+ " (SELECT COUNT(distinct dh.deliveryNoteId) FROM dh WHERE dh.status = 'created' ANd dh.tripped = true) as created, "
+					+ " (SELECT COUNT(distinct dh.deliveryNoteId) FROM dh WHERE dh.status = 'del_note_completed' ANd dh.tripped = true ) as del_note_completed "
+					+ " ) FROM TripDetailsDo AS t INNER JOIN t.deliveryHeader As dh INNER JOIN t.user As u INNER JOIN u.wareHouseDetails as driverWareHouse WHERE driverWareHouse.wareHouseId IN (:warehouselist)";
 		}
 		Query query = getSession().createQuery(hql);
 		query.setParameterList("deliveryNoteStatusList", deliveryNoteStatusList);
