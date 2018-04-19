@@ -542,14 +542,29 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 					+ " ) FROM TripDetailsDo AS t ";
 			isSuperAdmin = true;
 		} else {
-			hql = "SELECT new map( count(distinct t.tripId) as TOTAL_TRIPS ,  "
-					+ " (SELECT COUNT(distinct dh.deliveryNoteId) FROM dh WHERE dh.tripped = true AND status IN (:deliveryNoteStatusList)) as TOTAL_ORDERS, "
-					+ " (SELECT COUNT(distinct dh.deliveryNoteId) FROM dh WHERE dh.status = 'del_note_rejected' ANd dh.tripped = true ) as del_note_rejected, "
-					+ " (SELECT COUNT(distinct dh.deliveryNoteId) FROM dh WHERE dh.status = 'del_note_started' ANd dh.tripped = true) as del_note_started, "
-					+ " (SELECT COUNT(distinct dh.deliveryNoteId) FROM dh WHERE dh.status = 'del_note_partially_rejected' ANd dh.tripped = true) as del_note_partially_rejected, "
-					+ " (SELECT COUNT(distinct dh.deliveryNoteId) FROM dh WHERE dh.status = 'created' ANd dh.tripped = true) as created, "
-					+ " (SELECT COUNT(distinct dh.deliveryNoteId) FROM dh WHERE dh.status = 'del_note_completed' ANd dh.tripped = true ) as del_note_completed "
-					+ " ) FROM TripDetailsDo AS t INNER JOIN t.deliveryHeader As dh INNER JOIN t.user As u INNER JOIN u.wareHouseDetails as driverWareHouse WHERE driverWareHouse.wareHouseId IN (:warehouselist)";
+			
+			hql = "SELECT new map( count(t.tripId) as TOTAL_TRIPS ,  "
+					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.tripped = true AND status IN (:deliveryNoteStatusList) AND w.wareHouseId IN (:warehouselist)) as TOTAL_ORDERS, "
+					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_rejected' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_rejected, "
+					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_started' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_started, "
+					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_partially_rejected' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_partially_rejected, "
+					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'created' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as created, "
+					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_completed' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_completed "
+					+ " ) FROM TripDetailsDo AS t INNER JOIN t.deliveryHeader d  "
+					+ " INNER JOIN t.user As u INNER JOIN u.wareHouseDetails as driverWareHouse "
+					+ " WHERE driverWareHouse.wareHouseId IN (:warehouselist)";
+					
+			
+			/*hql = "SELECT new map( count(t.tripId) as TOTAL_TRIPS ,  "
+					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.tripped = true AND status IN (:deliveryNoteStatusList) AND w.wareHouseId IN (:warehouselist)) as TOTAL_ORDERS, "
+					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_rejected' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_rejected, "
+					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_started' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_started, "
+					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_partially_rejected' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_partially_rejected, "
+					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'created' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as created, "
+					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_completed' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_completed "
+					+ " ) FROM TripDetailsDo AS t INNER JOIN t.deliveryHeader As dh INNER JOIN t.user As u INNER JOIN u.wareHouseDetails as driverWareHouse "
+					+ " INNER JOIN dh.wareHouseDetails AS dhWarehouse "
+					+ " WHERE driverWareHouse.wareHouseId IN (:warehouselist) AND dh.tripped = true";*/
 		}
 		Query query = getSession().createQuery(hql);
 		query.setParameterList("deliveryNoteStatusList", deliveryNoteStatusList);
