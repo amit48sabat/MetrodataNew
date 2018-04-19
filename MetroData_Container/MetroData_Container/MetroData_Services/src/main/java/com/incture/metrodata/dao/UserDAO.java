@@ -58,11 +58,12 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 
 				RoleDetailsDo roleDetailsDo = new RoleDetailsDo();
 				try {
-					roleDetailsDo =roleDao.getByKeysForFK(userDetailsDTO.getRole());
+					roleDetailsDo = roleDao.getByKeysForFK(userDetailsDTO.getRole());
 				} catch (Exception e) {
 					// TODO: handle exception
 				}
-				detailsDo.setRole(roleDao.importDto(userDetailsDTO.getRole(),roleDetailsDo));			}
+				detailsDo.setRole(roleDao.importDto(userDetailsDTO.getRole(), roleDetailsDo));
+			}
 			if (!ServicesUtil.isEmpty(userDetailsDTO.getMobileToken())) {
 				detailsDo.setMobileToken(userDetailsDTO.getMobileToken());
 			}
@@ -208,22 +209,22 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 		// get all the user list if role is super_admin or sales_admin
 		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
 				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
-			hql = "SELECT u FROM UserDetailsDo AS u WHERE u.userId !=:adminId";
+			hql = "SELECT distinct u.userId FROM UserDetailsDo AS u WHERE u.userId !=:adminId";
 			isSuperAdmin = true;
 		} else
-			hql = "SELECT u FROM UserDetailsDo AS  u inner join u.wareHouseDetails AS w WHERE w.wareHouseId IN (:warehouselist) AND u.userId !=:adminId";
+			hql = "SELECT u from UserDetailsDo as u where u.userId In "
+					+ "(SELECT distinct u.userId FROM UserDetailsDo AS  u inner join u.wareHouseDetails AS w WHERE w.wareHouseId IN (:warehouselist) AND u.userId !=:adminId)";
 		Query query = getSession().createQuery(hql);
 		query.setFirstResult(PaginationUtil.FIRST_RESULT);
 		query.setMaxResults(PaginationUtil.MAX_RESULT);
-		if(!isSuperAdmin)
-		{
+		if (!isSuperAdmin) {
 			// send no data on if warehouse if is empty
 			if (ServicesUtil.isEmpty(wareHouseIds))
 				return new ArrayList<UserDetailsDTO>();
-			
+
 			query.setParameterList("warehouselist", wareHouseIds);
 		}
-		
+
 		query.setParameter("adminId", adminId);
 		ArrayList<UserDetailsDo> result = (ArrayList<UserDetailsDo>) query.list();
 		return exportList(result);
