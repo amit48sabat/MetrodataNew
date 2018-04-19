@@ -487,7 +487,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			hql = "SELECT distinct t FROM TripDetailsDo AS t  ORDER BY t.createdAt desc";
 			isSuperAdmin = true;
 		} else
-			hql = "SELECT distinct t FROM TripDetailsDo AS t LEFT OUTER JOIN t.user as u  INNER JOIN u.wareHouseDetails as w  WHERE w.wareHouseId IN (:warehouselist) or t.createdBy =:createdBy ORDER BY t.createdAt desc";
+			hql = "SELECT distinct t FROM TripDetailsDo AS t LEFT OUTER JOIN t.user as u  LEFT OUTER JOIN u.wareHouseDetails as w  WHERE w.wareHouseId IN (:warehouselist) or t.createdBy =:createdBy ORDER BY t.createdAt desc";
 		Query query = getSession().createQuery(hql);
 		if (!isSuperAdmin) {
 			if (ServicesUtil.isEmpty(wareHouseIds))
