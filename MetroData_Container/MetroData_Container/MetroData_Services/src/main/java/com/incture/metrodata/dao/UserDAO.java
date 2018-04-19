@@ -209,7 +209,7 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 		// get all the user list if role is super_admin or sales_admin
 		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
 				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
-			hql = "SELECT distinct u.userId FROM UserDetailsDo AS u WHERE u.userId !=:adminId";
+			hql = "SELECT u FROM UserDetailsDo AS u WHERE u.userId !=:adminId";
 			isSuperAdmin = true;
 		} else
 			hql = "SELECT u from UserDetailsDo as u where u.userId In "
