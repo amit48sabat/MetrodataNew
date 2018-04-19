@@ -551,8 +551,8 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'created' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as created, "
 					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_completed' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_completed "
 					+ " ) FROM TripDetailsDo AS t INNER JOIN t.deliveryHeader d  "
-					+ " INNER JOIN t.user As u INNER JOIN u.wareHouseDetails as driverWareHouse "
-					+ " WHERE driverWareHouse.wareHouseId IN (:warehouselist)";
+					+ " LEFT OUTER JOIN t.user As u LEFT OUTER JOIN u.wareHouseDetails as driverWareHouse "
+					+ " WHERE driverWareHouse.wareHouseId IN (:warehouselist) or t.createdBy =:createdBy";
 					
 			
 			/*hql = "SELECT new map( count(t.tripId) as TOTAL_TRIPS ,  "
@@ -573,7 +573,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			// send no data on if warehouse if is empty
 			if (ServicesUtil.isEmpty(wareHouseIds))
 				return new HashMap<String, Long>();
-
+			query.setParameter("createdBy", userId);
 			query.setParameterList("warehouselist", wareHouseIds);
 		}
 
