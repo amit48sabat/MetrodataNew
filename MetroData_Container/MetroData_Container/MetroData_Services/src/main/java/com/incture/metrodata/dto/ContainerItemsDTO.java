@@ -12,7 +12,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ContainerItemsDTO extends BaseDto{
-	List<ContainerDetailsDTO> item  = new ArrayList<ContainerDetailsDTO>();
+	List<ContainerDetailsDTO> ITEM  = new ArrayList<ContainerDetailsDTO>();
 
 	@Override
 	public void validate(DB_Operation enOperation) throws InvalidInputFault {

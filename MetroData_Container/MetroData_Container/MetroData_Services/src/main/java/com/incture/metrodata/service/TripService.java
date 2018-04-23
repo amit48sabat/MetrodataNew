@@ -374,9 +374,11 @@ public class TripService implements TripServiceLocal {
 				} catch (Exception e) {
 					throw new ExecutionFault("Driver details doesn't exist please log in and try again");
 				}
+				
+				dto.setUser(userDetailsDTO);
 				setAssignedUserInDeliveryHeader(dto);
 				dto.setStatus(TripStatus.TRIP_STATUS_DRIVER_ASSIGNED.getValue());
-				dto.setUser(userDetailsDTO);
+				
 				tripDao.update(dto);
 				responseDto.setStatus(true);
 

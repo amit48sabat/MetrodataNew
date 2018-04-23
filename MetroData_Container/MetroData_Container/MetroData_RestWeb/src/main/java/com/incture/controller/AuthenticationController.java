@@ -1,7 +1,5 @@
 package com.incture.controller;
 
-import java.util.Date;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -80,7 +78,7 @@ public class AuthenticationController {
 			 * m.get("primary")) { email= (String) m.get("value"); } }
 			 */
 
-			responseDto.setMessage("Login Success");
+		
 			UserDetailsDTO user = new UserDetailsDTO();
 
 			user.setUserId(userId);
@@ -96,8 +94,10 @@ public class AuthenticationController {
 			if (dto.isStatus()) {
 				responseDto.setData(dto.getData());
 				responseDto.setStatus(true);
+				responseDto.setMessage("Login Success");
 				responseDto.setCode(HttpStatus.OK.value());
 			} else {
+				responseDto.setMessage("Login Failed");
 				responseDto.setStatus(false);
 				responseDto.setCode(HttpStatus.UNAUTHORIZED.value());
 			}

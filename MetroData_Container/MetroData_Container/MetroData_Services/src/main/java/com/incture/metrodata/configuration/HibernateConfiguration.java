@@ -1,8 +1,15 @@
 package com.incture.metrodata.configuration;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Date;
 import java.util.Properties;
 
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.PBEParameterSpec;
 import javax.sql.DataSource;
 
 import org.hibernate.SessionFactory;
@@ -32,6 +39,9 @@ import com.incture.metrodata.service.DNFetchSchedulerService;
 import com.incture.metrodata.util.HciRestInvoker;
 import com.incture.metrodata.util.RESTInvoker;
 
+import sun.misc.BASE64Decoder;
+
+
 @Configuration
 @EnableTransactionManagement
 @ComponentScan({ "com.incture.metrodata.configuration" })
@@ -40,6 +50,10 @@ public class HibernateConfiguration {
 
 	@Autowired
 	private Environment environment;
+	
+	private static final char[] PASSWORD = "enfldsgbnlsngdlksdsgm".toCharArray();
+	private static final byte[] SALT = { (byte) 0xde, (byte) 0x33, (byte) 0x10, (byte) 0x12, (byte) 0xde, (byte) 0x33,
+			(byte) 0x10, (byte) 0x12, };
 
 	/*
 	 * @Autowired private UserServiceLocal userservice;
@@ -60,7 +74,11 @@ public class HibernateConfiguration {
 		dataSource.setDriverClassName(environment.getRequiredProperty("jdbc.driverClassName"));
 		dataSource.setUrl(environment.getRequiredProperty("jdbc.url"));
 		dataSource.setUsername(environment.getRequiredProperty("jdbc.username"));
-		dataSource.setPassword(environment.getRequiredProperty("jdbc.password"));
+		try {
+			dataSource.setUsername(environment.getRequiredProperty("jdbc.username"));
+			dataSource.setPassword(decrypt(environment.getRequiredProperty("jdbc.password")));
+		} catch (IllegalStateException | GeneralSecurityException | IOException e) {
+		}
 		return dataSource;
 	}
 
@@ -94,7 +112,11 @@ public class HibernateConfiguration {
 	public RESTInvoker getRESTInvoker() {
 		String url = environment.getRequiredProperty("idp.base.url");
 		String username = environment.getRequiredProperty("idp.tech.username");
-		String password = environment.getRequiredProperty("idp.tech.password");
+		String password = null;
+		try {
+			password = decrypt(environment.getRequiredProperty("idp.tech.password"));
+		} catch (IllegalStateException | GeneralSecurityException | IOException e) {
+		}
 		return new RESTInvoker(url, username, password);
 	}
 	
@@ -103,7 +125,13 @@ public class HibernateConfiguration {
 	public HciRestInvoker getHciRestInvoker() {
 		String url = environment.getRequiredProperty("hci.url");
 		String username = environment.getRequiredProperty("hci.username");
-		String password = environment.getRequiredProperty("hci.password");
+		String password = null;
+		try {
+			password = decrypt(environment.getRequiredProperty("hci.password"));
+		} catch (IllegalStateException | GeneralSecurityException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return new HciRestInvoker(url, username, password);
 	}
 
@@ -153,4 +181,19 @@ public class HibernateConfiguration {
 		return sf;
 
 	}
+	
+	private static String decrypt(String property) throws GeneralSecurityException, IOException {
+		SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBEWithMD5AndDES");
+		SecretKey key = keyFactory.generateSecret(new PBEKeySpec(PASSWORD));
+		Cipher pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
+		pbeCipher.init(Cipher.DECRYPT_MODE, key, new PBEParameterSpec(SALT, 20));
+		return new String(pbeCipher.doFinal(base64Decode(property)), "UTF-8");
+	}
+
+	@SuppressWarnings("restriction")
+	private static byte[] base64Decode(String property) throws IOException {
+		// NB: This class is internal, and you probably should use another impl
+		return new BASE64Decoder().decodeBuffer(property);
+	}
+	
 }

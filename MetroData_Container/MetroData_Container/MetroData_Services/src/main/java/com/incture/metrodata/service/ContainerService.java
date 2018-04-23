@@ -89,7 +89,7 @@ public class ContainerService implements ContainerServiceLocal {
 
 		if (!ServicesUtil.isEmpty(dto) && !ServicesUtil.isEmpty(dto.getDELIVERY())) {
 			try {
-				for (ContainerDetailsDTO d : dto.getDELIVERY().getItem()) {
+				for (ContainerDetailsDTO d : dto.getDELIVERY().getITEM()) {
 					containerDao.create(d, new ContainerDetailsDo());
 				}
 				Object data = createEntryInDeliveryHeader(dto);
@@ -106,9 +106,9 @@ public class ContainerService implements ContainerServiceLocal {
 			}
 		} else {
 			response.setStatus(true);
-			response.setMessage(Message.FAILED.getValue());
+			response.setMessage(Message.SUCCESS.getValue());
 			response.setData(dto);
-			response.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			response.setCode(HttpStatus.SC_OK);
 		}
 
 		return response;
@@ -143,7 +143,7 @@ public class ContainerService implements ContainerServiceLocal {
 		// ArrayListMultimap.create();
 		// Set<Long> isVisited = new HashSet<>();
 		if (!ServicesUtil.isEmpty(dto)) {
-			List<ContainerDetailsDTO> items = dto.getItem();
+			List<ContainerDetailsDTO> items = dto.getITEM();
 			Date currDate = new Date();
 			/*
 			 * ContainerDetailsDTO t = items.get(0);
@@ -269,7 +269,7 @@ public class ContainerService implements ContainerServiceLocal {
 			String title = "Delivery Note Cancelled";
 			String body = "The delivery note with id (" + headerDto.getDeliveryNoteId() +") has been cancelled. Please pull "
 					+ "to refresh for getting the updated delivery notes list.";
-			notification.sendNotification(title, driverDto.getMobileToken(), body);
+			//notification.sendNotification(title, driverDto.getMobileToken(), body);
 
 			MessageDetailsDTO messageDto = new MessageDetailsDTO();
 			messageDto.setTitle(title);

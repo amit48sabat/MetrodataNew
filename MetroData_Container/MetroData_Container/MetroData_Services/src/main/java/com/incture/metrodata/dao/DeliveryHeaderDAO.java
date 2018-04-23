@@ -21,6 +21,7 @@ import com.incture.metrodata.dto.DeliveryItemDTO;
 import com.incture.metrodata.dto.WareHouseDetailsDTO;
 import com.incture.metrodata.entity.DeliveryHeaderDo;
 import com.incture.metrodata.entity.DeliveryItemDo;
+import com.incture.metrodata.entity.WareHouseDetailsDo;
 import com.incture.metrodata.exceptions.InvalidInputFault;
 import com.incture.metrodata.util.PaginationUtil;
 import com.incture.metrodata.util.ServicesUtil;
@@ -129,8 +130,13 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 				deliveryHeaderDo.setAssignedUser(deliveryHeaderDTO.getAssignedUser());
 			}
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getWareHouseDetails())) {
-				deliveryHeaderDo.setWareHouseDetails(wareHouseDetailDao
-						.importDto(deliveryHeaderDTO.getWareHouseDetails(), deliveryHeaderDo.getWareHouseDetails()));
+				WareHouseDetailsDo wareHouseDo = new WareHouseDetailsDo();
+				try {
+					wareHouseDo = wareHouseDetailDao.getByKeysForFK(deliveryHeaderDTO.getWareHouseDetails());
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+				deliveryHeaderDo.setWareHouseDetails(wareHouseDetailDao.importDto(deliveryHeaderDTO.getWareHouseDetails(), wareHouseDo));
 
 			}
 

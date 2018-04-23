@@ -1,10 +1,12 @@
 package com.incture.metrodata.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.http.HttpStatus;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.incture.metrodata.constant.Message;
 import com.incture.metrodata.constant.MessageType;
+import com.incture.metrodata.constant.RoleConstant;
 import com.incture.metrodata.dao.MessageDetailsDAO;
 import com.incture.metrodata.dao.UserDAO;
 import com.incture.metrodata.dto.CommentsDTO;
@@ -54,7 +57,6 @@ public class MessageService implements MessageServiceLocal {
 			setCreatedAtAndUpdatedAtForDto(dto, createdBy);
 			List<MessageDetailsDTO> messageDetailsDTOs = new ArrayList<MessageDetailsDTO>();
 
-			
 			// set id for the message
 			if (!ServicesUtil.isEmpty(dto.getType())) {
 				setMessageId(dto);
@@ -62,31 +64,30 @@ public class MessageService implements MessageServiceLocal {
 				throw new InvalidInputFault("Message type is required");
 			}
 
-			
-			if (!dto.getType().equals(MessageType.INCIDENT.getValue())) {
-				UserDetailsDTO userDto = new UserDetailsDTO();
-				// if no user is set than send the mail to all the users
-				if (!ServicesUtil.isEmpty(dto.getUsers())) {
+			UserDetailsDTO userDto = new UserDetailsDTO();
+			// if no user is set than send the mail to all the users
+			if (!ServicesUtil.isEmpty(dto.getUsers())) {
+				if (!dto.getType().equals(MessageType.INCIDENT.getValue())) {
 					for (UserDetailsDTO detailsDTO : dto.getUsers()) {
 						userDto.setUserId(detailsDTO.getUserId());
 						userDto = userDao.findById(userDto);
 						if (!ServicesUtil.isEmpty(userDto.getMobileToken()))
 							notification.sendNotification(dto.getTitle(), userDto.getMobileToken(), dto.getBody());
 					}
-					dto = messageDetailsDao.create(dto, new MessageDetailsDo());
-				} else {
-					List<UserDetailsDTO> userList = userDao.findAll(userDto);
-					if (!ServicesUtil.isEmpty(userList)) {
-						List<String> tokens = new ArrayList<>();
-						for (UserDetailsDTO user : userList) {
-							if (!ServicesUtil.isEmpty(userDto.getMobileToken()))
-								tokens.add(user.getMobileToken());
-						}
-						dto.setUsers(new HashSet<>(userList));
-						dto = messageDetailsDao.create(dto, new MessageDetailsDo());
-						if (!ServicesUtil.isEmpty(tokens))
-							notification.sendNotification(dto.getTitle(), tokens, dto.getBody());
+				}
+				dto = messageDetailsDao.create(dto, new MessageDetailsDo());
+			} else {
+				List<UserDetailsDTO> userList = userDao.findAll(userDto);
+				if (!ServicesUtil.isEmpty(userList)) {
+					List<String> tokens = new ArrayList<>();
+					for (UserDetailsDTO user : userList) {
+						if (!ServicesUtil.isEmpty(user.getMobileToken()))
+							tokens.add(user.getMobileToken());
 					}
+					dto.setUsers(new HashSet<>(userList));
+					dto = messageDetailsDao.create(dto, new MessageDetailsDo());
+					if (!ServicesUtil.isEmpty(tokens))
+						notification.sendNotification(dto.getTitle(), tokens, dto.getBody());
 				}
 			}
 			response.setStatus(true);
@@ -137,7 +138,7 @@ public class MessageService implements MessageServiceLocal {
 
 		dto.setUpdatedAt(currdate);
 		dto.setUpdatedBy(createdBy);
-		
+
 		// setting created by if message id is empty
 		if (ServicesUtil.isEmpty(dto.getMessageId())) {
 			dto.setCreatedBy(createdBy);
@@ -296,6 +297,13 @@ public class MessageService implements MessageServiceLocal {
 
 			setCreatedAtAndUpdatedAtForDto(dto, updatedBy);
 			List<MessageDetailsDTO> messageDetailsDTOs = new ArrayList<MessageDetailsDTO>();
+			MessageDetailsDTO msgDto = messageDetailsDao.findById(dto);
+			UserDetailsDTO detailsDTO = new UserDetailsDTO();
+			detailsDTO.setUserId(updatedBy);
+			detailsDTO = userDao.findById(detailsDTO);
+			int lastCommentIndex = dto.getComments().size() - 1;
+			String comment = dto.getComments().get(lastCommentIndex).getComment();
+			sendCommentNotification(msgDto, detailsDTO, comment);
 			dto = messageDetailsDao.update(dto);
 
 			responseDto.setStatus(true);
@@ -309,6 +317,27 @@ public class MessageService implements MessageServiceLocal {
 			responseDto.setMessage(Message.FAILED + " : " + e.getMessage());
 		}
 		return responseDto;
+	}
+
+	private void sendCommentNotification(MessageDetailsDTO msgDto, UserDetailsDTO detailsDTO, String comment)
+			throws IOException {
+
+		if (detailsDTO.getRole().getRoleName().equals(RoleConstant.ADMIN_INSIDE_JAKARTA.getValue())
+				|| detailsDTO.getRole().getRoleName().equals(RoleConstant.SUPER_ADMIN.getValue())
+				|| detailsDTO.getRole().getRoleName().equals(RoleConstant.COURIER_ADMIN.getValue())) {
+			Set<UserDetailsDTO> users = msgDto.getUsers();
+			if (!ServicesUtil.isEmpty(users)) {
+				List<String> tokens = new ArrayList<>();
+				for (UserDetailsDTO user : users) {
+					if (!ServicesUtil.isEmpty(user.getMobileToken()))
+						tokens.add(user.getMobileToken());
+				}
+
+				if (!ServicesUtil.isEmpty(tokens))
+					notification.sendNotification("Admin Commented", tokens, comment);
+			}
+		}
+
 	}
 
 	/**

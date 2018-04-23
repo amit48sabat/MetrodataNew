@@ -36,7 +36,7 @@ public class UserService implements UserServiceLocal {
 	public ResponseDto create(UserDetailsDTO dto) {
 		ResponseDto responseDto = new ResponseDto();
 		try {
-		    // error if email id is not set
+			// error if email id is not set
 			if (ServicesUtil.isEmpty(dto.getEmail())) {
 				responseDto.setStatus(false);
 				responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
@@ -44,14 +44,14 @@ public class UserService implements UserServiceLocal {
 				return responseDto;
 			}
 
-			if(!ServicesUtil.isEmpty(dto.getUserId())){
+			if (!ServicesUtil.isEmpty(dto.getUserId())) {
 				responseDto.setStatus(false);
 				responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-				responseDto.setMessage("Failed : user with email '"+dto.getEmail()+"' is already exits with user Id "+dto.getUserId());
+				responseDto.setMessage("Failed : user with email '" + dto.getEmail()
+						+ "' is already exits with user Id " + dto.getUserId());
 				return responseDto;
 			}
-			
-			
+
 			// setting created at and updated at
 			setCreateAtAndUpdateAt(dto);
 			JsonObject userObj = new JsonObject();
@@ -74,15 +74,14 @@ public class UserService implements UserServiceLocal {
 				responseDto.setCode(HttpStatus.SC_OK);
 				responseDto.setData(dto);
 				responseDto.setMessage(Message.SUCCESS.getValue());
-			} 
-			else {
+			} else {
 				// user is already in idp we need to create in hana db
 				getUserByEmail(dto);
 				dto = userDAO.create(dto, new UserDetailsDo());
 				responseDto.setStatus(true);
 				responseDto.setCode(HttpStatus.SC_OK);
 				responseDto.setData(dto);
-				responseDto.setMessage(Message.SUCCESS.getValue()+" : User created with id "+dto.getUserId());
+				responseDto.setMessage(Message.SUCCESS.getValue() + " : User created with id " + dto.getUserId());
 			}
 		} catch (Exception e) {
 			responseDto.setStatus(false);
@@ -256,26 +255,27 @@ public class UserService implements UserServiceLocal {
 	}
 
 	private String parseUseridFromIdpResponse(JSONObject resources) {
-		
+
 		String id = "";
-		JSONArray array =(JSONArray) resources.get("Resources");
-		JSONObject    res=(JSONObject) array.get(0);
+		JSONArray array = (JSONArray) resources.get("Resources");
+		JSONObject res = (JSONObject) array.get(0);
 		id = res.get("id").toString();
 		return id;
 	}
 
-	
 	/***
-	 * Get user list associated with admin and return all the users if role is suoer_admin,sales_admin
+	 * Get user list associated with admin and return all the users if role is
+	 * suoer_admin,sales_admin
 	 */
 	@Override
 	public ResponseDto getUsersAssociatedWithAdmin(UserDetailsDTO dto) {
 		ResponseDto responseDto = new ResponseDto();
-	
+
 		try {
-			
-             // dto = userDAO.findById(dto);
-			Object userList = userDAO.getUsersAssociateWithAdmin(dto.getUserId(), dto.getRole().getRoleName(), dto.getWareHouseDetails());
+
+			// dto = userDAO.findById(dto);
+			Object userList = userDAO.getUsersAssociateWithAdmin(dto.getUserId(), dto.getRole().getRoleName(),
+					dto.getWareHouseDetails());
 
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
@@ -292,27 +292,31 @@ public class UserService implements UserServiceLocal {
 
 	@Override
 	public ResponseDto validatedUserRoleByUserId(String userId) {
-		ResponseDto responseDto  = new ResponseDto();
-		try{
-			UserDetailsDTO userDetailsDTO = new  UserDetailsDTO();
+		ResponseDto responseDto = new ResponseDto();
+		try {
+			UserDetailsDTO userDetailsDTO = new UserDetailsDTO();
 			userDetailsDTO.setUserId(userId);
 			userDetailsDTO = userDAO.findById(userDetailsDTO);
-		   	responseDto.setData(userDetailsDTO);
-		   	responseDto.setStatus(checkUserRole(userDetailsDTO.getRole()));
-		}catch (Exception e) {
-			responseDto  = ServicesUtil.getUnauthorizedResponseDto();
+			responseDto.setData(userDetailsDTO);
+			responseDto.setStatus(checkUserRole(userDetailsDTO.getRole()));
+		} catch (Exception e) {
+			responseDto = ServicesUtil.getUnauthorizedResponseDto();
 			responseDto.setStatus(false);
 		}
 		return responseDto;
 	}
 
-	 private boolean checkUserRole(RoleDetailsDTO dto){
-		 String role = dto.getRoleName();
-		 if(role.equals(RoleConstant.ADMIN_INSIDE_JAKARTA.getValue()) ||  role.equals(RoleConstant.ADMIN_OUTSIDE_JAKARTA.getValue())
-			|| role.equals(RoleConstant.SUPER_ADMIN.getValue()) || role.equals(RoleConstant.SALES_ADMIN.getValue())
-			|| role.equals(RoleConstant.COURIER_ADMIN.getValue()))
+	private boolean checkUserRole(RoleDetailsDTO dto) {
+		String role = dto.getRoleName();
+		if (role.equals(RoleConstant.ADMIN_INSIDE_JAKARTA.getValue())
+				|| role.equals(RoleConstant.ADMIN_OUTSIDE_JAKARTA.getValue())
+				|| role.equals(RoleConstant.SUPER_ADMIN.getValue()) 
+				|| role.equals(RoleConstant.SALES_ADMIN.getValue())
+				|| role.equals(RoleConstant.COURIER_ADMIN.getValue())
+				|| role.equals(RoleConstant.INSIDE_JAKARTA_DRIVER.getValue())
+				|| role.equals(RoleConstant.OUTSIDE_JAKARTA_DRIVER.getValue()))
 			return true;
-		 
-		  return false;
-	 }
+
+		return false;
+	}
 }
