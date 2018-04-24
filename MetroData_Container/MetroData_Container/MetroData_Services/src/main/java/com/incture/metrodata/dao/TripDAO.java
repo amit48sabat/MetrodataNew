@@ -484,10 +484,11 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		// get all the user list if role is super_admin or sales_admin
 		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
 				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
-			hql = "SELECT distinct t FROM TripDetailsDo AS t  ORDER BY t.createdAt desc";
+			hql = "SELECT t FROM TripDetailsDo AS t  ORDER BY t.createdAt desc";
 			isSuperAdmin = true;
 		} else
-			hql = "SELECT distinct t FROM TripDetailsDo AS t LEFT OUTER JOIN t.user as u  LEFT OUTER JOIN u.wareHouseDetails as w  WHERE w.wareHouseId IN (:warehouselist) or t.createdBy =:createdBy ORDER BY t.createdAt desc";
+			hql = " SELECT distinct t FROM TripDetailsDo AS t LEFT OUTER JOIN t.user as u  LEFT OUTER JOIN u.wareHouseDetails as w  "
+				+ "WHERE w.wareHouseId IN (:warehouselist) or t.createdBy =:createdBy ORDER BY t.createdAt desc";
 		Query query = getSession().createQuery(hql);
 		if (!isSuperAdmin) {
 			if (ServicesUtil.isEmpty(wareHouseIds))
@@ -532,7 +533,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		// get all the user list if role is super_admin or sales_admin
 		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
 				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
-			hql = "SELECT new map( count(t.tripId) as TOTAL_TRIPS ,  "
+			hql = "SELECT new map( count(distinct t.tripId) as TOTAL_TRIPS ,  "
 					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE tripped = true AND status IN (:deliveryNoteStatusList)) as TOTAL_ORDERS, "
 					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_rejected' AND tripped = true) as del_note_rejected, "
 					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_partially_rejected' AND tripped = true) as del_note_partially_rejected, "
@@ -543,7 +544,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			isSuperAdmin = true;
 		} else {
 			
-			hql = "SELECT new map( count(t.tripId) as TOTAL_TRIPS ,  "
+			hql = "SELECT new map( count(distinct t.tripId) as TOTAL_TRIPS ,  "
 					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.tripped = true AND status IN (:deliveryNoteStatusList) AND w.wareHouseId IN (:warehouselist)) as TOTAL_ORDERS, "
 					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_rejected' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_rejected, "
 					+ " (SELECT COUNT(dh.deliveryNoteId) FROM DeliveryHeaderDo AS dh INNER JOIN dh.wareHouseDetails as w WHERE dh.status = 'del_note_started' ANd dh.tripped = true AND w.wareHouseId IN (:warehouselist)) as del_note_started, "
