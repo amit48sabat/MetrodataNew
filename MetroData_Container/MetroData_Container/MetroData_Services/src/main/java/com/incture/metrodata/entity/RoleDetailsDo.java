@@ -35,6 +35,9 @@ public class RoleDetailsDo implements BaseDo {
 	
 	@Column(name = "DISPLAY_NAME", length = 100)
 	private String displayName;
+	
+	@Column(name = "USER_TYPE", length = 100)
+	private String userType;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED_AT")

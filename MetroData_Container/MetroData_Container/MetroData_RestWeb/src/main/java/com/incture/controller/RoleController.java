@@ -1,5 +1,7 @@
 package com.incture.controller;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -7,11 +9,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.RoleDetailsDTO;
+import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.service.RoleServiceLocal;
+import com.incture.metrodata.service.UserServiceLocal;
+import com.incture.metrodata.util.ServicesUtil;
 
 @RestController
 @CrossOrigin
@@ -21,6 +27,9 @@ public class RoleController {
 
 	@Autowired
 	RoleServiceLocal roleService;
+	
+	@Autowired
+    UserServiceLocal userServiceLocal;
 
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseDto create(@RequestBody RoleDetailsDTO dto) {
@@ -28,8 +37,28 @@ public class RoleController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public ResponseDto findAll() {
-		return roleService.findAll();
+	public ResponseDto findAll(HttpServletRequest request,
+			@RequestParam(value = "firstResult", defaultValue = "0") String firstResult,
+			@RequestParam(value = "maxResult", defaultValue = "0") String maxResult) {
+		
+		// setting pagination
+				ServicesUtil.setPagination(firstResult, maxResult);
+		
+		ResponseDto res = new ResponseDto();
+		String userId = "";
+		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
+			userId = request.getUserPrincipal().getName();
+		} else {
+			return ServicesUtil.getUnauthorizedResponseDto();
+
+		}
+		// validating user role if action not permitted then return
+		res = userServiceLocal.validatedUserRoleByUserId(userId);
+		if (!res.isStatus())
+			return res;
+
+		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
+		return roleService.getRoleByUser(adminDto);
 	}
 
 	@RequestMapping(value = "/{roleId}", method = RequestMethod.PUT)

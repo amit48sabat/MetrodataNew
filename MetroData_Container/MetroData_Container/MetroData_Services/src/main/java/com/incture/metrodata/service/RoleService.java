@@ -9,8 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.incture.metrodata.constant.Message;
 import com.incture.metrodata.dao.RoleDetailDAO;
+import com.incture.metrodata.dao.UserDAO;
 import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.RoleDetailsDTO;
+import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.entity.RoleDetailsDo;
 import com.incture.metrodata.util.ServicesUtil;
 
@@ -24,6 +26,9 @@ public class RoleService implements RoleServiceLocal{
 
 	@Autowired
 	RoleDetailDAO  roleDao;
+	
+	@Autowired
+	UserDAO userDao;
 	
 	@Override
 	public ResponseDto create(RoleDetailsDTO dto) {
@@ -143,6 +148,33 @@ public class RoleService implements RoleServiceLocal{
 			roleDto = roleDao.getRoleByName(roleName);
 		}
 		return roleDto;
+	}
+
+
+	/**
+	 * get role associated with admin
+	 */
+	@Override
+	public ResponseDto getRoleByUser(UserDetailsDTO adminDto) {
+			ResponseDto responseDto = new ResponseDto();
+
+			try {
+			
+				//adminDto = userDao.findById(adminDto);
+				
+				Object data = roleDao.getRoleByUser(adminDto.getUserId(), adminDto.getRole().getRoleName(),adminDto.getWareHouseDetails());
+
+				responseDto.setStatus(true);
+				responseDto.setCode(HttpStatus.SC_OK);
+				responseDto.setData(data);
+				responseDto.setMessage(Message.SUCCESS.getValue());
+			} catch (Exception e) {
+				responseDto.setStatus(false);
+				responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+				responseDto.setMessage(Message.FAILED.getValue());
+				e.printStackTrace();
+			}
+			return responseDto;
 	}
 	
 }

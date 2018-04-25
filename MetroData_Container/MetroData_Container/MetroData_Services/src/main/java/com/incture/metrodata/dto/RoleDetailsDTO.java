@@ -17,6 +17,7 @@ public class RoleDetailsDTO extends BaseDto{
 	private Date createdAt;
 	private Date updatedAt;
 	private String displayName;
+	private String userType;
 	@Override
 	public void validate(DB_Operation enOperation) throws InvalidInputFault {
      		
