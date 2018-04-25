@@ -142,6 +142,7 @@ public class HibernateConfiguration {
 		dto.setEmail(environment.getRequiredProperty("metrodata.onstart.tech.username"));
 		dto.setFirstName(environment.getRequiredProperty("metrodata.onstart.tech.firstname"));
 		dto.setLastName(environment.getRequiredProperty("metrodata.onstart.tech.lastname"));
+		dto.setRole(environment.getRequiredProperty("metrodata.onstart.tech.role"));
 		return dto;
 	}
 

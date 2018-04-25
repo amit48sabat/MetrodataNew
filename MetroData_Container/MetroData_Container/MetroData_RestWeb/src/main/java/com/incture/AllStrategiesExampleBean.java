@@ -47,6 +47,7 @@ public class AllStrategiesExampleBean {
 		courier.setCourierName("NA");
 		Date currDate = new Date();
 		RoleDetailsDTO roleDto = roleService.getRoleByRoleName(RoleConstant.SUPER_ADMIN.getValue());
+		roleDto.setDisplayName(dto.getRole());
 		if (!ServicesUtil.isEmpty(roleDto.getRoleName())) {
 			userDto.setRole(roleDto);
 		} else {
@@ -55,7 +56,7 @@ public class AllStrategiesExampleBean {
 			roleDto.setCreatedAt(currDate);
 			roleDto.setUpdatedAt(currDate);
 			roleDto.setRoleName(RoleConstant.SUPER_ADMIN.getValue());
-
+			roleDto.setDisplayName(dto.getRole());
 			userDto.setRole(roleDto);
 
 		}

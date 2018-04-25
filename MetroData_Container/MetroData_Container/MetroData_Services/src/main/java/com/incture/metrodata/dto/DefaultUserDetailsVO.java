@@ -8,5 +8,6 @@ import lombok.Setter;
 public class DefaultUserDetailsVO {
 	private String firstName;
 	private String lastName;
-	private String email; 
+	private String email;
+	private String role;
 }
