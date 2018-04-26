@@ -86,14 +86,27 @@ public class RoleDetailDAO extends BaseDao<RoleDetailsDo, RoleDetailsDTO> {
 	public Object getRoleByUser(String userId, String roleName, Set<WareHouseDetailsDTO> wareHouseDetails) {
 
 		String superAdmin = RoleConstant.SUPER_ADMIN.getValue();
+		ArrayList<String> outsideJkRoles = new ArrayList<>();
+		outsideJkRoles.add(RoleConstant.ADMIN_OUTSIDE_JAKARTA.getValue());
+		outsideJkRoles.add(RoleConstant.COURIER_ADMIN.getValue());
 
-		String hql = "FROM RoleDetailsDo r WHERE r.roleName <> '"+roleName+"'";
+		// base query
+		String hql = "FROM RoleDetailsDo r WHERE r.roleName <> '" + roleName + "'";
 
-		if (!roleName.equals(superAdmin)) {
+		if (roleName.equals(RoleConstant.ADMIN_OUTSIDE_JAKARTA.getValue())) {
+			hql += " AND r.userType in (:outsideJkRoles)";
+		}
+
+		else if (!roleName.equals(superAdmin)) {
 			hql += " AND r.userType ='" + roleName + "' ";
 		}
 
+		hql += " ORDER BY r.displayName asc";
 		Query query = getSession().createQuery(hql);
+		
+		if (roleName.equals(RoleConstant.ADMIN_OUTSIDE_JAKARTA.getValue())) {
+		  query.setParameterList("outsideJkRoles", outsideJkRoles);
+		}
 		ArrayList<RoleDetailsDo> resultSer = (ArrayList<RoleDetailsDo>) query.list();
 
 		return exportList(resultSer);

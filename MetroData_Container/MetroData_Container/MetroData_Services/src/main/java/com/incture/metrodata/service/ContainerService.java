@@ -200,8 +200,14 @@ public class ContainerService implements ContainerServiceLocal {
 				if (!ServicesUtil.isEmpty(d.getSLOC())) {
 					WareHouseDetailsDo warehouseDo = new WareHouseDetailsDo();
 					warehouseDo.setWareHouseId(d.getSLOC());
-					// find warehouse by id and assigned to delivery note
-					warehouseDo = wareHouseDao.find(warehouseDo);
+					
+					try{
+						// find warehouse by id and assigned to delivery note
+						warehouseDo = wareHouseDao.find(warehouseDo);
+					}
+					catch (Exception e) {
+						throw new InvalidInputFault("Invalid SLOC id '"+d.getSLOC()+"' no warehouse found");
+					}
 					dos.setWareHouseDetails(warehouseDo);
 				}
 
