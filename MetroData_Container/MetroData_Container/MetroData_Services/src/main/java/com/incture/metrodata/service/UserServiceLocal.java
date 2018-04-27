@@ -22,7 +22,7 @@ public interface UserServiceLocal {
 
 	UserDetailsDTO getUserByEmail(UserDetailsDTO dto);
 	
-	ResponseDto getUsersAssociatedWithAdmin(UserDetailsDTO dto);
+	ResponseDto getUsersAssociatedWithAdmin(UserDetailsDTO dto, String role);
 	
 	ResponseDto validatedUserRoleByUserId(String userId);
 }

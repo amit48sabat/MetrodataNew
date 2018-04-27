@@ -200,7 +200,7 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 
 	@SuppressWarnings("unchecked")
 	public List<UserDetailsDTO> getUsersAssociateWithAdmin(String adminId, String roleName,
-			Set<WareHouseDetailsDTO> wareHouseDetails) {
+			Set<WareHouseDetailsDTO> wareHouseDetails, String queryParam) {
 		List<String> wareHouseIds = new ArrayList<String>();
 		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
 			wareHouseIds.add(wareHouse.getWareHouseId());
@@ -209,12 +209,23 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 		// get all the user list if role is super_admin or sales_admin
 		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
 				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
-			hql = "SELECT u FROM UserDetailsDo AS u WHERE u.userId !=:adminId";
+			hql = "SELECT u FROM UserDetailsDo AS u INNER JOIN u.role as r WHERE u.userId !=:adminId ";
 			isSuperAdmin = true;
-		} else
-			hql = "SELECT u from UserDetailsDo as u where u.userId In "
+		} else {
+			hql = "SELECT u from UserDetailsDo as u INNER JOIN u.role as r  where u.userId In "
 					+ "(SELECT distinct u.userId FROM UserDetailsDo AS  u inner join u.wareHouseDetails AS w WHERE w.wareHouseId IN (:warehouselist) AND u.userId !=:adminId)";
+		}
+		
+		// if queryParam is not empty apply restriction for that
+		 if(!ServicesUtil.isEmpty(queryParam)){
+			 hql+=" AND r.roleName =:role";
+		 }
+		
 		Query query = getSession().createQuery(hql);
+		 
+		if(!ServicesUtil.isEmpty(queryParam))
+			query.setParameter("role", queryParam);
+		
 		query.setFirstResult(PaginationUtil.FIRST_RESULT);
 		query.setMaxResults(PaginationUtil.MAX_RESULT);
 		if (!isSuperAdmin) {

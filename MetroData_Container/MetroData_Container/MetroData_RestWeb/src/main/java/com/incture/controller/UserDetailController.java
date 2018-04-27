@@ -34,7 +34,7 @@ public class UserDetailController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public ResponseDto findAll(HttpServletRequest request,
+	public ResponseDto findAll(HttpServletRequest request, @RequestParam(value="role", defaultValue= "") String role,
 			@RequestParam(value = "firstResult", defaultValue = "0") String firstResult,
 			@RequestParam(value = "maxResult", defaultValue = "0") String maxResult) {
 
@@ -55,11 +55,10 @@ public class UserDetailController {
 			 return res;
 		 
 		UserDetailsDTO dto =  (UserDetailsDTO) res.getData();
-		return userServiceLocal.getUsersAssociatedWithAdmin(dto);
+		return userServiceLocal.getUsersAssociatedWithAdmin(dto,role);
 	}
 
 	@RequestMapping(value = "/{userId}", method = RequestMethod.PUT)
-
 	public ResponseDto update(@PathVariable String userId, @RequestBody UserDetailsDTO dto) {
 		dto.setUserId(userId);
 

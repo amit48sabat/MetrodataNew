@@ -268,14 +268,14 @@ public class UserService implements UserServiceLocal {
 	 * suoer_admin,sales_admin
 	 */
 	@Override
-	public ResponseDto getUsersAssociatedWithAdmin(UserDetailsDTO dto) {
+	public ResponseDto getUsersAssociatedWithAdmin(UserDetailsDTO dto, String queryParam) {
 		ResponseDto responseDto = new ResponseDto();
 
 		try {
 
 			// dto = userDAO.findById(dto);
 			Object userList = userDAO.getUsersAssociateWithAdmin(dto.getUserId(), dto.getRole().getRoleName(),
-					dto.getWareHouseDetails());
+					dto.getWareHouseDetails(),queryParam);
 
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
