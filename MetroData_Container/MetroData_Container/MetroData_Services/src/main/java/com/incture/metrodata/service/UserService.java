@@ -76,12 +76,18 @@ public class UserService implements UserServiceLocal {
 				responseDto.setMessage(Message.SUCCESS.getValue());
 			} else {
 				// user is already in idp we need to create in hana db
-				getUserByEmail(dto);
-				dto = userDAO.create(dto, new UserDetailsDo());
-				responseDto.setStatus(true);
-				responseDto.setCode(HttpStatus.SC_OK);
-				responseDto.setData(dto);
-				responseDto.setMessage(Message.SUCCESS.getValue() + " : User created with id " + dto.getUserId());
+				responseDto.setStatus(false);
+				responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+				responseDto.setMessage("Failed : user with email '" + dto.getEmail()
+				+ "' is already exits");
+				/*
+				 * getUserByEmail(dto); dto = userDAO.create(dto, new
+				 * UserDetailsDo()); responseDto.setStatus(true);
+				 * responseDto.setCode(HttpStatus.SC_OK);
+				 * responseDto.setData(dto);
+				 * responseDto.setMessage(Message.SUCCESS.getValue() +
+				 * " : User created with id " + dto.getUserId());
+				 */
 			}
 		} catch (Exception e) {
 			responseDto.setStatus(false);
@@ -275,7 +281,7 @@ public class UserService implements UserServiceLocal {
 
 			// dto = userDAO.findById(dto);
 			Object userList = userDAO.getUsersAssociateWithAdmin(dto.getUserId(), dto.getRole().getRoleName(),
-					dto.getWareHouseDetails(),queryParam);
+					dto.getWareHouseDetails(), queryParam);
 
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
@@ -310,8 +316,7 @@ public class UserService implements UserServiceLocal {
 		String role = dto.getRoleName();
 		if (role.equals(RoleConstant.ADMIN_INSIDE_JAKARTA.getValue())
 				|| role.equals(RoleConstant.ADMIN_OUTSIDE_JAKARTA.getValue())
-				|| role.equals(RoleConstant.SUPER_ADMIN.getValue()) 
-				|| role.equals(RoleConstant.SALES_ADMIN.getValue())
+				|| role.equals(RoleConstant.SUPER_ADMIN.getValue()) || role.equals(RoleConstant.SALES_ADMIN.getValue())
 				|| role.equals(RoleConstant.COURIER_ADMIN.getValue())
 				|| role.equals(RoleConstant.INSIDE_JAKARTA_DRIVER.getValue())
 				|| role.equals(RoleConstant.OUTSIDE_JAKARTA_DRIVER.getValue()))
