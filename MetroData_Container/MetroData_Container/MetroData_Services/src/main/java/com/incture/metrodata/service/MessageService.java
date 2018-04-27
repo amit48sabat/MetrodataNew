@@ -77,7 +77,16 @@ public class MessageService implements MessageServiceLocal {
 				}
 				dto = messageDetailsDao.create(dto, new MessageDetailsDo());
 			} else {
-				List<UserDetailsDTO> userList = userDao.findAll(userDto);
+				userDto.setUserId(createdBy);
+				userDto = userDao.findById(userDto);
+				// send notification to inside jk drivers only
+				List<UserDetailsDTO> userList = null;
+				if(!ServicesUtil.isEmpty(userDto)){
+					userList = userDao.getUsersAssociateWithAdmin(createdBy,
+							userDto.getRole().getRoleName(), userDto.getWareHouseDetails(),
+							RoleConstant.INSIDE_JAKARTA_DRIVER.getValue());
+				}
+				
 				if (!ServicesUtil.isEmpty(userList)) {
 					List<String> tokens = new ArrayList<>();
 					for (UserDetailsDTO user : userList) {
