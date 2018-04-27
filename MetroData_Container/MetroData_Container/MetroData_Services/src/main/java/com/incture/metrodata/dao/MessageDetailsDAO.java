@@ -18,7 +18,8 @@ import com.incture.metrodata.entity.MessageDetailsDo;
 import com.incture.metrodata.entity.UserDetailsDo;
 import com.incture.metrodata.exceptions.InvalidInputFault;
 import com.incture.metrodata.util.ServicesUtil;
-import com.incture.metrodata.util.UserComparator;
+import com.incture.metrodata.util.UserDtoComparator;
+
 
 @Repository("messageDetailsDAO")
 public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsDTO> {
@@ -161,7 +162,7 @@ public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsD
 
 			// parsing users
 			if (!ServicesUtil.isEmpty(dos.getUsers())) {
-				Set<UserDetailsDTO> userDtos = userDao.exportSet(dos.getUsers(), new UserComparator());
+				Set<UserDetailsDTO> userDtos = userDao.exportSet(dos.getUsers(), new UserDtoComparator());
 				dto.setUsers(userDtos);
 			}
 		}

@@ -13,10 +13,10 @@ import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.dto.WareHouseDetailsDTO;
 import com.incture.metrodata.entity.RoleDetailsDo;
 import com.incture.metrodata.entity.UserDetailsDo;
-import com.incture.metrodata.util.CourierDetailsComparator;
+import com.incture.metrodata.util.CourierDetailsDtoComparator;
 import com.incture.metrodata.util.PaginationUtil;
 import com.incture.metrodata.util.ServicesUtil;
-import com.incture.metrodata.util.WareHouseComparator;
+import com.incture.metrodata.util.WareHouseDtoComparator;
 
 @Repository("UserDao")
 public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
@@ -168,14 +168,14 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			if (!ServicesUtil.isEmpty(detailsDo.getWareHouseDetails())) {
 
 				userDetailsDTO.setWareHouseDetails(
-						wareHouseDao.exportSet(detailsDo.getWareHouseDetails(), new WareHouseComparator()));
+						wareHouseDao.exportSet(detailsDo.getWareHouseDetails(), new WareHouseDtoComparator()));
 			}
 
 			// parsing courier details
 			if (!ServicesUtil.isEmpty(detailsDo.getCourierDetails())) {
 
 				userDetailsDTO.setCourierDetails(
-						courierDao.exportSet(detailsDo.getCourierDetails(), new CourierDetailsComparator()));
+						courierDao.exportSet(detailsDo.getCourierDetails(), new CourierDetailsDtoComparator()));
 			}
 			if (!ServicesUtil.isEmpty(detailsDo.getTrackFreq())) {
 				userDetailsDTO.setTrackFreq(detailsDo.getTrackFreq());

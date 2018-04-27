@@ -7,7 +7,7 @@ import java.util.TreeSet;
 
 import com.incture.metrodata.exceptions.InvalidInputFault;
 import com.incture.metrodata.util.DB_Operation;
-import com.incture.metrodata.util.UserComparator;
+import com.incture.metrodata.util.UserDtoComparator;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -28,7 +28,7 @@ public class MessageDetailsDTO extends BaseDto{
 	private String address;
 	private Long deliveryNoteId;
 	private List<CommentsDTO> comments;
-	private Set<UserDetailsDTO> users=new TreeSet<UserDetailsDTO>(new UserComparator());;
+	private Set<UserDetailsDTO> users=new TreeSet<UserDetailsDTO>(new UserDtoComparator());;
 	public void validate(DB_Operation enOperation) throws InvalidInputFault {
 		// TODO Auto-generated method stub
 		

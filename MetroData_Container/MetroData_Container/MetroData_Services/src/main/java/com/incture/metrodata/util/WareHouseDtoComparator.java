@@ -4,7 +4,7 @@ import java.util.Comparator;
 
 import com.incture.metrodata.dto.WareHouseDetailsDTO;
 
-public class WareHouseComparator implements Comparator<WareHouseDetailsDTO> {
+public class WareHouseDtoComparator implements Comparator<WareHouseDetailsDTO> {
 
 	@Override
 	public int compare(WareHouseDetailsDTO o1, WareHouseDetailsDTO o2) {
