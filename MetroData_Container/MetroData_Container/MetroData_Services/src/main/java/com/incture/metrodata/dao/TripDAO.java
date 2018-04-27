@@ -637,7 +637,8 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			} else if (filterBy.equalsIgnoreCase("driver")) {
 				// hql = " inner join t.user as u where u.firstName like
 				// :searchParam OR u.lastName like :searchParam ";
-				hql += "  inner join u.role as r where  u.userId like :searchParam AND (r.roleName = 'inside_jakarta_driver' Or r.roleName = 'outside_jakarta_driver')";
+				hql += "  inner join u.role as r where u.userId is not null "
+						+ " And ( lower(u.userId) like :searchParam Or lower(u.firstName) like :searchParam Or lower(u.lastName) like :searchParam ) AND (r.roleName = 'inside_jakarta_driver' Or r.roleName = 'outside_jakarta_driver')";
 			} else if (filterBy.equalsIgnoreCase("delivery_note")) {
 				hql += "  inner join t.deliveryHeader as d where d.deliveryNoteId like :searchParam ";
 			}
@@ -658,7 +659,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 
 			query.setParameterList("warehouselist", wareHouseIds);
 			query.setMaxResults(10);
-			query.setString("searchParam", "%" + q + "%");
+			query.setString("searchParam", "%" + q.toLowerCase() + "%");
 			data = (List<TripDetailsDo>) query.list();
 		}
 
@@ -692,7 +693,8 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			} else if (filterBy.equalsIgnoreCase("driver")) {
 				// hql = " inner join t.user as u where u.firstName like
 				// :searchParam OR u.lastName like :searchParam ";
-				hql += "  inner join t.user as u inner join u.role as r where  u.userId like :searchParam AND (r.roleName = 'inside_jakarta_driver' Or r.roleName = 'outside_jakarta_driver')";
+				hql += "  inner join t.user as u inner join u.role as r where  u.userId is not null "
+						+ " And ( lower(u.userId) like :searchParam Or lower(u.firstName) like :searchParam Or lower(u.lastName) like :searchParam ) AND (r.roleName = 'inside_jakarta_driver' Or r.roleName = 'outside_jakarta_driver')";
 			} else if (filterBy.equalsIgnoreCase("delivery_note")) {
 				hql += "  inner join t.deliveryHeader as d where d.deliveryNoteId like :searchParam ";
 			}
@@ -707,7 +709,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			if (isStatus)
 				query.setParameter("tripStatus", status);
 			query.setMaxResults(10);
-			query.setString("searchParam", "%" + q + "%");
+			query.setString("searchParam", "%" + q.toLowerCase() + "%");
 			data = (List<TripDetailsDo>) query.list();
 		}
 
