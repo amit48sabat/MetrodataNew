@@ -633,7 +633,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		if (!ServicesUtil.isEmpty(dto)) {
 
 			if (filterBy.equalsIgnoreCase("trip")) {
-				hql += " where t.tripId like :searchParam ";
+				hql += " where lower(t.tripId) like lower(:searchParam)";
 			} else if (filterBy.equalsIgnoreCase("driver")) {
 				// hql = " inner join t.user as u where u.firstName like
 				// :searchParam OR u.lastName like :searchParam ";
