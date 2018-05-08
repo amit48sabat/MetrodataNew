@@ -638,7 +638,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 				// hql = " inner join t.user as u where u.firstName like
 				// :searchParam OR u.lastName like :searchParam ";
 				hql += "  inner join u.role as r where u.userId is not null "
-						+ " And ( lower(u.userId) like :searchParam Or lower(u.firstName) like :searchParam Or lower(u.lastName) like :searchParam ) AND (r.roleName = 'inside_jakarta_driver' Or r.roleName = 'outside_jakarta_driver')";
+						+ " And ( lower(u.userId) like lower(:searchParam) Or lower(u.firstName) like lower(:searchParam) Or lower(u.lastName) like lower(:searchParam) ) AND (r.roleName = 'inside_jakarta_driver' Or r.roleName = 'outside_jakarta_driver')";
 			} else if (filterBy.equalsIgnoreCase("delivery_note")) {
 				hql += "  inner join t.deliveryHeader as d where d.deliveryNoteId like :searchParam ";
 			}
@@ -689,7 +689,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		if (!ServicesUtil.isEmpty(dto)) {
 
 			if (filterBy.equalsIgnoreCase("trip")) {
-				hql += " where t.tripId like :searchParam ";
+				hql += " where lower(t.tripId) like lower(:searchParam)";
 			} else if (filterBy.equalsIgnoreCase("driver")) {
 				// hql = " inner join t.user as u where u.firstName like
 				// :searchParam OR u.lastName like :searchParam ";

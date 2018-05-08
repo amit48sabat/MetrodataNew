@@ -76,18 +76,31 @@ public class UserService implements UserServiceLocal {
 				responseDto.setMessage(Message.SUCCESS.getValue());
 			} else {
 				// user is already in idp we need to create in hana db
+				UserDetailsDTO userDetailsDTO= null;
+				try {
+					userDetailsDTO =userDAO.getByKeys(dto);
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+				if(ServicesUtil.isEmpty(userDetailsDTO))
+				{
+					
+					  getUserByEmail(dto); dto = userDAO.create(dto, new
+					  UserDetailsDo()); responseDto.setStatus(true);
+					  responseDto.setCode(HttpStatus.SC_OK);
+					  responseDto.setData(dto);
+					  responseDto.setMessage(Message.SUCCESS.getValue() +
+					 " : User created with id " + dto.getUserId());
+					 
+				}
+				else{	
 				responseDto.setStatus(false);
 				responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 				responseDto.setMessage("Failed : user with email '" + dto.getEmail()
-				+ "' is already exits");
-				/*
-				 * getUserByEmail(dto); dto = userDAO.create(dto, new
-				 * UserDetailsDo()); responseDto.setStatus(true);
-				 * responseDto.setCode(HttpStatus.SC_OK);
-				 * responseDto.setData(dto);
-				 * responseDto.setMessage(Message.SUCCESS.getValue() +
-				 * " : User created with id " + dto.getUserId());
-				 */
+				+ "' is already exist in identity provider system");
+				
+				}
+				
 			}
 		} catch (Exception e) {
 			responseDto.setStatus(false);

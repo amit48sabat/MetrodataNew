@@ -81,12 +81,11 @@ public class MessageService implements MessageServiceLocal {
 				userDto = userDao.findById(userDto);
 				// send notification to inside jk drivers only
 				List<UserDetailsDTO> userList = null;
-				if(!ServicesUtil.isEmpty(userDto)){
-					userList = userDao.getUsersAssociateWithAdmin(createdBy,
-							userDto.getRole().getRoleName(), userDto.getWareHouseDetails(),
-							RoleConstant.INSIDE_JAKARTA_DRIVER.getValue());
+				if (!ServicesUtil.isEmpty(userDto)) {
+					userList = userDao.getUsersAssociateWithAdmin(createdBy, userDto.getRole().getRoleName(),
+							userDto.getWareHouseDetails(), RoleConstant.INSIDE_JAKARTA_DRIVER.getValue());
 				}
-				
+
 				if (!ServicesUtil.isEmpty(userList)) {
 					List<String> tokens = new ArrayList<>();
 					for (UserDetailsDTO user : userList) {
@@ -157,8 +156,10 @@ public class MessageService implements MessageServiceLocal {
 		if (!ServicesUtil.isEmpty(dto.getComments())) {
 			for (CommentsDTO d : dto.getComments()) {
 				d.setUpdatedAt(currdate);
-				d.setCreatedBy(createdBy);
-				d.setCreatedAt(currdate);
+				if (ServicesUtil.isEmpty(d.getId())) {
+					d.setCreatedBy(createdBy);
+					d.setCreatedAt(currdate);
+				}
 
 			}
 		}

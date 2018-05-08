@@ -64,7 +64,7 @@ public class CommentsDAO extends BaseDao<CommentsDetailsDo, CommentsDTO> {
 			if (!ServicesUtil.isEmpty(dto.getComment())) {
 				dos.setComment(dto.getComment());
 			}
-			if (!ServicesUtil.isEmpty(dto.getCreatedBy())) {
+			if (!ServicesUtil.isEmpty(dto.getCreatedBy()) && dto.getCreatedBy() instanceof String ) {
 				dos.setCreatedBy((String) dto.getCreatedBy());
 			}
 			if (!ServicesUtil.isEmpty(dto.getCreatedAt())) {

@@ -88,7 +88,9 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getRefNo())) {
 				deliveryHeaderDo.setRefNo(deliveryHeaderDTO.getRefNo());
 			}
-
+			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getCustComment())) {
+				deliveryHeaderDo.setCustComment(deliveryHeaderDTO.getCustComment());
+			}
 			// validate the delivery note status if invalid throw expection
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getStatus())) {
 				if (checkDnStatus(deliveryHeaderDTO.getStatus()))
@@ -129,6 +131,7 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getAssignedUser())) {
 				deliveryHeaderDo.setAssignedUser(deliveryHeaderDTO.getAssignedUser());
 			}
+			
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getWareHouseDetails())) {
 				WareHouseDetailsDo wareHouseDo = new WareHouseDetailsDo();
 				try {
@@ -180,6 +183,10 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			}
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getSoldToAddress())) {
 				deliveryHeaderDTO.setSoldToAddress(deliveryHeaderDo.getSoldToAddress());
+			}
+			
+			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getCustComment())) {
+				deliveryHeaderDTO.setCustComment(deliveryHeaderDo.getCustComment());
 			}
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getShipToAddress())) {
 				deliveryHeaderDTO.setShipToAddress(deliveryHeaderDo.getShipToAddress());

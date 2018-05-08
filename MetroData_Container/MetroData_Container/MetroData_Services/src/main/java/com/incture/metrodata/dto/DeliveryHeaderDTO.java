@@ -41,6 +41,7 @@ public class DeliveryHeaderDTO extends BaseDto {
 	private Date startedAt;
 	private Date endedAt;
 	private String reasonForCancellation;
+	private String custComment;
 	private List<DeliveryItemDTO> deliveryItems;
 	private Long deliveryOrder;
 	private String signatureDocId;

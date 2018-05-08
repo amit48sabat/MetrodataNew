@@ -111,6 +111,9 @@ public class DeliveryHeaderDo implements BaseDo {
 	@Column(name ="REASON_FOR_CANCELLATION")
 	private String reasonForCancellation;
 	
+	@Column(name ="CUST_COMMENT")
+	private String custComment;
+	
 	@Column(name ="AIR_WAY_BILL_NO")
 	private String airwayBillNo;
 	
