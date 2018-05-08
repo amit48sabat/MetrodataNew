@@ -100,8 +100,10 @@ public class RoleDetailDAO extends BaseDao<RoleDetailsDo, RoleDetailsDTO> {
 		else if (!roleName.equals(superAdmin)) {
 			hql += " AND r.userType ='" + roleName + "' ";
 		} else if (roleName.equals(superAdmin)) {
-			hql += " AND r.roleName not in ('" + RoleConstant.INSIDE_JAKARTA_DRIVER.getValue() + "','"
-					+ RoleConstant.OUTSIDE_JAKARTA_DRIVER.getValue() + "')";
+			String driverInside = RoleConstant.INSIDE_JAKARTA_DRIVER.getValue();
+			String driverOutside = RoleConstant.OUTSIDE_JAKARTA_DRIVER.getValue();
+			String courierAdmin  = RoleConstant.COURIER_ADMIN.getValue() ;
+			hql += " AND r.roleName not in ('" + driverInside + "', '"+ driverOutside + "', '"+ courierAdmin+ "' )";
 		}
 		hql += " ORDER BY r.displayName asc";
 		Query query = getSession().createQuery(hql);
