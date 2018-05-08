@@ -619,7 +619,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	 */
 	@SuppressWarnings("unchecked")
 	private List<TripDetailsDTO> filterTripsAsAdminOnly(FilterDTO dto, String userId, List<String> wareHouseIds) {
-		String hql = "SELECT t from TripDetailsDo as t  inner join t.user  as u inner join u.wareHouseDetails as w ";
+		String hql = "SELECT distinct t from TripDetailsDo as t  inner join t.user  as u inner join u.wareHouseDetails as w ";
 		String filterBy = dto.getFilterBy();
 		String q = dto.getQuery();
 		boolean isStatus = false;
@@ -675,7 +675,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	 */
 	@SuppressWarnings("unchecked")
 	private List<TripDetailsDTO> filterTripsAsSuperAdmin(FilterDTO dto, String userId, List<String> wareHouseDetails) {
-		String hql = "SELECT t from TripDetailsDo as t  ";
+		String hql = "SELECT distinct t from TripDetailsDo as t  ";
 		String filterBy = dto.getFilterBy();
 		String q = dto.getQuery();
 		boolean isStatus = false;
