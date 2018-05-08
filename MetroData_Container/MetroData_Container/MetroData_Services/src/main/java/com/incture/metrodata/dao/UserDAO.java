@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.Criteria;
 import org.hibernate.Query;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -239,5 +241,20 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 		query.setParameter("adminId", adminId);
 		ArrayList<UserDetailsDo> result = (ArrayList<UserDetailsDo>) query.list();
 		return exportList(result);
+	}
+	
+	public UserDetailsDTO getUserByEmailId(UserDetailsDTO userDto){
+		UserDetailsDo resDo = null;
+        /* String hql = " SELECT u.userId from UserDetailsDo as u where lower(u.email) = lower(:userEmail) ";
+         Query query = getSession().createQuery(hql);
+         query.setParameter("userEmail", userDto.getEmail());
+         resDo = (UserDetailsDo) query.uniqueResult();*/
+		Criteria criteria = getSession().createCriteria(UserDetailsDo.class);
+		criteria.add(Restrictions.eq("email", userDto.getEmail()).ignoreCase());
+		resDo =  (UserDetailsDo) criteria.uniqueResult();
+         if(ServicesUtil.isEmpty(resDo))
+        	 return null;
+         else
+    		return exportDto(resDo);
 	}
 }

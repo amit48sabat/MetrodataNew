@@ -78,7 +78,8 @@ public class UserService implements UserServiceLocal {
 				// user is already in idp we need to create in hana db
 				UserDetailsDTO userDetailsDTO= null;
 				try {
-					userDetailsDTO =userDAO.getByKeys(dto);
+					//userDetailsDTO = userDAO.getByKeys(dto);
+					userDetailsDTO =  userDAO.getUserByEmailId(dto);
 				} catch (Exception e) {
 					// TODO: handle exception
 				}
@@ -97,7 +98,7 @@ public class UserService implements UserServiceLocal {
 				responseDto.setStatus(false);
 				responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 				responseDto.setMessage("Failed : user with email '" + dto.getEmail()
-				+ "' is already exist in identity provider system");
+				+ "' is already exist.");
 				
 				}
 				
