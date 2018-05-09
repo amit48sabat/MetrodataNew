@@ -199,7 +199,7 @@ public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsD
 		String sql = "SELECT distinct m FROM MessageDetailsDo as m ";
 
 		if (!ServicesUtil.isEmpty(dto.getUserId())) {
-			sql += " INNER JOIN m.users as u WHERE (u.userId = '" + dto.getUserId() + "'"+"OR m.createdBy ='" + dto.getUserId() + "')";
+			sql += " INNER JOIN m.users as u WHERE (u.userId = '" + dto.getUserId() + "'"+" OR m.createdBy ='" + dto.getUserId() + "')";
 		} else {
 			sql += " WHERE 1=1 ";
 		}
@@ -210,7 +210,7 @@ public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsD
 			sql += " AND m.type = '" + dto.getType() + "' ";
 
 		if (!ServicesUtil.isEmpty(dto.getTripId()))
-			sql += " AND m.tripId = '" + "'dto.getTripId() ";
+			sql += " AND m.tripId = '" + dto.getTripId() +"'";
 
 		if (!ServicesUtil.isEmpty(dto.getStartedAt()))
 			sql += " AND m.createdAt >= :startedAt ";
