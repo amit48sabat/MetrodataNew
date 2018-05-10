@@ -186,11 +186,11 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 
 		// getting the corresponding trip driver
 		UserDetailsDTO driverDto = tripDao.getDriverFromTripByDN(headerDto);
-		if (!ServicesUtil.isEmpty(driverDto.getMobileToken())) {
+		if (!ServicesUtil.isEmpty(driverDto) && !ServicesUtil.isEmpty(driverDto.getMobileToken())) {
 			String title = "Admin Update";
 			String body = "Admin " + adminDto.getFirstName() + " (" + adminDto.getUserId()
 					+ ") has updated the status of deliveryNote with  id " + "" + headerDto.getDeliveryNoteId()
-					+ "  to " + headerDto.getStatus();
+					+ "  to " + DeliveryNoteStatus.getDnStatusDisplayValue(headerDto.getStatus());
 			//notification.sendNotification(title, driverDto.getMobileToken(), body);
 
 			MessageDetailsDTO messageDto = new MessageDetailsDTO();
