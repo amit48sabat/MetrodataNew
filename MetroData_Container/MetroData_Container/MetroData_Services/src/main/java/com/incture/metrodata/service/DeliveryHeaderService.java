@@ -183,7 +183,7 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 
 	private void sendNotificationToDriverWhenAdminUpdateDnStatus(DeliveryHeaderDTO headerDto, UserDetailsDTO adminDto)
 			throws IOException {
-
+ 
 		// getting the corresponding trip driver
 		UserDetailsDTO driverDto = tripDao.getDriverFromTripByDN(headerDto);
 		if (!ServicesUtil.isEmpty(driverDto) && !ServicesUtil.isEmpty(driverDto.getMobileToken())) {
