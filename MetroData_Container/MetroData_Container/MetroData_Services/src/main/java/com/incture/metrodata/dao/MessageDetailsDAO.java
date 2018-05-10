@@ -9,6 +9,7 @@ import org.hibernate.criterion.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.incture.metrodata.constant.RoleConstant;
 import com.incture.metrodata.dto.CommentsDTO;
 import com.incture.metrodata.dto.MessageDetailsDTO;
 import com.incture.metrodata.dto.SearchMessageVO;
@@ -193,12 +194,13 @@ public class MessageDetailsDAO extends BaseDao<MessageDetailsDo, MessageDetailsD
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<MessageDetailsDTO> findAllMessages(SearchMessageVO dto) throws InvalidInputFault {
+	public List<MessageDetailsDTO> findAllMessages(SearchMessageVO dto, String roleName) throws InvalidInputFault {
 		// Criteria criteria =
 		// getSession().createCriteria(MessageDetailsDo.class);
 		String sql = "SELECT distinct m FROM MessageDetailsDo as m ";
-
-		if (!ServicesUtil.isEmpty(dto.getUserId())) {
+        String superAdmin = RoleConstant.SUPER_ADMIN.getValue();
+        
+		if (!superAdmin.equalsIgnoreCase(roleName)){
 			sql += " INNER JOIN m.users as u WHERE (u.userId = '" + dto.getUserId() + "'"+" OR m.createdBy ='" + dto.getUserId() + "')";
 		} else {
 			sql += " WHERE 1=1 ";

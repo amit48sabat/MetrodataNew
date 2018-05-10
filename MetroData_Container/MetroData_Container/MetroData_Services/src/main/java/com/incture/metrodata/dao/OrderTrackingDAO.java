@@ -96,6 +96,30 @@ public class OrderTrackingDAO extends BaseDao<OrderTrackingDo, OrderTrackingDTO>
 		
 		List<OrderTrackingDo> resultDos = criteria.list();
 		List<OrderTrackingDTO> resultDtos = exportList(resultDos);
+		
+		// if no tracking data found in the given timestamp giving the last data associate with the dn 
+		if(ServicesUtil.isEmpty(resultDtos))
+			resultDtos = getTheLastOrderTrackingDetails(dto);
+		
+		return resultDtos;
+	}
+	
+	public  List<OrderTrackingDTO> getTheLastOrderTrackingDetails(OrderTrackingDTO dto){
+		Criteria criteria = getSession().createCriteria(OrderTrackingDo.class);
+		
+		 if(!ServicesUtil.isEmpty(dto.getTripId()))
+		    criteria.add(Restrictions.eq("tripId", dto.getTripId()));
+		
+		 if(!ServicesUtil.isEmpty(dto.getDeliveryNoteId()))
+			criteria.add(Restrictions.eq("deliveryNoteId", dto.getDeliveryNoteId()));
+		
+		 if(!ServicesUtil.isEmpty(dto.getDriverId()))
+			criteria.add(Restrictions.eq("driverId", dto.getDriverId()));
+		
+		criteria.addOrder(Order.desc("createdAt"));
+		
+		List<OrderTrackingDo> resultDos = criteria.setMaxResults(1).list();
+		List<OrderTrackingDTO> resultDtos = exportList(resultDos);
 		return resultDtos;
 	}
 }

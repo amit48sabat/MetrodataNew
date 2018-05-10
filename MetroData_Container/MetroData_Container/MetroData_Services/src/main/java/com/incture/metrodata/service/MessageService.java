@@ -253,12 +253,20 @@ public class MessageService implements MessageServiceLocal {
 	public ResponseDto findAll(SearchMessageVO dto) {
 		ResponseDto response = new ResponseDto();
 		try {
-			List<MessageDetailsDTO> messageList = messageDetailsDao.findAllMessages(dto);
-			setUserDetailsDtoByCreatedAt(messageList);
-			response.setStatus(true);
-			response.setCode(HttpStatus.SC_OK);
-			response.setData(messageList);
-			response.setMessage(Message.SUCCESS + "");
+			
+			if (!ServicesUtil.isEmpty(dto.getUserId())){
+				UserDetailsDTO userDto = new  UserDetailsDTO();
+				userDto.setUserId(dto.getUserId());
+				
+				userDto = userDao.findById(userDto);
+			  
+				List<MessageDetailsDTO> messageList = messageDetailsDao.findAllMessages(dto, userDto.getRole().getRoleName());
+				setUserDetailsDtoByCreatedAt(messageList);
+				response.setStatus(true);
+				response.setCode(HttpStatus.SC_OK);
+				response.setData(messageList);
+				response.setMessage(Message.SUCCESS + "");
+			}
 		} catch (Exception e) {
 			response.setStatus(false);
 			response.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
