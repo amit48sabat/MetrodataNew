@@ -1,5 +1,7 @@
 package com.incture.controller;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,5 +110,23 @@ class DeliveryHeaderController {
 	public ResponseDto deleteDeliveryNote(@PathVariable Long deliveryNoteId) {
 		// LOGGER.info("Inside delivery data creation");
 		return deliveryHeaderServiceLocal.delete(deliveryNoteId);
+	}
+	
+	
+	@RequestMapping(value = "/listUpdate", method = RequestMethod.PUT)
+	public ResponseDto updateDeliveryNoteList(@RequestBody List<DeliveryHeaderDTO> dtoList,
+			HttpServletRequest request) {
+			ResponseDto res = new ResponseDto();
+			String userId = "";
+			if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
+				userId = request.getUserPrincipal().getName();
+			}
+			// validating user role if action not permitted then return
+			UserDetailsDTO userDto = new UserDetailsDTO();
+			userDto.setUserId(userId);
+			res = userServiceLocal.find(userDto);
+
+			userDto = (UserDetailsDTO) res.getData();
+		return deliveryHeaderServiceLocal.updateList(dtoList,userDto);
 	}
 }
