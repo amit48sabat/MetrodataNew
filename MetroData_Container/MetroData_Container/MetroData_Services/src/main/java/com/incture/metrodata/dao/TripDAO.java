@@ -281,7 +281,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	 * driverDashbord information
 	 */
 	@SuppressWarnings("unchecked")
-	public Object getDriverDashboardDetails(String userId) {
+	public HashMap<String, Long> getDriverDashboardDetails(String userId) {
 		String hql = "SELECT status,COUNT(tripId) AS count FROM TripDetailsDo WHERE user ='" + userId
 				+ "' GROUP BY status";
 		Query query = getSession().createQuery(hql);
@@ -344,6 +344,19 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		query.setParameter("driverId", userId);
 		Map<String, Long> result = (Map<String, Long>) query.uniqueResult();
 
+		return result;
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public Map<String, String> getLatestOngoingTrip(String userId) {
+		String hql = "select top 1 new map(trip_id,status) from trip_details "
+				+ "where user_user_id= :userId and status=:tripStatus "
+				+ "order by trip_id desc;";
+		Query query = getSession().createQuery(hql);
+		query.setParameter("tripStatus", TripStatus.TRIP_STATUS_STARTED.getValue());
+		query.setParameter("userId", userId);
+		Map<String, String> result = (Map<String, String>) query.uniqueResult();
 		return result;
 	}
 
