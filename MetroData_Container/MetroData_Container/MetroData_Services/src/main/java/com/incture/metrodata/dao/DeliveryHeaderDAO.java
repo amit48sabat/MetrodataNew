@@ -131,6 +131,12 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getAssignedUser())) {
 				deliveryHeaderDo.setAssignedUser(deliveryHeaderDTO.getAssignedUser());
 			}
+			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getValidationStatus())) {
+				deliveryHeaderDo.setValidationStatus(deliveryHeaderDTO.getValidationStatus());
+			}
+			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getAwbValidated())) {
+				deliveryHeaderDo.setAwbValidated(deliveryHeaderDTO.getAwbValidated());
+			}
 			
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getWareHouseDetails())) {
 				WareHouseDetailsDo wareHouseDo = new WareHouseDetailsDo();
@@ -255,6 +261,13 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 						.setWareHouseDetails(wareHouseDetailDao.exportDto(deliveryHeaderDo.getWareHouseDetails()));
 
 			}
+			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getValidationStatus())) {
+				deliveryHeaderDTO.setValidationStatus(deliveryHeaderDo.getValidationStatus());
+			}
+			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getAwbValidated())) {
+				deliveryHeaderDTO.setAwbValidated(deliveryHeaderDo.getAwbValidated());
+			}
+			
 			// exporting delivery items
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getDeliveryItems())) {
 				List<DeliveryItemDTO> itemDtos = deliveryItemDAO.exportList(deliveryHeaderDo.getDeliveryItems());
