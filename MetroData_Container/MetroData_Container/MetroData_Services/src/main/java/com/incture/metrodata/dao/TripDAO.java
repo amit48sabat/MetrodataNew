@@ -667,6 +667,10 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			} else if (filterBy.equalsIgnoreCase("delivery_note")) {
 				hql += "  inner join t.deliveryHeader as d where d.deliveryNoteId like :searchParam ";
 			}
+			else if (filterBy.equalsIgnoreCase("airwayBillNo")) {
+				hql += "  inner join t.deliveryHeader as d where d.airwayBillNo like :searchParam ";
+			}
+
 
 			if (isStatus) {
 				hql += " AND t.status = :tripStatus ";
