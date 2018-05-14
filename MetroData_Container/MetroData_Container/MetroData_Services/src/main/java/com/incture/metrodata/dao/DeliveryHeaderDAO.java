@@ -137,6 +137,9 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getAwbValidated())) {
 				deliveryHeaderDo.setAwbValidated(deliveryHeaderDTO.getAwbValidated());
 			}
+			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getAirwayBillNo())) {
+				deliveryHeaderDo.setAirwayBillNo(deliveryHeaderDTO.getAirwayBillNo());
+			}
 			
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getWareHouseDetails())) {
 				WareHouseDetailsDo wareHouseDo = new WareHouseDetailsDo();
@@ -256,18 +259,20 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getAssignedUser())) {
 				deliveryHeaderDTO.setAssignedUser(deliveryHeaderDo.getAssignedUser());
 			}
-			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getWareHouseDetails())) {
-				deliveryHeaderDTO
-						.setWareHouseDetails(wareHouseDetailDao.exportDto(deliveryHeaderDo.getWareHouseDetails()));
-
-			}
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getValidationStatus())) {
 				deliveryHeaderDTO.setValidationStatus(deliveryHeaderDo.getValidationStatus());
 			}
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getAwbValidated())) {
 				deliveryHeaderDTO.setAwbValidated(deliveryHeaderDo.getAwbValidated());
 			}
-			
+			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getAirwayBillNo())) {
+				deliveryHeaderDTO.setAirwayBillNo(deliveryHeaderDo.getAirwayBillNo());
+			}
+			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getWareHouseDetails())) {
+				deliveryHeaderDTO
+						.setWareHouseDetails(wareHouseDetailDao.exportDto(deliveryHeaderDo.getWareHouseDetails()));
+
+			}
 			// exporting delivery items
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getDeliveryItems())) {
 				List<DeliveryItemDTO> itemDtos = deliveryItemDAO.exportList(deliveryHeaderDo.getDeliveryItems());

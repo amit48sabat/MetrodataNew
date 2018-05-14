@@ -55,7 +55,7 @@ public class DeliveryHeaderDTO extends BaseDto {
 	private String airwayBillNo;
 	private WareHouseDetailsDTO wareHouseDetails;
 	private String validationStatus;
-	private Boolean awbValidated;
+	private String awbValidated;
 	@Override
 	public void validate(DB_Operation enOperation) throws InvalidInputFault {
 		// TODO Auto-generated method stub

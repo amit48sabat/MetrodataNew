@@ -343,8 +343,8 @@ public class TripService implements TripServiceLocal {
 			// setting up response
 			Map<String, Object> map = new HashMap<>();
 			if(!ServicesUtil.isEmpty(onGoingTrip)){
-				map.put("trip_id", onGoingTrip.get("0"));
-				map.put("trip_status", onGoingTrip.get("1"));
+				map.put("trip_id", onGoingTrip.get("tripId"));
+				map.put("trip_status", onGoingTrip.get("status"));
 			}
 			
 			map.put("profile", object);

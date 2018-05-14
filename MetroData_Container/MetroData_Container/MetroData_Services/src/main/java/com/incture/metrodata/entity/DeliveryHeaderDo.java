@@ -102,9 +102,9 @@ public class DeliveryHeaderDo implements BaseDo {
 	@Column(name = "ASSIGNED_USER")
 	private String assignedUser;
 
-	@Column(name = "AWB_VALIDATED")
-	@ColumnDefault("'0'")
-	private Boolean AwbValidated;
+	@Column(name = "IS_AWB_VALIDATE")
+	@ColumnDefault("'false'")
+	private String awbValidated;
 
 	// expected delivery date
 	@Temporal(TemporalType.TIMESTAMP)
