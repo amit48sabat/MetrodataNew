@@ -18,6 +18,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
 
 import lombok.Data;
@@ -87,7 +88,8 @@ public class UserDetailsDo implements BaseDo {
 	@Column(name = "LAST_LOGIN_TIME")
 	private Date lastLogedIn;
 	
-	@Column(name = "TRACK_FREQ")
+	@Column(name = "TRACK_FREQUENCY")
+	@ColumnDefault("'30'")
 	private Long trackFreq;
 	
 	@ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)

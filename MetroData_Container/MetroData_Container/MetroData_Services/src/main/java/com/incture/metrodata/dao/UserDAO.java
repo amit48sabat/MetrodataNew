@@ -108,7 +108,8 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			if (!ServicesUtil.isEmpty(userDetailsDTO.getTrackFreq())) {
 				detailsDo.setTrackFreq(userDetailsDTO.getTrackFreq());
 			}
-
+			else
+				detailsDo.setTrackFreq(30L);
 		}
 		return detailsDo;
 	}
@@ -182,6 +183,8 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			if (!ServicesUtil.isEmpty(detailsDo.getTrackFreq())) {
 				userDetailsDTO.setTrackFreq(detailsDo.getTrackFreq());
 			}
+			else
+				userDetailsDTO.setTrackFreq(30L);
 
 		}
 		return userDetailsDTO;

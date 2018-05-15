@@ -259,15 +259,21 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getAssignedUser())) {
 				deliveryHeaderDTO.setAssignedUser(deliveryHeaderDo.getAssignedUser());
 			}
-			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getValidationStatus())) {
-				deliveryHeaderDTO.setValidationStatus(deliveryHeaderDo.getValidationStatus());
-			}
-			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getAwbValidated())) {
-				deliveryHeaderDTO.setAwbValidated(deliveryHeaderDo.getAwbValidated());
-			}
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getAirwayBillNo())) {
 				deliveryHeaderDTO.setAirwayBillNo(deliveryHeaderDo.getAirwayBillNo());
 			}
+			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getValidationStatus())) {
+				deliveryHeaderDTO.setValidationStatus(deliveryHeaderDo.getValidationStatus());
+			}
+			else
+				deliveryHeaderDTO.setValidationStatus("false");
+			
+			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getAwbValidated())) {
+				deliveryHeaderDTO.setAwbValidated(deliveryHeaderDo.getAwbValidated());
+			}
+			else
+				deliveryHeaderDTO.setAwbValidated("false");
+			
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getWareHouseDetails())) {
 				deliveryHeaderDTO
 						.setWareHouseDetails(wareHouseDetailDao.exportDto(deliveryHeaderDo.getWareHouseDetails()));
