@@ -19,4 +19,30 @@ public enum RoleConstant {
 	public String getValue() {
 		return this.value;
 	}
+	
+   public static String getDisplayValue(String roleName){
+      String displayName = "SUPER ADMIN";
+      switch(roleName){
+      case "sales_admin":
+    	  displayName = "SALES ADMIN";
+    	  break;
+      case "courier_admin":
+    	  displayName = "COURIER ADMIN";
+    	  break;
+      case "admin_inside_jakarta":
+    	  displayName = "ADMIN INSIDE JAKARTA";
+    	  break;
+      case "admin_outside_jakarta":
+    	  displayName = "ADMIN OUTSIDE JAKARTA";
+    	  break;
+      case "inside_jakarta_driver":
+    	  displayName = "DRIVER INSIDE JAKARTA";
+    	  break;
+      case "outside_jakarta_driver":
+    	  displayName = "DRIVER OUTSIDE JAKARTA";
+    	  break;
+      }
+      
+      return displayName;
+    }
 }

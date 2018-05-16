@@ -17,6 +17,7 @@ import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.dto.WareHouseDetailsDTO;
 import com.incture.metrodata.service.RoleServiceLocal;
 import com.incture.metrodata.service.UserServiceLocal;
+import com.incture.metrodata.service.WareHouseServiceLocal;
 import com.incture.metrodata.util.ServicesUtil;
 
 @Component
@@ -33,6 +34,9 @@ public class AllStrategiesExampleBean {
 
 	@Autowired
 	RoleServiceLocal roleService;
+	
+	@Autowired
+	WareHouseServiceLocal wareHouseService;
 
 	@EventListener(ContextRefreshedEvent.class)
 	void contextRefreshedEvent() {
@@ -62,6 +66,12 @@ public class AllStrategiesExampleBean {
 		}
         
 		userService.createDefaultUser(userDto);
+		
+		// creating roles 
+		roleService.createAllRoles();
+		
+		// creating warehouse too
+		wareHouseService.refreshWareHouseListFromEcc();
 	}
 
 }

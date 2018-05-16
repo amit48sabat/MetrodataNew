@@ -176,6 +176,9 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 			dto.setTripped(false);
 			// setting status to create bcz in admin dashboard valid dns have status have status create only
 			dto.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
+			dto.setAirwayBillNo("null");
+			dto.setValidationStatus("false");
+			dto.setAwbValidated("false");
 			//deliveryHeaderDao.removeTripDeliveryNoteMapping(dto);
 		}
 

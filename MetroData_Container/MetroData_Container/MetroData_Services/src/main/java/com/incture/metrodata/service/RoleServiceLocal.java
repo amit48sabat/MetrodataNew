@@ -13,6 +13,7 @@ public interface RoleServiceLocal {
 	ResponseDto delete(RoleDetailsDTO dto);
 	RoleDetailsDTO getRoleByRoleName(String roleName);
 	ResponseDto getRoleByUser(UserDetailsDTO adminDto);
+	void createAllRoles();
 	
 	
 }
