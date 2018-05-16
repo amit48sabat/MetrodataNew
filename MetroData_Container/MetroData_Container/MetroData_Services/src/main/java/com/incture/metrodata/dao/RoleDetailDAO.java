@@ -88,7 +88,7 @@ public class RoleDetailDAO extends BaseDao<RoleDetailsDo, RoleDetailsDTO> {
 		String superAdmin = RoleConstant.SUPER_ADMIN.getValue();
 		ArrayList<String> outsideJkRoles = new ArrayList<>();
 		outsideJkRoles.add(RoleConstant.ADMIN_OUTSIDE_JAKARTA.getValue());
-		outsideJkRoles.add(RoleConstant.COURIER_ADMIN.getValue());
+		//outsideJkRoles.add(RoleConstant.COURIER_ADMIN.getValue());
 
 		// base query
 		String hql = "FROM RoleDetailsDo r WHERE r.roleName <> '" + roleName + "'";
