@@ -29,18 +29,31 @@ public class UserDetailController {
 	TripServiceLocal tripService;
 
 	@RequestMapping(method = RequestMethod.POST)
-	public ResponseDto create(@RequestBody UserDetailsDTO dto) {
+	public ResponseDto create(@RequestBody UserDetailsDTO dto, HttpServletRequest request) {
+		ResponseDto res = new ResponseDto();
+		String createdBy = "";
+		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
+			createdBy = request.getUserPrincipal().getName();
+		} else {
+			return ServicesUtil.getUnauthorizedResponseDto();
+
+		}
+
+		// setting created by and updated by of new user
+		dto.setCreatedBy(createdBy);
+		dto.setUpdatedBy(createdBy);
+
 		return userServiceLocal.create(dto);
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public ResponseDto findAll(HttpServletRequest request, @RequestParam(value="role", defaultValue= "") String role,
+	public ResponseDto findAll(HttpServletRequest request, @RequestParam(value = "role", defaultValue = "") String role,
 			@RequestParam(value = "firstResult", defaultValue = "0") String firstResult,
 			@RequestParam(value = "maxResult", defaultValue = "0") String maxResult) {
 
 		// setting pagination
 		ServicesUtil.setPagination(firstResult, maxResult);
-		
+
 		ResponseDto res = new ResponseDto();
 		String userId = "";
 		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
@@ -50,16 +63,29 @@ public class UserDetailController {
 
 		}
 		// validating user role if action not permitted then return
-		 res = userServiceLocal.validatedUserRoleByUserId(userId);
-		 if(!res.isStatus())
-			 return res;
-		 
-		UserDetailsDTO dto =  (UserDetailsDTO) res.getData();
-		return userServiceLocal.getUsersAssociatedWithAdmin(dto,role);
+		res = userServiceLocal.validatedUserRoleByUserId(userId);
+		if (!res.isStatus())
+			return res;
+
+		UserDetailsDTO dto = (UserDetailsDTO) res.getData();
+		return userServiceLocal.getUsersAssociatedWithAdmin(dto, role);
 	}
 
 	@RequestMapping(value = "/{userId}", method = RequestMethod.PUT)
-	public ResponseDto update(@PathVariable String userId, @RequestBody UserDetailsDTO dto) {
+	public ResponseDto update(@PathVariable String userId, @RequestBody UserDetailsDTO dto,
+			HttpServletRequest request) {
+		ResponseDto res = new ResponseDto();
+		String createdBy = "";
+		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
+			createdBy = request.getUserPrincipal().getName();
+		} else {
+			return ServicesUtil.getUnauthorizedResponseDto();
+
+		}
+
+		// setting updated by of new user
+
+		dto.setUpdatedBy(createdBy);
 		dto.setUserId(userId);
 
 		return userServiceLocal.update(dto);

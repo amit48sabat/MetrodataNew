@@ -84,6 +84,12 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			if (!ServicesUtil.isEmpty(userDetailsDTO.getParentId())) {
 				detailsDo.setParentId(userDetailsDTO.getParentId());
 			}
+			if (!ServicesUtil.isEmpty(userDetailsDTO.getCreatedBy())) {
+				detailsDo.setCreatedBy(userDetailsDTO.getCreatedBy());
+			}
+			if (!ServicesUtil.isEmpty(userDetailsDTO.getUpdatedBy())) {
+				detailsDo.setUpdatedBy(userDetailsDTO.getUpdatedBy());
+			}
 
 			/*
 			 * if (!ServicesUtil.isEmpty(userDetailsDTO.getWareHouseId())) {
@@ -159,6 +165,12 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 
 			if (!ServicesUtil.isEmpty(detailsDo.getTelephone())) {
 				userDetailsDTO.setTelephone(detailsDo.getTelephone());
+			}
+			if (!ServicesUtil.isEmpty(detailsDo.getCreatedBy())) {
+				userDetailsDTO.setCreatedBy(detailsDo.getCreatedBy());
+			}
+			if (!ServicesUtil.isEmpty(detailsDo.getUpdatedBy())) {
+				userDetailsDTO.setUpdatedBy(detailsDo.getUpdatedBy());
 			}
 			/*
 			 * if (!ServicesUtil.isEmpty(detailsDo.getWareHouseId())) {

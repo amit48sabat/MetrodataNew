@@ -51,6 +51,12 @@ public class UserDetailsDo implements BaseDo {
 	@Column(name = "TELEPHONE")
 	private String telephone;
 	
+	@Column(name = "CREATED_BY")
+	private String createdBy;
+	
+	@Column(name = "UPDATED_BY")
+	private String updatedBy;
+	
 	
 	@Column(name = "MOBILE_TOKEN")
 	@Lob

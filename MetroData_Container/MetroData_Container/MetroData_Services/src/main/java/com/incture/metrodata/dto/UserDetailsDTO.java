@@ -31,6 +31,8 @@ public class UserDetailsDTO extends BaseDto {
 	private String parentId;
 	private RoleDetailsDTO role;
 	private Long trackFreq;
+	private String createdBy;
+	private String updatedBy;
 	private Set<WareHouseDetailsDTO> wareHouseDetails = new HashSet<WareHouseDetailsDTO>(0);
 	private Set<CourierDetailsDTO> courierDetails = new HashSet<CourierDetailsDTO>(0);
 
