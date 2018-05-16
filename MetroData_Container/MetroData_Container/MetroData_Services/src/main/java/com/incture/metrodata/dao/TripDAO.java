@@ -281,7 +281,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	 * driverDashbord information
 	 */
 	@SuppressWarnings("unchecked")
-	public Object getDriverDashboardDetails(String userId) {
+	public HashMap<String, Long> getDriverDashboardDetails(String userId) {
 		String hql = "SELECT status,COUNT(tripId) AS count FROM TripDetailsDo WHERE user ='" + userId
 				+ "' GROUP BY status";
 		Query query = getSession().createQuery(hql);
@@ -344,6 +344,21 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		query.setParameter("driverId", userId);
 		Map<String, Long> result = (Map<String, Long>) query.uniqueResult();
 
+		return result;
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public Map<String, String> getLatestOngoingTrip(String userId) {
+		String hql = "select new map(t.tripId as tripId,t.status as status) from TripDetailsDo t "
+				+ "where t.user.userId= :userId "
+				//+ "and t.status=:tripStatus "
+				+ "order by t.createdAt desc";
+		Query query = getSession().createQuery(hql);
+		//query.setParameter("tripStatus", TripStatus.TRIP_STATUS_STARTED.getValue());
+		query.setParameter("userId", userId);
+		query.setMaxResults(1);
+		Map<String, String> result =  (Map<String, String>) query.uniqueResult();
 		return result;
 	}
 
@@ -652,6 +667,10 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			} else if (filterBy.equalsIgnoreCase("delivery_note")) {
 				hql += "  inner join t.deliveryHeader as d where d.deliveryNoteId like :searchParam ";
 			}
+			else if (filterBy.equalsIgnoreCase("airwayBillNo")) {
+				hql += "  inner join t.deliveryHeader as d where d.airwayBillNo like :searchParam ";
+			}
+
 
 			if (isStatus) {
 				hql += " AND t.status = :tripStatus ";

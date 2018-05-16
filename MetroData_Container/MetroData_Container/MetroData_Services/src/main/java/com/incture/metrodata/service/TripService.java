@@ -328,8 +328,11 @@ public class TripService implements TripServiceLocal {
 		try {
 
 			// fetching driver trip report
-			Object tripReport = tripDao.getDriverDashboardDetails(userId);
+			HashMap<String,String> onGoingTrip= (HashMap<String, String>) tripDao.getLatestOngoingTrip(userId);
+
+			HashMap<String, Long> tripReport = tripDao.getDriverDashboardDetails(userId);
 			Object deliveryNoteReport = tripDao.getDriversDeliveryNoteReport(userId);
+			
 			// fetching driver profile
 			String userProfileString = restInvoker.getDataFromServer("/Users/" + userId);
 			JsonParser parser = new JsonParser();
@@ -339,6 +342,11 @@ public class TripService implements TripServiceLocal {
 
 			// setting up response
 			Map<String, Object> map = new HashMap<>();
+			if(!ServicesUtil.isEmpty(onGoingTrip)){
+				map.put("trip_id", onGoingTrip.get("tripId"));
+				map.put("trip_status", onGoingTrip.get("status"));
+			}
+			
 			map.put("profile", object);
 			map.put("tripReport", tripReport);
 			map.put("deliveryNoteReport", deliveryNoteReport);

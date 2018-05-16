@@ -176,6 +176,9 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 			dto.setTripped(false);
 			// setting status to create bcz in admin dashboard valid dns have status have status create only
 			dto.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
+			dto.setAirwayBillNo("null");
+			dto.setValidationStatus("false");
+			dto.setAwbValidated("false");
 			//deliveryHeaderDao.removeTripDeliveryNoteMapping(dto);
 		}
 
@@ -360,6 +363,30 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
 			responseDto.setData(userList);
+			responseDto.setMessage(Message.SUCCESS.getValue());
+		} catch (Exception e) {
+			responseDto.setStatus(false);
+			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			responseDto.setMessage(Message.FAILED.getValue());
+			e.printStackTrace();
+		}
+		return responseDto;
+	}
+
+	/**
+	 * update list of delivery notes
+	 */
+	@Override
+	public ResponseDto updateList(List<DeliveryHeaderDTO> dtoList, UserDetailsDTO updaingUserDto) {
+		ResponseDto responseDto = new ResponseDto();
+
+		try {
+            for(DeliveryHeaderDTO dto: dtoList){
+            	update(dto,updaingUserDto);
+            }
+			responseDto.setStatus(true);
+			responseDto.setCode(HttpStatus.SC_OK);
+			responseDto.setData(dtoList);
 			responseDto.setMessage(Message.SUCCESS.getValue());
 		} catch (Exception e) {
 			responseDto.setStatus(false);

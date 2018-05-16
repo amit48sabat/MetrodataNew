@@ -131,9 +131,18 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getAssignedUser())) {
 				deliveryHeaderDo.setAssignedUser(deliveryHeaderDTO.getAssignedUser());
 			}
-			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getAirwayBillNo())) {
-				deliveryHeaderDo.setAirwayBillNo(deliveryHeaderDTO.getAirwayBillNo());
+			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getValidationStatus())) {
+				deliveryHeaderDo.setValidationStatus(deliveryHeaderDTO.getValidationStatus());
 			}
+			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getAwbValidated())) {
+				deliveryHeaderDo.setAwbValidated(deliveryHeaderDTO.getAwbValidated());
+			}
+			
+			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getAirwayBillNo()) 
+					&& !deliveryHeaderDTO.getAirwayBillNo().equalsIgnoreCase("null")) {
+				deliveryHeaderDo.setAirwayBillNo(deliveryHeaderDTO.getAirwayBillNo());
+			}else
+				deliveryHeaderDo.setAirwayBillNo(null);
 			
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getWareHouseDetails())) {
 				WareHouseDetailsDo wareHouseDo = new WareHouseDetailsDo();
@@ -253,9 +262,19 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getAssignedUser())) {
 				deliveryHeaderDTO.setAssignedUser(deliveryHeaderDo.getAssignedUser());
 			}
-			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getAirwayBillNo())) {
-				deliveryHeaderDTO.setAirwayBillNo(deliveryHeaderDo.getAirwayBillNo());
+			
+			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getValidationStatus())) {
+				deliveryHeaderDTO.setValidationStatus(deliveryHeaderDo.getValidationStatus());
 			}
+			else
+				deliveryHeaderDTO.setValidationStatus("false");
+			
+			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getAwbValidated())) {
+				deliveryHeaderDTO.setAwbValidated(deliveryHeaderDo.getAwbValidated());
+			}
+			else
+				deliveryHeaderDTO.setAwbValidated("false");
+			
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getWareHouseDetails())) {
 				deliveryHeaderDTO
 						.setWareHouseDetails(wareHouseDetailDao.exportDto(deliveryHeaderDo.getWareHouseDetails()));

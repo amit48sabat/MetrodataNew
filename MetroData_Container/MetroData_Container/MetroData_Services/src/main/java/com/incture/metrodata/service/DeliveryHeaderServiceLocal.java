@@ -1,6 +1,8 @@
 
 package com.incture.metrodata.service;
 
+import java.util.List;
+
 import com.incture.metrodata.dto.DeliveryHeaderDTO;
 import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.UserDetailsDTO;
@@ -30,4 +32,6 @@ public interface DeliveryHeaderServiceLocal {
 	ResponseDto getAllDeliveryNoteByAdminsWareHouse(UserDetailsDTO  adminDto);
 
 	ResponseDto getDeliveryNoteByStatus(UserDetailsDTO adminDto,String deliveryNoteId);
+
+	ResponseDto updateList(List<DeliveryHeaderDTO> dtoList, UserDetailsDTO updaingUserDto);
 }
