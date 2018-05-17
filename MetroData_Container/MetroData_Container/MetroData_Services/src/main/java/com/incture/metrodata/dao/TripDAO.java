@@ -350,10 +350,13 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 
 	@SuppressWarnings("unchecked")
 	public Map<String, String> getLatestOngoingTrip(String userId) {
+		List<String> dnList = new ArrayList<>();
+		dnList.add(TripStatus.TRIP_STATUS_STARTED.getValue());
+		dnList.add(TripStatus.TRIP_STATUS_DRIVER_ASSIGNED.getValue());
 		String hql = "select new map(t.tripId as tripId,t.status as status) from TripDetailsDo t "
-				+ "where t.user.userId= :userId " + "and t.status=:tripStatus " + "order by t.createdAt desc";
+				+ "where t.user.userId= :userId " + "and t.status in (:tripStatus) " + "order by t.createdAt desc";
 		Query query = getSession().createQuery(hql);
-		query.setParameter("tripStatus", TripStatus.TRIP_STATUS_STARTED.getValue());
+		query.setParameterList("tripStatus", dnList);
 		query.setParameter("userId", userId);
 		query.setMaxResults(1);
 		Map<String, String> result = (Map<String, String>) query.uniqueResult();
