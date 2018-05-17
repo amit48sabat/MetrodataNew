@@ -698,17 +698,19 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
 			wareHouseIds.add(wareHouse.getWareHouseId());
 
+		List<String> driverList = null;
 		List<String> driverRole = new ArrayList<>();
 		driverRole.add(RoleConstant.INSIDE_JAKARTA_DRIVER.getValue());
 		driverRole.add(RoleConstant.OUTSIDE_JAKARTA_DRIVER.getValue());
 		boolean isSuperAdmin = false;
-		String addWarehouseListCriteria = "";
+		String andUserCreatedBy = "";
 		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
 				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
-			addWarehouseListCriteria = "";
+			andUserCreatedBy = "";
 			isSuperAdmin = true;
 		} else {
-			addWarehouseListCriteria = " AND w.wareHouseId IN (:warehouselist) ";
+			driverList = userDAO.getDriversAssociatedWithAdmin(userId, roleName);
+			andUserCreatedBy = " AND u.userId IN (:driverList) ";
 		}
 
 		ArrayList<String> totalStatus = new ArrayList<>();
@@ -727,8 +729,8 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 				+ sDateAndeDate + ") as del_note_partially_rejected, "
 				+ " (select Count(dh.status) from DeliveryHeaderDo as dh WHERE dh.assignedUser = u.userId AND dh.status ='del_note_rejected' "
 				+ sDateAndeDate + ") as del_note_rejected " + " ) "
-				+ " from TripDetailsDo as t  inner join t.deliveryHeader as dh inner join t.user as u inner join u.wareHouseDetails as w inner join u.role as r "
-				+ " where r.roleName IN (:driver) " + addWarehouseListCriteria + " ";
+				+ " from TripDetailsDo as t  inner join t.deliveryHeader as dh inner join t.user as u  inner join u.role as r "
+				+ " where r.roleName IN (:driver) " + andUserCreatedBy + " ";
 
 		/*
 		 * if (!ServicesUtil.isEmpty(dto.getFrom()) &&
@@ -743,16 +745,14 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 
 		query.setParameterList("driver", driverRole);
 		query.setParameterList("totalstatus", totalStatus);
-		// setting time range
+         // setting time range 
 		query.setParameter("stDate", dto.getFrom());
 		query.setParameter("edDate", dto.getTo());
 
 		if (!isSuperAdmin) {
-			// send no data on if warehouse if is empty
-			if (ServicesUtil.isEmpty(wareHouseIds))
-				return new HashMap<String, Long>();
-			query.setParameterList("warehouselist", wareHouseIds);
+			query.setParameterList("driverList", driverList);
 		}
+		
 		return query.list();
 	}
 

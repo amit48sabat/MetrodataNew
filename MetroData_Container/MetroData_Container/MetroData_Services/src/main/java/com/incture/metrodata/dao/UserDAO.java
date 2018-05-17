@@ -279,4 +279,31 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
          else
     		return exportDto(resDo);
 	}
+	
+	@SuppressWarnings("unchecked")
+	public List<String> getDriversAssociatedWithAdmin(String adminId, String role){
+		
+		if (role.equals(RoleConstant.SUPER_ADMIN.getValue())
+				|| role.equals(RoleConstant.SALES_ADMIN.getValue()))
+			return null;
+		
+		List<String> driverRole = new ArrayList<>();
+		driverRole.add(RoleConstant.INSIDE_JAKARTA_DRIVER.getValue());
+		driverRole.add(RoleConstant.OUTSIDE_JAKARTA_DRIVER.getValue());
+		String hql = " SELECT u.userId from UserDetailsDo as u INNER JOIN u.role as r  where u.createdBy = :adminId "
+				     +" AND r.roleName in (:role)";
+		
+		if(role.equalsIgnoreCase(RoleConstant.ADMIN_OUTSIDE_JAKARTA.getValue())){
+			hql = "SELECT  u.userId from UserDetailsDo as u INNER JOIN u.role as r where u.createdBy In "
+					+ " (SELECT distinct u.userId FROM UserDetailsDo AS  u   WHERE u.createdBy = :adminId ) AND r.roleName in (:role)";
+		}
+		
+		Query query = getSession().createQuery(hql);
+		
+		query.setParameter("adminId", adminId);
+		query.setParameterList("role", driverRole);
+		
+		List<String> driversList  = (List<String>) query.list();
+		return driversList;
+	}
 }
