@@ -226,11 +226,18 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 		// get all the user list if role is super_admin or sales_admin
 		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
 				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
-			hql = "SELECT u FROM UserDetailsDo AS u INNER JOIN u.role as r WHERE u.userId !=:adminId ";
+			hql = "SELECT  u FROM UserDetailsDo AS u INNER JOIN u.role as r WHERE u.userId != :adminId ";
 			isSuperAdmin = true;
-		} else {
-			hql = "SELECT u from UserDetailsDo as u INNER JOIN u.role as r  where u.userId In "
-					+ "(SELECT distinct u.userId FROM UserDetailsDo AS  u inner join u.wareHouseDetails AS w WHERE w.wareHouseId IN (:warehouselist) AND u.userId !=:adminId)";
+		} else if(roleName.equals(RoleConstant.ADMIN_INSIDE_JAKARTA.getValue())
+				|| roleName.equals(RoleConstant.COURIER_ADMIN.getValue())){
+			hql = "SELECT  u from UserDetailsDo as u INNER JOIN u.role as r  where u.userId In "
+					+ "( SELECT distinct u.userId from UserDetailsDo as u "
+					+ " WHERE u.createdBy = :adminId )";
+		}
+		else {
+			// else admin outside jakarta 
+			hql = "SELECT  u from UserDetailsDo as u INNER JOIN u.role as r  where u.createdBy In "
+					+ " (SELECT distinct u.userId FROM UserDetailsDo AS  u  WHERE u.createdBy = :adminId) Or u.createdBy = :adminId ";
 		}
 		
 		// if queryParam is not empty apply restriction for that
@@ -245,13 +252,13 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 		
 		query.setFirstResult(PaginationUtil.FIRST_RESULT);
 		query.setMaxResults(PaginationUtil.MAX_RESULT);
-		if (!isSuperAdmin) {
+		/*if (!isSuperAdmin) {
 			// send no data on if warehouse if is empty
 			if (ServicesUtil.isEmpty(wareHouseIds))
 				return new ArrayList<UserDetailsDTO>();
 
-			query.setParameterList("warehouselist", wareHouseIds);
-		}
+			
+		}*/
 
 		query.setParameter("adminId", adminId);
 		ArrayList<UserDetailsDo> result = (ArrayList<UserDetailsDo>) query.list();

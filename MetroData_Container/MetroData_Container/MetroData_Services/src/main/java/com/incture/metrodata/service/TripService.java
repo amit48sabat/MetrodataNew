@@ -179,11 +179,11 @@ public class TripService implements TripServiceLocal {
 		String status = dto.getStatus();
 		Date currDate = new Date();
 		// if trip status is ENROUTE
-		if (status.equalsIgnoreCase(TripStatus.TRIP_STATUS_STARTED.getValue())) {
+		if (status.equalsIgnoreCase(TripStatus.TRIP_STATUS_STARTED.getValue()) && ServicesUtil.isEmpty(dto.getStartTime())) {
 			dto.setStartTime(currDate);
 		}
 		// if trip status is ENROUTE
-		if (status.equalsIgnoreCase(TripStatus.TRIP_STATUS_COMPLETED.getValue())) {
+		if (status.equalsIgnoreCase(TripStatus.TRIP_STATUS_COMPLETED.getValue()) && ServicesUtil.isEmpty(dto.getEndTime())) {
 			dto.setEndTime(currDate);
 		}
 
