@@ -505,9 +505,9 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			isSuperAdmin = true;
 		} else if (roleName.equals(RoleConstant.ADMIN_INSIDE_JAKARTA.getValue())
 				|| roleName.equals(RoleConstant.ADMIN_OUTSIDE_JAKARTA.getValue())) {
-			hql = " SELECT distinct t FROM TripDetailsDo AS t t.createdBy = :createdBy ORDER BY t.createdAt desc";
+			hql = " SELECT distinct t FROM TripDetailsDo AS t where t.createdBy = :createdBy ORDER BY t.createdAt desc";
 		} else if (roleName.equals(RoleConstant.COURIER_ADMIN.getValue())) {
-			hql = " SELECT distinct t FROM TripDetailsDo AS t t.user.createdBy = :createdBy ORDER BY t.createdAt desc";
+			hql = " SELECT distinct t FROM TripDetailsDo AS t where t.user.createdBy = :createdBy ORDER BY t.createdAt desc";
 		}
 		Query query = getSession().createQuery(hql);
 		if (!isSuperAdmin) {
