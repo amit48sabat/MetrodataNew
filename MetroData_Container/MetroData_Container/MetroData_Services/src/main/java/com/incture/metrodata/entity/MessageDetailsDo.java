@@ -23,10 +23,12 @@ import org.hibernate.annotations.FetchMode;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Setter
 @Getter
+@ToString
 @Table(name = "MESSAGE_DETAILS")
 public class MessageDetailsDo implements BaseDo {
 

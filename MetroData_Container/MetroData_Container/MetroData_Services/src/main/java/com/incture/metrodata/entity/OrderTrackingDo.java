@@ -12,9 +12,11 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import lombok.Data;
+import lombok.ToString;
 
 @Entity
 @Data
+@ToString
 @Table(name = "ORDER_TRACKING_DETAILS")
 public class OrderTrackingDo implements BaseDo{
 	

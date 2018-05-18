@@ -20,9 +20,11 @@ import javax.persistence.TemporalType;
 import com.incture.metrodata.util.SortDHDoByDeliveryOrder;
 
 import lombok.Data;
+import lombok.ToString;
 
 @Entity
 @Data // for auto generation of getters and setters
+@ToString
 @Table(name = "TRIP_DETAILS")
 public class TripDetailsDo implements BaseDo {
 

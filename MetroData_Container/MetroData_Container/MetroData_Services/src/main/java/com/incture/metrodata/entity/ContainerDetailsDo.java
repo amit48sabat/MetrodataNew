@@ -11,10 +11,12 @@ import javax.persistence.TableGenerator;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Getter
 @Setter
+@ToString
 @Table(name = "CONTAINER_DETAILS")
 public class ContainerDetailsDo implements BaseDo {
 

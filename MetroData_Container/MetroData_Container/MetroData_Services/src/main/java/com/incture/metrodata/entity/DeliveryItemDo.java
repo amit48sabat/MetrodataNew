@@ -10,9 +10,11 @@ import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 
 import lombok.Data;
+import lombok.ToString;
 
 @Entity
 @Data
+@ToString
 @Table(name = "DELIVERY_ITEM")
 public class DeliveryItemDo implements BaseDo {
 	

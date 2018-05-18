@@ -21,6 +21,7 @@ import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Where;
 
 import lombok.Data;
+import lombok.ToString;
 
 /**
  * @author Lucky.Barkane
@@ -28,6 +29,7 @@ import lombok.Data;
  */
 @Entity
 @Data
+@ToString
 @Table(name = "DELIVERY_HEADER")
 @Where(clause = "DELETED = 0")
 public class DeliveryHeaderDo implements BaseDo {

@@ -22,9 +22,11 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
 
 import lombok.Data;
+import lombok.ToString;
 
 @Entity
 @Data
+@ToString
 @Table(name = "USER_DETAILS")
 @DynamicUpdate(true)
 public class UserDetailsDo implements BaseDo {

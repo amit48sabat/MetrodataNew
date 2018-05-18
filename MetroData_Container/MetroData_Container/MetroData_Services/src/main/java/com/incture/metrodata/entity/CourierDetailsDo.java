@@ -14,9 +14,11 @@ import javax.persistence.TemporalType;
 import org.hibernate.annotations.DynamicUpdate;
 
 import lombok.Data;
+import lombok.ToString;
 
 @Entity
 @Data
+@ToString
 @Table(name = "COURIER_DETAILS")
 @DynamicUpdate(true)
 public class CourierDetailsDo implements BaseDo {
