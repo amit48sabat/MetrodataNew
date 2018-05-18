@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.incture.metrodata.dto.FilterDTO;
 import com.incture.metrodata.dto.ResponseDto;
@@ -43,6 +45,8 @@ public class TripController {
 	@Autowired
 	UserServiceLocal userServiceLocal;
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(TripController.class);
+	
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseDto create(@RequestBody TripDetailsDTO dto, HttpServletRequest request) {
 		String userId = "";
@@ -64,6 +68,8 @@ public class TripController {
 		dto.setUpdatedBy(userId);
 		// setting tracking feq for trip as per admin frq.
 		dto.setTrackFreq(adminDto.getTrackFreq());
+		
+		LOGGER.error("INSIDE CREATE TRIP CONTROLLER. TRIP CREATOR ID "+userId);
 		
 		return tripService.create(dto);
 	}
@@ -91,6 +97,7 @@ public class TripController {
 
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
 
+		LOGGER.error("INSIDE FIND ALL TRIPS CONTROLLER. ADMIN ID "+adminDto.getUserId());
 		return tripService.getAllTripsAssociatedWithAdminsDrivers(adminDto);
 	}
 
@@ -111,6 +118,7 @@ public class TripController {
 		
 
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
+		LOGGER.error("INSIDE FIND TRIP CONTROLLER WITH USER ID "+userId);
 		return tripService.findByParam(dto,adminDto);
 	}
 
@@ -124,6 +132,7 @@ public class TripController {
 		dto.setUpdatedBy(userId);
 
 		dto.setTripId(tripId);
+		LOGGER.error("INSIDE UPDATE TRIP CONTROLLER WITH USER ID "+userId);
 		return tripService.update(dto);
 	}
 
@@ -149,6 +158,7 @@ public class TripController {
 		
 
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
+		LOGGER.error("INSIDE FILTER TRIP CONTROLLER WITH USER ID "+userId);
 		return tripService.filterTripsAsPerAdmin(adminDto, dto);
 		// return tripService.filter(dto);
 	}
@@ -166,6 +176,7 @@ public class TripController {
 		Long s, e;
 		s = Long.parseLong(start);
 		e = Long.parseLong(end);
+		LOGGER.error("INSIDE ASSIGN DRIVER TO TRIP CONTROLLER WITH USER ID "+userId);
 		return tripService.getTripHistoryByDriverId(userId, s, e);
 	}
 
@@ -192,6 +203,7 @@ public class TripController {
 		
 
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
+		LOGGER.error("INSIDE LEADERBOARD TRIP CONTROLLER WITH USER ID "+userId);
 		return tripService.getLeaderBoardAssociatedWithAdmin(dto, adminDto);
 		// return tripService.leaderBoard(dto);
 	}
@@ -205,7 +217,7 @@ public class TripController {
 
 		HttpHeaders header = new HttpHeaders();
 		header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + "manifest_" + tripId + ".pdf");
-
+		LOGGER.error("INSIDE MENIFEST TRIP CONTROLLER.");
 		InputStream stream = new FileInputStream(f);
 		InputStreamResource resource = new InputStreamResource(stream);
 		return ResponseEntity.ok().headers(header).contentType(MediaType.parseMediaType("application/pdf"))
