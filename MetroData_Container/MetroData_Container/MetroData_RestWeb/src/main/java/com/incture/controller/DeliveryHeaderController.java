@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -34,9 +36,12 @@ class DeliveryHeaderController {
 	@Autowired
 	UserServiceLocal userServiceLocal;
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(DeliveryHeaderController.class);
+	
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseDto createDeliveryNote(@RequestBody DeliveryHeaderDTO dto) {
 		// LOGGER.info("Inside delivery data creation");
+		LOGGER.error("INSIDE CREATE DELIVERY NOTE CONTROLLER.");
 		return deliveryHeaderServiceLocal.create(dto);
 	}
 
@@ -56,6 +61,8 @@ class DeliveryHeaderController {
 		userDto = (UserDetailsDTO) res.getData();
 		// LOGGER.info("Inside delivery data creation");
 		dto.setDeliveryNoteId(deliveryNoteId);
+		
+		LOGGER.error("INSIDE UPDATE DELIVERY NOTE CONTROLLER. USER ID "+userId);
 		return deliveryHeaderServiceLocal.update(dto, userDto);
 	}
 
@@ -81,7 +88,7 @@ class DeliveryHeaderController {
 			return ServicesUtil.getUnauthorizedResponseDto();
 
 		UserDetailsDTO dto = (UserDetailsDTO) res.getData();
-		// LOGGER.info("Inside delivery data creation");
+		LOGGER.error("INSIDE FIND ALL DELIVERY NOTE CONTROLLER. USER ID "+userId);
 		return deliveryHeaderServiceLocal.getAllDeliveryNoteByAdminsWareHouse(dto);
 	}
 
@@ -102,7 +109,7 @@ class DeliveryHeaderController {
 			return ServicesUtil.getUnauthorizedResponseDto();
 
 		UserDetailsDTO dto = (UserDetailsDTO) res.getData();
-		// LOGGER.info("Inside delivery data creation");
+		LOGGER.error("INSIDE GET DELIVERY NOTE BY STATUS CONTROLLER. USER ID "+userId);
 		return deliveryHeaderServiceLocal.getDeliveryNoteByStatus(dto,status);
 	}
 
@@ -127,6 +134,7 @@ class DeliveryHeaderController {
 			res = userServiceLocal.find(userDto);
 
 			userDto = (UserDetailsDTO) res.getData();
+			LOGGER.error("INSIDE LIST UPDATE DELIVERY NOTE CONTROLLER. USER ID "+userId);
 		return deliveryHeaderServiceLocal.updateList(dtoList,userDto);
 	}
 }
