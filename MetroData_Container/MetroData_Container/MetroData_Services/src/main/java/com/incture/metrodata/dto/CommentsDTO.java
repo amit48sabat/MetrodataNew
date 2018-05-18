@@ -7,9 +7,11 @@ import com.incture.metrodata.util.DB_Operation;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class CommentsDTO extends BaseDto {
 
 	private Long id;

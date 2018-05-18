@@ -7,9 +7,11 @@ import com.incture.metrodata.util.DB_Operation;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class WareHouseDetailsDTO extends BaseDto {
 	private String wareHouseId;
 	private String wareHouseName;

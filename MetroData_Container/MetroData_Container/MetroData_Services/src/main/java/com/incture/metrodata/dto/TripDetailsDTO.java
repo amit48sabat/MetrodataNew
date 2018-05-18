@@ -10,9 +10,11 @@ import com.incture.metrodata.util.SortDhDTOByDeliveryOrder;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class TripDetailsDTO extends BaseDto {
 	private String tripId;
 	private String status;
