@@ -2,6 +2,8 @@ package com.incture.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -30,6 +32,8 @@ public class AdminController {
 	
 	@Autowired
 	UserServiceLocal userServiceLocal;
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(AdminController.class);
 	
 	@RequestMapping(value = "/dashboard", method = RequestMethod.GET)
 	public ResponseDto adminDashbord(HttpServletRequest request) {
@@ -47,6 +51,7 @@ public class AdminController {
 			 return ServicesUtil.getUnauthorizedResponseDto();;
 		 
 		UserDetailsDTO adminDto =  (UserDetailsDTO) res.getData();
+		LOGGER.error("INSIDE ADMIN DASHBOARD CONTROLLER. ADMIN ID "+userId);
 		return tripServiceLocal.getAdminDashboardAssociatedWithAdmins(adminDto);
 		//return deliveryHeaderServiceLocal.adminDashboardService();
 	}

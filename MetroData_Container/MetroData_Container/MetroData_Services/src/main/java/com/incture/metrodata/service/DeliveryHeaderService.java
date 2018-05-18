@@ -9,6 +9,8 @@ import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,6 +56,8 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 	@Autowired
 	MessageServiceLocal messageService;
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(DeliveryHeaderService.class);
+
 	/**
 	 * api for creating delivery header
 	 */
@@ -69,9 +73,7 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 				dto.setLongitude(latAndLong.get("lng"));
 			}
 
-			/*
-			 * Date currDate = new Date(); dto.setCreatedDate(currDate);
-			 */
+			LOGGER.error("INSIDE CREATE DELIVERY NOTE SERVICE. DELIVERY NOTE ID " + dto.getDeliveryNoteId());
 
 			DeliveryHeaderDo dos = new DeliveryHeaderDo();
 
@@ -104,7 +106,7 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 	public ResponseDto update(DeliveryHeaderDTO dto, UserDetailsDTO updatingUserDto) {
 		ResponseDto responseDto = new ResponseDto();
 		try {
-			String deliveyNoteStatus  = dto.getStatus();
+			String deliveyNoteStatus = dto.getStatus();
 			if (!ServicesUtil.isEmpty(dto.getFileContent())) {
 
 				byte[] decodedString;
@@ -117,7 +119,7 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 			}
 			if (!ServicesUtil.isEmpty(dto.getStatus()))
 				updateDeliveryHeaderStatusConstraints(dto, updatingUserDto);
-			
+
 			// setting lat and long
 			if (!ServicesUtil.isEmpty(dto.getShipToAddress())) {
 				String address = dto.getShipToAddress();
@@ -125,6 +127,8 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 				dto.setLatitude(latAndLong.get("lat"));
 				dto.setLongitude(latAndLong.get("lng"));
 			}
+
+			LOGGER.error("INSIDE UPDATE DELIVERY NOTE SERVICE. DELIVERY NOTE ID " + dto.getDeliveryNoteId());
 
 			setCreatedAtAndUpdatedAtForDto(dto);
 			dto = deliveryHeaderDao.update(dto);
@@ -174,19 +178,20 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 		// notifying the corresponding trip driver
 		if (status.equalsIgnoreCase(DeliveryNoteStatus.ADMIN_DN_INVALIDATED.getValue())) {
 			dto.setTripped(false);
-			// setting status to create bcz in admin dashboard valid dns have status have status create only
+			// setting status to create bcz in admin dashboard valid dns have
+			// status have status create only
 			dto.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
 			dto.setAirwayBillNo("null");
 			dto.setValidationStatus("false");
 			dto.setAwbValidated("false");
-			//deliveryHeaderDao.removeTripDeliveryNoteMapping(dto);
+			// deliveryHeaderDao.removeTripDeliveryNoteMapping(dto);
 		}
 
 	}
 
 	private void sendNotificationToDriverWhenAdminUpdateDnStatus(DeliveryHeaderDTO headerDto, UserDetailsDTO adminDto)
 			throws IOException {
- 
+
 		// getting the corresponding trip driver
 		UserDetailsDTO driverDto = tripDao.getDriverFromTripByDN(headerDto);
 		if (!ServicesUtil.isEmpty(driverDto) && !ServicesUtil.isEmpty(driverDto.getMobileToken())) {
@@ -194,7 +199,8 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 			String body = "Admin " + adminDto.getFirstName() + " (" + adminDto.getUserId()
 					+ ") has updated the status of deliveryNote with  id " + "" + headerDto.getDeliveryNoteId()
 					+ "  to " + DeliveryNoteStatus.getDnStatusDisplayValue(headerDto.getStatus());
-			//notification.sendNotification(title, driverDto.getMobileToken(), body);
+			// notification.sendNotification(title, driverDto.getMobileToken(),
+			// body);
 
 			MessageDetailsDTO messageDto = new MessageDetailsDTO();
 			messageDto.setTitle(title);
@@ -204,6 +210,9 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 			messageDto.setUpdatedBy(adminDto.getUserId());
 			messageDto.setType(MessageType.NOTIFICATION.getValue());
 			messageService.create(messageDto, adminDto.getUserId());
+
+			LOGGER.error("NOTIFICATION SEND TO DRIVER ID " + driverDto.getUserId() + " AS ADMIN ID "
+					+ adminDto.getUserId() + " UPDATED THE DELIVERY NOTE ID " + headerDto.getDeliveryNoteId());
 		}
 
 		// if admin invalidated dn then removing the mapping of trip and dn and
@@ -255,8 +264,8 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 
 	@Override
 	/**
-	 * api for admin dashbord
-	 *  not in use
+	 * api for admin dashbord not in use
+	 * 
 	 * @return
 	 */
 	public ResponseDto adminDashboardService() {
@@ -351,14 +360,14 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 	}
 
 	@Override
-	public ResponseDto getDeliveryNoteByStatus(UserDetailsDTO adminDto,String deliveryNoteStatus) {
+	public ResponseDto getDeliveryNoteByStatus(UserDetailsDTO adminDto, String deliveryNoteStatus) {
 		ResponseDto responseDto = new ResponseDto();
 
 		try {
 
 			// adminDto = userDao.findById(adminDto);
 			Object userList = deliveryHeaderDao.getDeliveryNoteByStatus(adminDto.getUserId(),
-					adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails(),deliveryNoteStatus);
+					adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails(), deliveryNoteStatus);
 
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
@@ -381,9 +390,11 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 		ResponseDto responseDto = new ResponseDto();
 
 		try {
-            for(DeliveryHeaderDTO dto: dtoList){
-            	update(dto,updaingUserDto);
-            }
+			
+			LOGGER.error("INSIDE LIST UPDATE DELIVERY NOTE. REQUEST PAYLOAD "+dtoList);	
+			for (DeliveryHeaderDTO dto : dtoList) {
+				update(dto, updaingUserDto);
+			}
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
 			responseDto.setData(dtoList);

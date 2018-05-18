@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.management.relation.Role;
-
 import org.apache.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,9 +64,11 @@ public class TripService implements TripServiceLocal {
 
 	@Autowired
 	RESTInvoker restInvoker;
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(TripService.class);
 
 	/**
-	 * api for creating the trip
+	 * api for creating the trip (\/)
 	 */
 	@Override
 	public ResponseDto create(TripDetailsDTO dto) {
@@ -88,7 +90,7 @@ public class TripService implements TripServiceLocal {
 			TripDetailsDo dos = new TripDetailsDo();
 
 			// setTripDoForTripCreate(dto, dos);
-
+			LOGGER.error("INSIDE CREATE TRIP SERVICE. TRIP ID "+tripId);
 			dto = tripDao.create(dto, dos);
 
 			responseDto.setStatus(true);
@@ -98,7 +100,7 @@ public class TripService implements TripServiceLocal {
 		}
 		catch (InvalidInputFault e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			////LOGGER.error("ERROR WHILE CREATING TRIP : " +e.getMessage());
 			responseDto.setStatus(false);
 			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			responseDto.setMessage(e.getMessage());
@@ -106,6 +108,7 @@ public class TripService implements TripServiceLocal {
 		}
 		catch (Exception e) {
 			responseDto.setStatus(false);
+			////LOGGER.error("ERROR WHILE CREATING TRIP : " +e.getMessage());
 			responseDto.setCode(500);
 			responseDto.setMessage(Message.FAILED + " : " + e.getMessage());
 			e.printStackTrace();
@@ -145,7 +148,7 @@ public class TripService implements TripServiceLocal {
 	}
 
 	/**
-	 * api for updating the trip
+	 * api for updating the trip (\/)
 	 */
 	@Override
 	public ResponseDto update(TripDetailsDTO dto) {
@@ -162,7 +165,7 @@ public class TripService implements TripServiceLocal {
 			if (!ServicesUtil.isEmpty(dto.getUser())) {
 				setAssignedUserInDeliveryHeader(dto);
 			}
-
+			LOGGER.error("INSIDE UPDATE TRIP SERVICE. TRIP ID "+dto.getTripId());
 			dto = tripDao.update(dto);
 
 			responseDto.setStatus(true);
@@ -171,8 +174,7 @@ public class TripService implements TripServiceLocal {
 			responseDto.setMessage(Message.SUCCESS.toString() + " : Trip updated with id " + dto.getTripId());
 		}
 		catch (InvalidInputFault e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//LOGGER.error("ERROR WHILE CREATING TRIP : " +e.getMessage());
 			responseDto.setStatus(false);
 			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			responseDto.setMessage(e.getMessage());
@@ -180,7 +182,9 @@ public class TripService implements TripServiceLocal {
 		}
 		catch (Exception e) {
 			responseDto.setStatus(false);
+			//LOGGER.error("ERROR WHILE CREATING TRIP : " +e.getMessage());
 			responseDto.setCode(500);
+			e.printStackTrace();
 			responseDto.setMessage(Message.FAILED + " : " + e.getMessage());
 		}
 		return responseDto;
@@ -212,7 +216,7 @@ public class TripService implements TripServiceLocal {
 	}
 
 	/**
-	 * api for searching trip by trip id or trip status
+	 * api for searching trip by trip id or trip status (\/)
 	 */
 
 	@Override
@@ -241,7 +245,7 @@ public class TripService implements TripServiceLocal {
 				List<TripDetailsDTO> tripList = tripDao.findTripByParam(dto, adminDto);
 				responseDto.setData(tripList);
 			}
-
+			LOGGER.error("INSIDE FIND TRIP BY PARAM SERVICE. TRIP ID "+dto.getTripId());
 			responseDto.setStatus(true);
 			responseDto.setCode(200);
 			responseDto.setMessage(Message.SUCCESS.toString());
@@ -250,6 +254,7 @@ public class TripService implements TripServiceLocal {
 			responseDto.setStatus(false);
 			responseDto.setCode(500);
 			responseDto.setMessage(Message.FAILED + " : " + e.getMessage());
+			////LOGGER.error("ERROR WHILE CREATING TRIP : " +e.getMessage());
 			e.printStackTrace();
 		}
 		return responseDto;
@@ -271,7 +276,7 @@ public class TripService implements TripServiceLocal {
 		 */
 
 	/**
-	 * api for deleting the trip by trip id
+	 * api for deleting the trip by trip id (\/)
 	 */
 	@Override
 	public ResponseDto delete(String tripId) {
@@ -281,7 +286,7 @@ public class TripService implements TripServiceLocal {
 			tripDetailsDTO.setTripId(tripId);
 
 			tripDao.deleteById(tripDetailsDTO);
-
+			LOGGER.error("INSIDE DELETE TRIP BY ID SERVICE.");
 			responseDto.setStatus(true);
 			responseDto.setCode(200);
 			responseDto.setMessage(Message.SUCCESS.toString());
@@ -289,6 +294,7 @@ public class TripService implements TripServiceLocal {
 			responseDto.setStatus(false);
 			responseDto.setCode(500);
 			responseDto.setMessage(Message.FAILED + " : " + e.getMessage());
+			////LOGGER.error("ERROR WHILE CREATING TRIP : " +e.getMessage());
 		}
 		return responseDto;
 	}
@@ -303,7 +309,6 @@ public class TripService implements TripServiceLocal {
 			TripDetailsDTO tripDetailsDTO = new TripDetailsDTO();
 
 			Object tripList = tripDao.findAll(tripDetailsDTO);
-
 			responseDto.setStatus(true);
 			responseDto.setCode(200);
 			responseDto.setData(tripList);
@@ -322,7 +327,7 @@ public class TripService implements TripServiceLocal {
 	@Override
 	public ResponseDto filter(FilterDTO dto) {
 		ResponseDto responseDto = new ResponseDto();
-		try {
+		/*try {
 			Object data = tripDao.filterRecords(dto);
 			responseDto.setStatus(true);
 			responseDto.setCode(200);
@@ -334,7 +339,7 @@ public class TripService implements TripServiceLocal {
 			responseDto.setStatus(false);
 			responseDto.setCode(500);
 			responseDto.setMessage(Message.FAILED + " : " + e.getMessage());
-		}
+		}*/
 		return responseDto;
 	}
 
@@ -347,46 +352,42 @@ public class TripService implements TripServiceLocal {
 	 */
 	public ResponseDto driverDashboardService(String userId) {
 		ResponseDto responseDto = new ResponseDto();
-
-		try {
-
-			// fetching driver trip report
-			HashMap<String,String> onGoingTrip= (HashMap<String, String>) tripDao.getLatestOngoingTrip(userId);
-
-			HashMap<String, Long> tripReport = tripDao.getDriverDashboardDetails(userId);
-			Object deliveryNoteReport = tripDao.getDriversDeliveryNoteReport(userId);
-			
-			// fetching driver profile
-			String userProfileString = restInvoker.getDataFromServer("/Users/" + userId);
-			JsonParser parser = new JsonParser();
-			JsonElement mJson = parser.parse(userProfileString);
-			Gson gson = new Gson();
-			Object object = gson.fromJson(mJson, Object.class);
-
-			// setting up response
-			Map<String, Object> map = new HashMap<>();
-			if(!ServicesUtil.isEmpty(onGoingTrip)){
-				map.put("trip_id", onGoingTrip.get("tripId"));
-				map.put("trip_status", onGoingTrip.get("status"));
-			}
-			
-			map.put("profile", object);
-			map.put("tripReport", tripReport);
-			map.put("deliveryNoteReport", deliveryNoteReport);
-			responseDto.setCode(200);
-			responseDto.setStatus(true);
-			responseDto.setData(map);
-			responseDto.setMessage(Message.SUCCESS + "");
-		} catch (Exception e) {
-			responseDto.setCode(500);
-			responseDto.setStatus(false);
-			e.printStackTrace();
-			responseDto.setMessage(e.getMessage());
-		}
-
+		/*
+		 * try {
+		 * 
+		 * // fetching driver trip report HashMap<String,String> onGoingTrip=
+		 * (HashMap<String, String>) tripDao.getLatestOngoingTrip(userId);
+		 * 
+		 * HashMap<String, Long> tripReport =
+		 * tripDao.getDriverDashboardDetails(userId); Object deliveryNoteReport
+		 * = tripDao.getDriversDeliveryNoteReport(userId);
+		 * 
+		 * // fetching driver profile String userProfileString =
+		 * restInvoker.getDataFromServer("/Users/" + userId); JsonParser parser
+		 * = new JsonParser(); JsonElement mJson =
+		 * parser.parse(userProfileString); Gson gson = new Gson(); Object
+		 * object = gson.fromJson(mJson, Object.class);
+		 * 
+		 * // setting up response Map<String, Object> map = new HashMap<>();
+		 * if(!ServicesUtil.isEmpty(onGoingTrip)){ map.put("trip_id",
+		 * onGoingTrip.get("tripId")); map.put("trip_status",
+		 * onGoingTrip.get("status")); }
+		 * 
+		 * map.put("profile", object); map.put("tripReport", tripReport);
+		 * map.put("deliveryNoteReport", deliveryNoteReport);
+		 * responseDto.setCode(200); responseDto.setStatus(true);
+		 * responseDto.setData(map); responseDto.setMessage(Message.SUCCESS +
+		 * ""); } catch (Exception e) { responseDto.setCode(500);
+		 * responseDto.setStatus(false); e.printStackTrace();
+		 * responseDto.setMessage(e.getMessage()); }
+		 */
 		return responseDto;
 	}
 
+	
+	/**
+	 * check and assign driver to requesting trip (\/)
+	 */
 	@Override
 	public ResponseDto assigTripDriver(String tripId, String userId) {
 		// TODO Auto-generated method stub
@@ -406,10 +407,13 @@ public class TripService implements TripServiceLocal {
 			String driverOutside = RoleConstant.OUTSIDE_JAKARTA_DRIVER.getValue();
 			String userRole  = driverDto.getRole().getRoleName();
 			
-			if(!(userRole.equalsIgnoreCase(driverInside)) || userRole.equalsIgnoreCase(driverOutside))
-				throw new InvalidInputFault("Invalid request.");
+			/*if(!(userRole.equalsIgnoreCase(driverInside)) || userRole.equalsIgnoreCase(driverOutside))
+				throw new InvalidInputFault("Invalid request.");*/
 			
 			dto = tripDao.findById(dto);
+			
+			if(ServicesUtil.isEmpty(dto) || ServicesUtil.isEmpty(dto.getCreatedBy()))
+				throw new InvalidInputFault("Invalid trip id.");
 			
 			if(userRole.equalsIgnoreCase(driverInside) && !dto.getCreatedBy().equalsIgnoreCase(driverDto.getCreatedBy()))
 				throw new InvalidInputFault("Invalid request.");
@@ -428,6 +432,8 @@ public class TripService implements TripServiceLocal {
 				dto.setUser(userDetailsDTO);
 				setAssignedUserInDeliveryHeader(dto);
 				dto.setStatus(TripStatus.TRIP_STATUS_DRIVER_ASSIGNED.getValue());
+				
+				LOGGER.error("INSIDE ASSIGN DRIVER SERVICE. TRIP ID "+dto.getTripId());
 				
 				tripDao.update(dto);
 				responseDto.setStatus(true);
@@ -450,7 +456,7 @@ public class TripService implements TripServiceLocal {
 
 		}
 		catch (Exception e) {
-			// TODO Auto-generated catch block
+			////LOGGER.error("ERROR WHILE CREATING TRIP : " +e.getMessage());
 			e.printStackTrace();
 			responseDto.setStatus(false);
 			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
@@ -462,7 +468,7 @@ public class TripService implements TripServiceLocal {
 	}
 
 	/***
-	 * Api for getting trip history by driver id
+	 * Api for getting trip history by driver id (\/)
 	 */
 	@Override
 	public ResponseDto getTripHistoryByDriverId(String userId, Long start, Long end) {
@@ -483,7 +489,7 @@ public class TripService implements TripServiceLocal {
 				totalDn = deliveryNoteReport.get("total_delivery_note");
 				avgDnsPerTrip =  totalDn / totalTrips;
 				}
-
+			LOGGER.error("INSIDE TRIP DRIVER HISTORY SERVICE");
 			Map<String, Object> resMap = new HashMap<>();
 			resMap.put("tripReport", tripReport);
 			resMap.put("deliveryNoteReport", deliveryNoteReport);
@@ -498,6 +504,7 @@ public class TripService implements TripServiceLocal {
 					.setMessage(Message.SUCCESS + " : Fetching trip and delivery note report for driver id " + userId);
 
 		} catch (Exception e) {
+			
 			e.printStackTrace();
 			responseDto.setStatus(false);
 			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
@@ -512,7 +519,7 @@ public class TripService implements TripServiceLocal {
 	@Override
 	public ResponseDto leaderBoard(WebLeaderBoardVO dto) {
 		ResponseDto responseDto = new ResponseDto();
-		try {
+		/*try {
 
 			if (ServicesUtil.isEmpty(dto.getFirstResult()) || ServicesUtil.isEmpty(dto.getMaxResult())) {
 				dto.setFirstResult(0);
@@ -541,19 +548,19 @@ public class TripService implements TripServiceLocal {
 			responseDto.setStatus(false);
 			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			responseDto.setMessage(e.getMessage());
-		}
+		}*/
 		return responseDto;
 	}
 
 	/**
-	 * api for finding all the trip by admin's driver's warehouse ids
+	 * api for finding all the trip by admin's driver's warehouse ids (\/)
 	 */
 	@Override
 	public ResponseDto getAllTripsAssociatedWithAdminsDrivers(UserDetailsDTO adminDto) {
 		ResponseDto responseDto = new ResponseDto();
 
 		try {
-
+            LOGGER.error("INSIDE GET ALL TRIPS ASSOCIATED WITH ADMIN");
 			// adminDto = userDao.findById(adminDto);
 			Object tripList = tripDao.getAllTripsAssociatedWithAdminsDrivers(adminDto.getUserId(),
 					adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails());
@@ -597,7 +604,7 @@ public class TripService implements TripServiceLocal {
 	}
 
 	/***
-	 * api for filtering trip as per logged in admin
+	 * api for filtering trip as per logged in admin (\/)
 	 */
 	@Override
 	public ResponseDto filterTripsAsPerAdmin(UserDetailsDTO adminDto, FilterDTO filterDto) {
@@ -625,7 +632,7 @@ public class TripService implements TripServiceLocal {
 
 	
 	/**
-	 * api for leaderboard report as per logged in admin or super_admin
+	 * api for leaderboard report as per logged in admin or super_admin (\/)
 	 * @param dto
 	 * @param adminDto
 	 * @return
