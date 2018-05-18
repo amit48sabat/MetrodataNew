@@ -137,6 +137,9 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getAwbValidated())) {
 				deliveryHeaderDo.setAwbValidated(deliveryHeaderDTO.getAwbValidated());
 			}
+			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getDeliveryDate())) {
+				deliveryHeaderDo.setDeliveryDate(deliveryHeaderDTO.getDeliveryDate());
+			}
 			
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getAirwayBillNo()) 
 					&& !deliveryHeaderDTO.getAirwayBillNo().equalsIgnoreCase("null")) {
@@ -262,6 +265,10 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getAssignedUser())) {
 				deliveryHeaderDTO.setAssignedUser(deliveryHeaderDo.getAssignedUser());
 			}
+			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getDeliveryDate())) {
+				deliveryHeaderDTO.setDeliveryDate(deliveryHeaderDo.getDeliveryDate());
+			}
+			
 			
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getValidationStatus())) {
 				deliveryHeaderDTO.setValidationStatus(deliveryHeaderDo.getValidationStatus());

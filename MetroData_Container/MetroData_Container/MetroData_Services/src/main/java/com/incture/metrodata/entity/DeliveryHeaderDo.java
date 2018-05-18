@@ -144,6 +144,10 @@ public class DeliveryHeaderDo implements BaseDo {
 	@Column(name = "REC_NAME")
 	private String receiverName;
 
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "DELIVERY_DATE")
+	private Date deliveryDate;
+	
 	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private WareHouseDetailsDo wareHouseDetails;
 

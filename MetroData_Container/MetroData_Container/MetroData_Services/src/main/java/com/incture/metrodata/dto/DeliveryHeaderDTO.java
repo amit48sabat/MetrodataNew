@@ -51,6 +51,7 @@ public class DeliveryHeaderDTO extends BaseDto {
 	private String fileName;
 	private Integer rating;
 	private String receiverName;
+	private Date deliveryDate;
 	private String assignedUser;
 	private String airwayBillNo;
 	private WareHouseDetailsDTO wareHouseDetails;
