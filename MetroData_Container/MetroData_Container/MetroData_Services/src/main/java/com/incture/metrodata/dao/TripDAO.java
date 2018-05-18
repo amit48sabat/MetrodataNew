@@ -353,6 +353,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		List<String> dnList = new ArrayList<>();
 		dnList.add(TripStatus.TRIP_STATUS_STARTED.getValue());
 		dnList.add(TripStatus.TRIP_STATUS_DRIVER_ASSIGNED.getValue());
+		dnList.add(TripStatus.TRIP_STATUS_CANCELLED.getValue());
 		String hql = "select new map(t.tripId as tripId,t.status as status) from TripDetailsDo t "
 				+ "where t.user.userId= :userId " + "and t.status in (:tripStatus) " + "order by t.createdAt desc";
 		Query query = getSession().createQuery(hql);
@@ -572,6 +573,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 				dashBoardCountMap.put((String) noteCountResult[0], (Long) noteCountResult[1]);
 				totalOrders += (Long) noteCountResult[1];
 			}
+			dashBoardCountMap.put("TOTAL_ORDERS", totalOrders);
 			Long avgOrders =  totalOrders/dashBoardCountMap.get("TOTAL_TRIPS");
 			dashBoardCountMap.put("AVG_TRIP_ORDER", avgOrders);
 		} else if (roleName.equals(RoleConstant.ADMIN_INSIDE_JAKARTA.getValue())
@@ -594,6 +596,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 				totalOrders += (Long) noteCountResult[1];
 			}
 			Long avgOrders = dashBoardCountMap.get("TOTAL_TRIPS") / totalOrders;
+			dashBoardCountMap.put("TOTAL_ORDERS", totalOrders);
 			dashBoardCountMap.put("AVG_TRIP_ORDER", avgOrders);
 		} else if (roleName.equals(RoleConstant.COURIER_ADMIN.getValue())) {
 			hql = "SELECT new map(count(distinct t.tripId) as TOTAL_TRIPS)  FROM TripDetailsDo AS t where t.user.createdBy = :userId";
@@ -612,6 +615,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 				dashBoardCountMap.put((String) noteCountResult[0], (Long) noteCountResult[1]);
 				totalOrders += (Long) noteCountResult[1];
 			}
+			dashBoardCountMap.put("TOTAL_ORDERS", totalOrders);
 			Long avgOrders = dashBoardCountMap.get("TOTAL_TRIPS") / totalOrders;
 			dashBoardCountMap.put("AVG_TRIP_ORDER", avgOrders);
 		}
