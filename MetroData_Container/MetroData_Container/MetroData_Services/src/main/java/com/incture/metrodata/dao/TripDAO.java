@@ -542,9 +542,6 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	@SuppressWarnings("unchecked")
 	public Map<String, Long> getAdminDashboardAssociatedWithAdmins(String userId, String roleName,
 			Set<WareHouseDetailsDTO> wareHouseDetails) {
-		List<String> wareHouseIds = new ArrayList<String>();
-		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
-			wareHouseIds.add(wareHouse.getWareHouseId());
 
 		ArrayList<String> deliveryNoteStatusList = new ArrayList<String>();
 		deliveryNoteStatusList.add("del_note_rejected");
@@ -555,60 +552,71 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 
 		boolean isSuperAdmin = false;
 		String hql = "";
+		Query query;
+		Map<String, Long> dashBoardCountMap = null;
 		// get all the user list if role is super_admin or sales_admin
 		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
 				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
-			hql = "SELECT new map( count(distinct t.tripId) as TOTAL_TRIPS ,  "
-					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE tripped = true AND status IN (:deliveryNoteStatusList)) as TOTAL_ORDERS, "
-					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_rejected' AND tripped = true) as del_note_rejected, "
-					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_partially_rejected' AND tripped = true) as del_note_partially_rejected, "
-					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_started' AND tripped = true) as del_note_started, "
-					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'created' AND tripped = true) as created, "
-					+ " (SELECT COUNT(deliveryNoteId) FROM DeliveryHeaderDo WHERE status = 'del_note_completed' AND tripped = true) as del_note_completed "
-					+ " ) FROM TripDetailsDo AS t ";
-			isSuperAdmin = true;
-		} else if(roleName.equals(RoleConstant.ADMIN_INSIDE_JAKARTA.getValue())
+
+			hql = "SELECT new map(count(distinct t.tripId) as TOTAL_TRIPS)  FROM TripDetailsDo AS t";
+			query = getSession().createQuery(hql);
+			dashBoardCountMap = (Map<String, Long>) query.uniqueResult();
+
+			hql = "SELECT tdh.status,count(distinct tdh.deliveryNoteId) FROM TripDetailsDo AS t join t.deliveryHeader "
+					+ "tdh WHERE tdh.tripped = true AND tdh.status IN(:deliveryNoteStatusList) group by tdh.status";
+			query = getSession().createQuery(hql);
+			query.setParameterList("deliveryNoteStatusList", deliveryNoteStatusList);
+			List<Object[]> noteCountResultList = query.list();
+			Long totalOrders = 0l;
+			for (Object[] noteCountResult : noteCountResultList) {
+				dashBoardCountMap.put((String) noteCountResult[0], (Long) noteCountResult[1]);
+				totalOrders += (Long) noteCountResult[1];
+			}
+			Long avgOrders =  totalOrders/dashBoardCountMap.get("TOTAL_TRIPS");
+			dashBoardCountMap.put("AVG_TRIP_ORDER", avgOrders);
+		} else if (roleName.equals(RoleConstant.ADMIN_INSIDE_JAKARTA.getValue())
 				|| roleName.equals(RoleConstant.ADMIN_OUTSIDE_JAKARTA.getValue())) {
+			hql = "SELECT new map(count(distinct t.tripId) as TOTAL_TRIPS)  FROM TripDetailsDo AS t where t.createdBy = :userId";
+			
+			query = getSession().createQuery(hql);
+			query.setParameter("userId", userId);
+			dashBoardCountMap = (Map<String, Long>) query.uniqueResult();
 
-			hql = "SELECT new map( count(distinct t.tripId) as TOTAL_TRIPS ,  "
-					+ " (SELECT COUNT(tdh.deliveryNoteId) FROM TripDetailsDo AS t INNER JOIN t.deliveryHeader  as tdh WHERE tdh.tripped = true AND status IN (:deliveryNoteStatusList) AND t.createdBy = (:userId) as TOTAL_ORDERS, "
-					+ " (SELECT COUNT(tdh.deliveryNoteId) FROM TripDetailsDo AS t INNER JOIN t.deliveryHeader  as tdh WHERE tdh.status = 'del_note_rejected' ANd tdh.tripped = true AND  t.createdBy = (:userId)) as del_note_rejected, "
-					+ " (SELECT COUNT(dh.deliveryNoteId)  FROM TripDetailsDo AS t INNER JOIN t.deliveryHeader  as tdh WHERE tdh.status = 'del_note_started' ANd tdh.tripped = true AND t.createdBy = (:userId)) as del_note_started, "
-					+ " (SELECT COUNT(dh.deliveryNoteId) FROM TripDetailsDo AS t INNER JOIN t.deliveryHeader  as tdh  WHERE tdh.status = 'del_note_partially_rejected' ANd tdh.tripped = true AND t.createdBy = (:userId)) as del_note_partially_rejected, "
-					+ " (SELECT COUNT(dh.deliveryNoteId)  FROM TripDetailsDo AS t INNER JOIN t.deliveryHeader  as tdh  WHERE tdh.status = 'created' ANd tdh.tripped = true AND t.createdBy = (:userId))) as created, "
-					+ " (SELECT COUNT(dh.deliveryNoteId) FROM TripDetailsDo AS t INNER JOIN t.deliveryHeader  as tdh WHERE tdh.status = 'del_note_completed' ANd tdh.tripped = true AND t.createdBy = (:userId)) as del_note_completed "
-					+ " ) FROM TripDetailsDo AS t "
-					+ " WHERE  t.createdBy =:createdBy";
-		}
-		else if(roleName.equals(RoleConstant.COURIER_ADMIN.getValue())){
-			hql = "SELECT new map( count(distinct t.tripId) as TOTAL_TRIPS ,  "
-					+ " (SELECT COUNT(tdh.deliveryNoteId) FROM TripDetailsDo AS t INNER JOIN t.deliveryHeader  as tdh WHERE tdh.tripped = true AND status IN (:deliveryNoteStatusList) AND t.user.createdBy = (:userId) as TOTAL_ORDERS, "
-					+ " (SELECT COUNT(tdh.deliveryNoteId) FROM TripDetailsDo AS t INNER JOIN t.deliveryHeader  as tdh WHERE tdh.status = 'del_note_rejected' ANd tdh.tripped = true AND  t.user.createdBy = (:userId)) as del_note_rejected, "
-					+ " (SELECT COUNT(dh.deliveryNoteId)  FROM TripDetailsDo AS t INNER JOIN t.deliveryHeader  as tdh WHERE tdh.status = 'del_note_started' ANd tdh.tripped = true AND t.user.createdBy = (:userId)) as del_note_started, "
-					+ " (SELECT COUNT(dh.deliveryNoteId) FROM TripDetailsDo AS t INNER JOIN t.deliveryHeader  as tdh  WHERE tdh.status = 'del_note_partially_rejected' ANd tdh.tripped = true AND t.user.createdBy = (:userId)) as del_note_partially_rejected, "
-					+ " (SELECT COUNT(dh.deliveryNoteId)  FROM TripDetailsDo AS t INNER JOIN t.deliveryHeader  as tdh  WHERE tdh.status = 'created' ANd tdh.tripped = true AND t.user.createdBy = (:userId))) as created, "
-					+ " (SELECT COUNT(dh.deliveryNoteId) FROM TripDetailsDo AS t INNER JOIN t.deliveryHeader  as tdh WHERE tdh.status = 'del_note_completed' ANd tdh.tripped = true AND t.user.createdBy = (:userId)) as del_note_completed "
-					+ " ) FROM TripDetailsDo AS t "
-					+ " WHERE  t.user.createdBy =:createdBy";
-		}
-		Query query = getSession().createQuery(hql);
-		query.setParameterList("deliveryNoteStatusList", deliveryNoteStatusList);
+			hql = "SELECT tdh.status,count(distinct tdh.deliveryNoteId) FROM TripDetailsDo AS t join t.deliveryHeader "
+					+ "tdh WHERE tdh.tripped = true AND t.createdBy = :userId AND tdh.status IN(:deliveryNoteStatusList) group by tdh.status";
+			query = getSession().createQuery(hql);
+			query.setParameter("userId", userId);
+			query.setParameterList("deliveryNoteStatusList", deliveryNoteStatusList);
+			List<Object[]> noteCountResultList = query.list();
+			Long totalOrders = 0l;
+			for (Object[] noteCountResult : noteCountResultList) {
+				dashBoardCountMap.put((String) noteCountResult[0], (Long) noteCountResult[1]);
+				totalOrders += (Long) noteCountResult[1];
+			}
+			Long avgOrders = dashBoardCountMap.get("TOTAL_TRIPS") / totalOrders;
+			dashBoardCountMap.put("AVG_TRIP_ORDER", avgOrders);
+		} else if (roleName.equals(RoleConstant.COURIER_ADMIN.getValue())) {
+			hql = "SELECT new map(count(distinct t.tripId) as TOTAL_TRIPS)  FROM TripDetailsDo AS t where t.user.createdBy = :userId";
+			query = getSession().createQuery(hql);
+			query.setParameter("userId", userId);
+			dashBoardCountMap = (Map<String, Long>) query.uniqueResult();
 
-		if (!isSuperAdmin) {
-			// send no data on if warehouse if is empty
-			if (ServicesUtil.isEmpty(wareHouseIds))
-				return new HashMap<String, Long>();
-			query.setParameter("createdBy", userId);
-			//query.setParameterList("warehouselist", wareHouseIds);
+			hql = "SELECT tdh.status,count(distinct tdh.deliveryNoteId) FROM TripDetailsDo AS t join t.deliveryHeader "
+					+ "tdh WHERE tdh.tripped = true AND  t.user.createdBy = :userId AND tdh.status IN(:deliveryNoteStatusList) group by tdh.status";
+			query = getSession().createQuery(hql);
+			query.setParameter("userId", userId);
+			query.setParameterList("deliveryNoteStatusList", deliveryNoteStatusList);
+			List<Object[]> noteCountResultList = query.list();
+			Long totalOrders = 0l;
+			for (Object[] noteCountResult : noteCountResultList) {
+				dashBoardCountMap.put((String) noteCountResult[0], (Long) noteCountResult[1]);
+				totalOrders += (Long) noteCountResult[1];
+			}
+			Long avgOrders = dashBoardCountMap.get("TOTAL_TRIPS") / totalOrders;
+			dashBoardCountMap.put("AVG_TRIP_ORDER", avgOrders);
 		}
 
-		Map<String, Long> result = (Map<String, Long>) query.uniqueResult();
-		result.put("AVG_TRIP_ORDER", 0L);
-		if (result.get("TOTAL_TRIPS") > 0) {
-			Long avgOrders = result.get("TOTAL_ORDERS") / result.get("TOTAL_TRIPS");
-			result.put("AVG_TRIP_ORDER", avgOrders);
-		}
-		return result;
+		return dashBoardCountMap;
 	}
 
 	/**
