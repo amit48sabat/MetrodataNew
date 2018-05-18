@@ -2,6 +2,8 @@ package com.incture.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -31,8 +33,11 @@ public class RoleController {
 	@Autowired
     UserServiceLocal userServiceLocal;
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(RoleController.class);
+	
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseDto create(@RequestBody RoleDetailsDTO dto) {
+		LOGGER.error("INSIDE CREATE ROLE CONTROLLER");
 		return roleService.create(dto);
 	}
 
@@ -58,12 +63,16 @@ public class RoleController {
 			return res;
 
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
+		
+		LOGGER.error("INSIDE FIND ALL ROLE CONTROLLER");
+		
 		return roleService.getRoleByUser(adminDto);
 	}
 
 	@RequestMapping(value = "/{roleId}", method = RequestMethod.PUT)
 	public ResponseDto update(@PathVariable Long roleId,@RequestBody RoleDetailsDTO dto) {
 		dto.setRoleId(roleId);
+		LOGGER.error("INSIDE UPDATE ROLE CONTROLLER");
 		return roleService.update(dto);
 	}
 
@@ -71,6 +80,7 @@ public class RoleController {
 	public ResponseDto delete(@PathVariable Long roleId) {
 		RoleDetailsDTO dto = new RoleDetailsDTO();
 		dto.setRoleId(roleId);
+		LOGGER.error("INSIDE DELETE ROLE CONTROLLER");
 		return roleService.delete(dto);
 	}
 
@@ -78,6 +88,7 @@ public class RoleController {
 	public ResponseDto findById(@PathVariable Long roleId) {
 		RoleDetailsDTO dto = new RoleDetailsDTO();
 		dto.setRoleId(roleId);
+		LOGGER.error("INSIDE FIND ROLE BY ID CONTROLLER");
 		return roleService.find(dto);
 	}
 }

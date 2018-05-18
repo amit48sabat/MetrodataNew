@@ -2,6 +2,8 @@ package com.incture.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -31,8 +33,11 @@ public class WareHouseController {
 	@Autowired
 	UserServiceLocal userService;
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(WareHouseController.class);
+	
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseDto create(@RequestBody WareHouseDetailsDTO dto) {
+		LOGGER.error("INSIDE CREATE WAREHOUSE CONTROLLER");
 		return wareHouseService.create(dto);
 	}
 
@@ -59,13 +64,14 @@ public class WareHouseController {
 			return ServicesUtil.getUnauthorizedResponseDto();
 
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
-		
+		LOGGER.error("INSIDE FIND ALL WAREHOUSE CONTROLLER");
 		return wareHouseService.getWareHouseListByUserId(userId, adminDto.getRole().getRoleName());
 	}
 
 	@RequestMapping(value = "/{wareHouseId}", method = RequestMethod.PUT)
 	public ResponseDto update(@PathVariable String wareHouseId, @RequestBody WareHouseDetailsDTO dto) {
 		dto.setWareHouseId(wareHouseId);
+		LOGGER.error("INSIDE UPDATE WAREHOUSE CONTROLLER");
 		return wareHouseService.update(dto);
 	}
 
@@ -80,11 +86,13 @@ public class WareHouseController {
 	public ResponseDto findById(@PathVariable String wareHouseId) {
 		WareHouseDetailsDTO dto = new WareHouseDetailsDTO();
 		dto.setWareHouseId(wareHouseId);
+		LOGGER.error("INSIDE FIND WAREHOUSE BY ID CONTROLLER");
 		return wareHouseService.find(dto);
 	}
 
 	@RequestMapping(value = "/ecc", method = RequestMethod.GET)
 	public ResponseDto getAllWareHouseFromECC() {
+		LOGGER.error("INSIDE FETCH WAREHOUSE FROM ECC CONTROLLER");
 		return wareHouseService.refreshWareHouseListFromEcc();
 	}
 

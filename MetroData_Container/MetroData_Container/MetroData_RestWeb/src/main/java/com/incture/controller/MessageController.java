@@ -2,6 +2,8 @@ package com.incture.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -25,6 +27,8 @@ public class MessageController {
 	@Autowired
 	MessageServiceLocal messageService;
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(MessageController.class);
+	
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseDto create(@RequestBody MessageDetailsDTO dto, HttpServletRequest request) {
 		String userId = "";
@@ -32,11 +36,16 @@ public class MessageController {
 			userId = request.getUserPrincipal().getName();
 		}
 		dto.setCreatedBy(userId);
+		
+		LOGGER.error("INSIDE CREATE MESSAGE CONTROLLER. USER ID "+userId);
+		
 		return messageService.create(dto, userId);
 	}
 
 	@RequestMapping(value = "/find", method = RequestMethod.PUT)
 	public ResponseDto findByParam(@RequestBody MessageDetailsDTO dto) {
+		
+		LOGGER.error("INSIDE FIND MESSAGE CONTROLLER.");
 		return messageService.findByParam(dto);
 	}
 
@@ -47,6 +56,7 @@ public class MessageController {
 			userId = request.getUserPrincipal().getName();
 		}
 		dto.setUserId(userId);
+		LOGGER.error("INSIDE FILTER ALL MESSAGE CONTROLLER.");
 		return messageService.findAll(dto);
 	}
 
@@ -57,6 +67,7 @@ public class MessageController {
 			userId = request.getUserPrincipal().getName();
 		}
 		//dto.setCreatedBy(userId);
+		LOGGER.error("INSIDE UPDATE MESSAGE CONTROLLER. USER ID "+ userId);
 		return messageService.update(dto, userId);
 	}
 
@@ -64,6 +75,8 @@ public class MessageController {
 	public ResponseDto delete(@PathVariable String messageId) {
 		MessageDetailsDTO dto = new MessageDetailsDTO();
 		dto.setMessageId(messageId);
+		
+		LOGGER.error("INSIDE DELETE MESSAGE CONTROLLER.");
 		return messageService.delete(dto);
 	}
 

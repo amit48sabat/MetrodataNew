@@ -2,6 +2,8 @@ package com.incture.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -31,6 +33,8 @@ public class CourierController {
 	@Autowired
 	UserServiceLocal userServiceLocal;
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CourierController.class);
+	
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseDto create(@RequestBody CourierDetailsDTO dto, HttpServletRequest request) {
 		String userId = "";
@@ -39,6 +43,8 @@ public class CourierController {
 		}
 		// dto.setCreatedBy(userId);
 		// dto.setUpdatedBy(userId);
+		
+		LOGGER.error("INSIDE CREATE COURIER CONTROLLER");
 		return courierService.create(dto);
 	}
 
@@ -52,6 +58,7 @@ public class CourierController {
 		// dto.setCreatedBy(userId);
 		// dto.setUpdatedBy(userId);
 		dto.setCourierId(courierId);
+		LOGGER.error("INSIDE UPDATE COURIER CONTROLLER. USER ID "+userId);
 		return courierService.update(dto);
 	}
 
@@ -59,6 +66,7 @@ public class CourierController {
 	public ResponseDto find(@PathVariable Long courierId) {
 		CourierDetailsDTO dto = new CourierDetailsDTO();
 		dto.setCourierId(courierId);
+		LOGGER.error("INSIDE FIND COURIER CONTROLLER");
 		return courierService.find(dto);
 	}
 
@@ -86,6 +94,7 @@ public class CourierController {
 			return res;
 
 		 dto = (UserDetailsDTO) res.getData();
+		 LOGGER.error("INSIDE FIND ALL COURIER CONTROLLER. USER ID "+userId);
 		return courierService.findAll(dto);
 	}
 
@@ -93,6 +102,7 @@ public class CourierController {
 	public ResponseDto delete(@PathVariable Long courierId) {
 		CourierDetailsDTO dto = new CourierDetailsDTO();
 		dto.setCourierId(courierId);
+		 LOGGER.error("INSIDE DELETE COURIER CONTROLLER.");
 		return courierService.delete(dto);
 	}
 

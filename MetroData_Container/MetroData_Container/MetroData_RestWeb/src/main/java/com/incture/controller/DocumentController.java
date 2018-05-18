@@ -3,6 +3,8 @@ package com.incture.controller;
 import java.io.IOException;
 
 import org.apache.chemistry.opencmis.client.api.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -28,6 +30,8 @@ public class DocumentController {
 	@Autowired
 	DeliveryHeaderServiceLocal deliveryHeaderServiceLocal;
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(DocumentController.class);
+	
 /*	@PostMapping("/upload")
 	public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile uploadfile) {
 
@@ -66,6 +70,9 @@ public class DocumentController {
 	    header.set(HttpHeaders.CONTENT_DISPOSITION,
 	                   "attachment; filename=" + doc.getContentStream().getFileName());
 	    header.setContentLength(doc.getContentStream().getLength());
+	    
+	    LOGGER.error("INSIDE DOWNLOAD DOCUMENT CONTROLLER");
+	    
 	    return ResponseEntity.ok()
 	            .headers(header)
 	            //.contentLength(file.length())

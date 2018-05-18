@@ -2,6 +2,8 @@ package com.incture.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +24,7 @@ public class CommentsContoller {
 	@Autowired
 	CommentsServiceLocal commentsServiceLocal;
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CommentsContoller.class);
 	
 	/*
 	 * @RequestMapping(method = RequestMethod.POST) public ResponseDto
@@ -34,7 +37,9 @@ public class CommentsContoller {
 	public ResponseDto update(@PathVariable Long commentId, @RequestBody CommentsDTO dto, HttpServletRequest request) {
 		String userId = request.getUserPrincipal().getName();
 		dto.setId(commentId);
-
+        
+		LOGGER.error("INSIDE UPDATE COMMENT CONTROLLER");
+		
 		return commentsServiceLocal.update(dto, userId);
 	}
 
@@ -42,6 +47,8 @@ public class CommentsContoller {
 	public ResponseDto delete(@PathVariable Long commentId) {
 		CommentsDTO dto = new CommentsDTO();
 		dto.setId(commentId);
+		
+		LOGGER.error("INSIDE DELETE COMMENT CONTROLLER");
 		return commentsServiceLocal.delete(dto);
 	}
 

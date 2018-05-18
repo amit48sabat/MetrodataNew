@@ -2,6 +2,8 @@ package com.incture.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +30,8 @@ public class UserDetailController {
 	@Autowired
 	TripServiceLocal tripService;
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(UserDetailController.class);
+	
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseDto create(@RequestBody UserDetailsDTO dto, HttpServletRequest request) {
 		ResponseDto res = new ResponseDto();
@@ -43,6 +47,8 @@ public class UserDetailController {
 		dto.setCreatedBy(createdBy);
 		dto.setUpdatedBy(createdBy);
 
+		LOGGER.error("INSIDE CREATE USER CONTROLLER");
+		
 		return userServiceLocal.create(dto);
 	}
 
@@ -68,6 +74,9 @@ public class UserDetailController {
 			return res;
 
 		UserDetailsDTO dto = (UserDetailsDTO) res.getData();
+		
+		LOGGER.error("INSIDE FIND ALL USER CONTROLLER");
+		
 		return userServiceLocal.getUsersAssociatedWithAdmin(dto, role);
 	}
 
@@ -88,6 +97,8 @@ public class UserDetailController {
 		dto.setUpdatedBy(createdBy);
 		dto.setUserId(userId);
 
+		LOGGER.error("INSIDE UPDATE USER CONTROLLER.");
+		
 		return userServiceLocal.update(dto);
 	}
 
@@ -102,12 +113,15 @@ public class UserDetailController {
 	public ResponseDto findById(@PathVariable String userId) {
 		UserDetailsDTO dto = new UserDetailsDTO();
 		dto.setUserId(userId);
+		LOGGER.error("INSIDE FIND USER BY ID CONTROLLER.");
 		return userServiceLocal.find(dto);
 	}
 
 	@RequestMapping(value = "/dashboard", method = RequestMethod.GET)
 	public ResponseDto userDashboard(HttpServletRequest request) {
 		String userId = request.getUserPrincipal().getName();
+		
+		LOGGER.error("INSIDE DRIVER DASHBOARD CONTROLLER.");
 		return tripService.driverDashboardService(userId);
 	}
 

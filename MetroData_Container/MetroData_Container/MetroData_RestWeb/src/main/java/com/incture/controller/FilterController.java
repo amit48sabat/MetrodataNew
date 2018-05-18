@@ -1,5 +1,7 @@
 package com.incture.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -21,8 +23,11 @@ public class FilterController {
 	@Autowired
 	TripServiceLocal tripService;
 	
+	private static final Logger LOGGER = LoggerFactory.getLogger(FilterController.class);
+	
 	@RequestMapping( method = RequestMethod.PUT)
 	public ResponseDto filter(@RequestBody FilterDTO dto) {
+		LOGGER.error("INSIDE FILTER CONTROLLER");
 		return tripService.filter(dto);
 	}
 }

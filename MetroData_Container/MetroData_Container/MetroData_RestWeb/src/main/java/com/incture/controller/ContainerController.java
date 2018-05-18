@@ -1,5 +1,7 @@
 package com.incture.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -23,11 +25,16 @@ public class ContainerController {
 	@Autowired
 	ContainerServiceLocal containerService;
 	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ContainerController.class);
+	
 	@RequestMapping( method = RequestMethod.POST)
 	public ResponseDto create(@RequestBody String controllerJson) {
 		ResponseDto response = new ResponseDto();
 	  try{
-		   Gson gson = new Gson();
+		    Gson gson = new Gson();
+		    
+		    LOGGER.error("INSIDE CREATE CONTAINER CONTROLLER");
+		    
 			ContainerDTO dto = gson.fromJson(controllerJson.toString(), ContainerDTO.class);
 			 response = containerService.create(dto);
 	   }catch(Exception e){
