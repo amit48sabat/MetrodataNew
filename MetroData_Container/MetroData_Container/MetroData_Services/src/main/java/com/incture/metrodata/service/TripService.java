@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.management.relation.Role;
+
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.incture.metrodata.constant.DeliveryNoteStatus;
 import com.incture.metrodata.constant.Message;
+import com.incture.metrodata.constant.RoleConstant;
 import com.incture.metrodata.constant.TripStatus;
 import com.incture.metrodata.dao.DeliveryHeaderDAO;
 import com.incture.metrodata.dao.TripDAO;
@@ -33,6 +36,7 @@ import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.dto.WebLeaderBoardVO;
 import com.incture.metrodata.entity.TripDetailsDo;
 import com.incture.metrodata.exceptions.ExecutionFault;
+import com.incture.metrodata.exceptions.InvalidInputFault;
 import com.incture.metrodata.util.RESTInvoker;
 import com.incture.metrodata.util.ServicesUtil;
 import com.itextpdf.text.BaseColor;
@@ -91,7 +95,16 @@ public class TripService implements TripServiceLocal {
 			responseDto.setCode(200);
 			responseDto.setData(dto);
 			responseDto.setMessage(Message.SUCCESS.toString() + " : Trip created with id " + tripId);
-		} catch (Exception e) {
+		}
+		catch (InvalidInputFault e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			responseDto.setStatus(false);
+			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			responseDto.setMessage(e.getMessage());
+
+		}
+		catch (Exception e) {
 			responseDto.setStatus(false);
 			responseDto.setCode(500);
 			responseDto.setMessage(Message.FAILED + " : " + e.getMessage());
@@ -156,7 +169,16 @@ public class TripService implements TripServiceLocal {
 			responseDto.setCode(200);
 			responseDto.setData(dto);
 			responseDto.setMessage(Message.SUCCESS.toString() + " : Trip updated with id " + dto.getTripId());
-		} catch (Exception e) {
+		}
+		catch (InvalidInputFault e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			responseDto.setStatus(false);
+			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			responseDto.setMessage(e.getMessage());
+
+		}
+		catch (Exception e) {
 			responseDto.setStatus(false);
 			responseDto.setCode(500);
 			responseDto.setMessage(Message.FAILED + " : " + e.getMessage());
@@ -307,7 +329,8 @@ public class TripService implements TripServiceLocal {
 			responseDto.setData(data);
 			responseDto.setMessage(Message.SUCCESS + "");
 
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			responseDto.setStatus(false);
 			responseDto.setCode(500);
 			responseDto.setMessage(Message.FAILED + " : " + e.getMessage());
@@ -368,10 +391,29 @@ public class TripService implements TripServiceLocal {
 	public ResponseDto assigTripDriver(String tripId, String userId) {
 		// TODO Auto-generated method stub
 		ResponseDto responseDto = new ResponseDto();
+		UserDetailsDTO driverDto = new UserDetailsDTO();
+		
 		TripDetailsDTO dto = new TripDetailsDTO();
 		dto.setTripId(tripId);
 		try {
+			//  feching user if role is  not driver throw error
+			driverDto.setUserId(userId);
+			driverDto = userDao.findById(driverDto);
+			if(ServicesUtil.isEmpty(driverDto.getRole()))
+				throw new InvalidInputFault("Unauthorized request.");
+			
+			String driverInside = RoleConstant.INSIDE_JAKARTA_DRIVER.getValue();
+			String driverOutside = RoleConstant.OUTSIDE_JAKARTA_DRIVER.getValue();
+			String userRole  = driverDto.getRole().getRoleName();
+			
+			if(!(userRole.equalsIgnoreCase(driverInside)) || userRole.equalsIgnoreCase(driverOutside))
+				throw new InvalidInputFault("Invalid request.");
+			
 			dto = tripDao.findById(dto);
+			
+			if(userRole.equalsIgnoreCase(driverInside) && !dto.getCreatedBy().equalsIgnoreCase(driverDto.getCreatedBy()))
+				throw new InvalidInputFault("Invalid request.");
+			
 			UserDetailsDTO userDetailsDTO = new UserDetailsDTO();
 			if (ServicesUtil.isEmpty(dto.getUser())) {
 				
@@ -398,7 +440,16 @@ public class TripService implements TripServiceLocal {
 				throw new ExecutionFault(
 						"Trip with id " + dto.getTripId() + " is already assigned to driver please scan a new trip ");
 			}
-		} catch (Exception e) {
+		}
+		catch (InvalidInputFault e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			responseDto.setStatus(false);
+			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			responseDto.setMessage(e.getMessage());
+
+		}
+		catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			responseDto.setStatus(false);
