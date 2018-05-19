@@ -545,7 +545,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		deliveryNoteStatusList.add("del_note_started");
 		deliveryNoteStatusList.add("created"); // as del_note_validated
 		deliveryNoteStatusList.add("del_note_completed");
-		
+
 		boolean isSuperAdmin = false;
 		String hql = "";
 		Query query;
@@ -569,13 +569,15 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 				dashBoardCountMap.put((String) noteCountResult[0], (Long) noteCountResult[1]);
 				totalOrders += (Long) noteCountResult[1];
 			}
-			dashBoardCountMap.put("TOTAL_ORDERS", totalOrders);
-			Long avgOrders = totalOrders / dashBoardCountMap.get("TOTAL_TRIPS");
-			dashBoardCountMap.put("AVG_TRIP_ORDER", avgOrders);
+			if (!ServicesUtil.isEmpty(totalOrders)) {
+				dashBoardCountMap.put("TOTAL_ORDERS", totalOrders);
+				Long avgOrders = totalOrders / dashBoardCountMap.get("TOTAL_TRIPS");
+				dashBoardCountMap.put("AVG_TRIP_ORDER", avgOrders);
+			}
+
 		} else if (roleName.equals(RoleConstant.ADMIN_INSIDE_JAKARTA.getValue())
 				|| roleName.equals(RoleConstant.ADMIN_OUTSIDE_JAKARTA.getValue())) {
 			hql = "SELECT new map(count(distinct t.tripId) as TOTAL_TRIPS)  FROM TripDetailsDo AS t where t.createdBy = :userId AND (t.status != :status or t.status is null)";
-			hql = "SELECT new map(count(distinct t.tripId) as TOTAL_TRIPS)  FROM TripDetailsDo AS t where t.createdBy = :userId";
 
 			query = getSession().createQuery(hql);
 			query.setParameter("userId", userId);
@@ -593,9 +595,11 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 				dashBoardCountMap.put((String) noteCountResult[0], (Long) noteCountResult[1]);
 				totalOrders += (Long) noteCountResult[1];
 			}
-			Long avgOrders = dashBoardCountMap.get("TOTAL_TRIPS") / totalOrders;
-			dashBoardCountMap.put("TOTAL_ORDERS", totalOrders);
-			dashBoardCountMap.put("AVG_TRIP_ORDER", avgOrders);
+			if (!ServicesUtil.isEmpty(totalOrders)) {
+				dashBoardCountMap.put("TOTAL_ORDERS", totalOrders);
+				Long avgOrders = totalOrders / dashBoardCountMap.get("TOTAL_TRIPS");
+				dashBoardCountMap.put("AVG_TRIP_ORDER", avgOrders);
+			}
 		} else if (roleName.equals(RoleConstant.COURIER_ADMIN.getValue())) {
 			hql = "SELECT new map(count(distinct t.tripId) as TOTAL_TRIPS)  FROM TripDetailsDo AS t where t.user.createdBy = :userId AND (t.status != :status or t.status is null)";
 			query = getSession().createQuery(hql);
@@ -614,36 +618,37 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 				dashBoardCountMap.put((String) noteCountResult[0], (Long) noteCountResult[1]);
 				totalOrders += (Long) noteCountResult[1];
 			}
-			dashBoardCountMap.put("TOTAL_ORDERS", totalOrders);
-			Long avgOrders = dashBoardCountMap.get("TOTAL_TRIPS") / totalOrders;
-			dashBoardCountMap.put("AVG_TRIP_ORDER", avgOrders);
+			if (!ServicesUtil.isEmpty(totalOrders)) {
+				dashBoardCountMap.put("TOTAL_ORDERS", totalOrders);
+				Long avgOrders = totalOrders / dashBoardCountMap.get("TOTAL_TRIPS");
+				dashBoardCountMap.put("AVG_TRIP_ORDER", avgOrders);
+			}
 		}
-			
-		
-		if(!dashBoardCountMap.containsKey("AVG_TRIP_ORDER"))
-			dashBoardCountMap.put("AVG_TRIP_ORDER",0L);
-		
-		if(!dashBoardCountMap.containsKey("TOTAL_TRIPS"))
+
+		if (!dashBoardCountMap.containsKey("AVG_TRIP_ORDER"))
+			dashBoardCountMap.put("AVG_TRIP_ORDER", 0L);
+
+		if (!dashBoardCountMap.containsKey("TOTAL_TRIPS"))
 			dashBoardCountMap.put("TOTAL_TRIPS", 0L);
-		
-		if(!dashBoardCountMap.containsKey("TOTAL_ORDERS"))
+
+		if (!dashBoardCountMap.containsKey("TOTAL_ORDERS"))
 			dashBoardCountMap.put("TOTAL_ORDERS", 0L);
-		
-		if(!dashBoardCountMap.containsKey("del_note_rejected"))
-			dashBoardCountMap.put("del_note_rejected",0L);
-		
-		if(!dashBoardCountMap.containsKey("del_note_started"))
+
+		if (!dashBoardCountMap.containsKey("del_note_rejected"))
+			dashBoardCountMap.put("del_note_rejected", 0L);
+
+		if (!dashBoardCountMap.containsKey("del_note_started"))
 			dashBoardCountMap.put("del_note_started", 0L);
-		
-		if(!dashBoardCountMap.containsKey("del_note_partially_rejected"))
+
+		if (!dashBoardCountMap.containsKey("del_note_partially_rejected"))
 			dashBoardCountMap.put("del_note_partially_rejected", 0L);
-		
-		if(!dashBoardCountMap.containsKey("created"))
+
+		if (!dashBoardCountMap.containsKey("created"))
 			dashBoardCountMap.put("created", 0L);
-		
-		if(!dashBoardCountMap.containsKey("del_note_completed"))
+
+		if (!dashBoardCountMap.containsKey("del_note_completed"))
 			dashBoardCountMap.put("del_note_completed", 0L);
-		
+
 		return dashBoardCountMap;
 	}
 
