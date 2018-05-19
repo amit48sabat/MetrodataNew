@@ -140,13 +140,18 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getDeliveryDate())) {
 				deliveryHeaderDo.setDeliveryDate(deliveryHeaderDTO.getDeliveryDate());
 			}
-			
-			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getAirwayBillNo()) 
+			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getDeliveredAtLatitude())) {
+				deliveryHeaderDo.setDeliveredAtLatitude(deliveryHeaderDTO.getDeliveredAtLatitude());
+			}
+			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getDeliveredAtLongitude())) {
+				deliveryHeaderDo.setDeliveredAtLongitude(deliveryHeaderDTO.getDeliveredAtLongitude());
+			}
+			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getAirwayBillNo())
 					&& !deliveryHeaderDTO.getAirwayBillNo().equalsIgnoreCase("null")) {
 				deliveryHeaderDo.setAirwayBillNo(deliveryHeaderDTO.getAirwayBillNo());
-			}else
+			} else
 				deliveryHeaderDo.setAirwayBillNo(null);
-			
+
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getWareHouseDetails())) {
 				WareHouseDetailsDo wareHouseDo = new WareHouseDetailsDo();
 				try {
@@ -154,7 +159,8 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 				} catch (Exception e) {
 					// TODO: handle exception
 				}
-				deliveryHeaderDo.setWareHouseDetails(wareHouseDetailDao.importDto(deliveryHeaderDTO.getWareHouseDetails(), wareHouseDo));
+				deliveryHeaderDo.setWareHouseDetails(
+						wareHouseDetailDao.importDto(deliveryHeaderDTO.getWareHouseDetails(), wareHouseDo));
 
 			}
 
@@ -199,7 +205,7 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getSoldToAddress())) {
 				deliveryHeaderDTO.setSoldToAddress(deliveryHeaderDo.getSoldToAddress());
 			}
-			
+
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getCustComment())) {
 				deliveryHeaderDTO.setCustComment(deliveryHeaderDo.getCustComment());
 			}
@@ -268,20 +274,23 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getDeliveryDate())) {
 				deliveryHeaderDTO.setDeliveryDate(deliveryHeaderDo.getDeliveryDate());
 			}
-			
-			
+
+			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getDeliveredAtLatitude())) {
+				deliveryHeaderDTO.setDeliveredAtLatitude(deliveryHeaderDo.getDeliveredAtLatitude());
+			}
+			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getDeliveredAtLongitude())) {
+				deliveryHeaderDTO.setDeliveredAtLongitude(deliveryHeaderDo.getDeliveredAtLongitude());
+			}
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getValidationStatus())) {
 				deliveryHeaderDTO.setValidationStatus(deliveryHeaderDo.getValidationStatus());
-			}
-			else
+			} else
 				deliveryHeaderDTO.setValidationStatus("false");
-			
+
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getAwbValidated())) {
 				deliveryHeaderDTO.setAwbValidated(deliveryHeaderDo.getAwbValidated());
-			}
-			else
+			} else
 				deliveryHeaderDTO.setAwbValidated("false");
-			
+
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getWareHouseDetails())) {
 				deliveryHeaderDTO
 						.setWareHouseDetails(wareHouseDetailDao.exportDto(deliveryHeaderDo.getWareHouseDetails()));
@@ -390,41 +399,41 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 		return exportList(result);
 
 	}
-	
-	
-   public boolean removeTripDeliveryNoteMapping(DeliveryHeaderDTO dto){
-	   String sql = "DELETE FROM TRIP_DELIVERY_HEADER_MAPPING WHERE DELIVERY_NOTE_ID = "+dto.getDeliveryNoteId();
-	   SQLQuery query = getSession().createSQLQuery(sql);
-	   query.executeUpdate();
-	   return false;
-   }
 
-@SuppressWarnings("unchecked")
-public Object getDeliveryNoteByStatus(String userId, String roleName, Set<WareHouseDetailsDTO> wareHouseDetails, String deliveryNoteStatus) {
-	List<String> wareHouseIds = new ArrayList<String>();
-	for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
-		wareHouseIds.add(wareHouse.getWareHouseId());
-	boolean isSuperAdmin = false;
-	String hql = "";
-	// get all the user list if role is super_admin or sales_admin
-	if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
-			|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
-		hql = "SELECT d FROM DeliveryHeaderDo AS d WHERE d.status = :status  ORDER BY d.createdAt desc";
-		isSuperAdmin = true;
-	} else
-		hql = "SELECT d FROM DeliveryHeaderDo AS d inner join d.wareHouseDetails w WHERE d.status = :status AND w.wareHouseId IN (:warehouselist) ORDER BY d.createdAt desc";
-	Query query = getSession().createQuery(hql);
-	query.setParameter("status", deliveryNoteStatus);
-	if (!isSuperAdmin) {
-		// send no data on if warehouse if is empty
-		if (ServicesUtil.isEmpty(wareHouseIds))
-			return new ArrayList<DeliveryHeaderDTO>();
-
-		query.setParameterList("warehouselist", wareHouseIds);
+	public boolean removeTripDeliveryNoteMapping(DeliveryHeaderDTO dto) {
+		String sql = "DELETE FROM TRIP_DELIVERY_HEADER_MAPPING WHERE DELIVERY_NOTE_ID = " + dto.getDeliveryNoteId();
+		SQLQuery query = getSession().createSQLQuery(sql);
+		query.executeUpdate();
+		return false;
 	}
 
-	ArrayList<DeliveryHeaderDo> result = (ArrayList<DeliveryHeaderDo>) query.list();
-	return exportList(result);
-}
+	@SuppressWarnings("unchecked")
+	public Object getDeliveryNoteByStatus(String userId, String roleName, Set<WareHouseDetailsDTO> wareHouseDetails,
+			String deliveryNoteStatus) {
+		List<String> wareHouseIds = new ArrayList<String>();
+		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
+			wareHouseIds.add(wareHouse.getWareHouseId());
+		boolean isSuperAdmin = false;
+		String hql = "";
+		// get all the user list if role is super_admin or sales_admin
+		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
+				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
+			hql = "SELECT d FROM DeliveryHeaderDo AS d WHERE d.status = :status  ORDER BY d.createdAt desc";
+			isSuperAdmin = true;
+		} else
+			hql = "SELECT d FROM DeliveryHeaderDo AS d inner join d.wareHouseDetails w WHERE d.status = :status AND w.wareHouseId IN (:warehouselist) ORDER BY d.createdAt desc";
+		Query query = getSession().createQuery(hql);
+		query.setParameter("status", deliveryNoteStatus);
+		if (!isSuperAdmin) {
+			// send no data on if warehouse if is empty
+			if (ServicesUtil.isEmpty(wareHouseIds))
+				return new ArrayList<DeliveryHeaderDTO>();
+
+			query.setParameterList("warehouselist", wareHouseIds);
+		}
+
+		ArrayList<DeliveryHeaderDo> result = (ArrayList<DeliveryHeaderDo>) query.list();
+		return exportList(result);
+	}
 
 }

@@ -155,12 +155,21 @@ public class DeliveryHeaderDo implements BaseDo {
 
 	@Column(name = "DELETED")
 	private Integer deleted = 0;
+	
+	@Column(name = "DELEVERED_AT_LONG")
+	private Double deliveredAtLongitude;
+	
+	@Column(name = "DELEVERED_AT_LAT")
+    private Double deliveredAtLatitude; 
 
 	// getters and setters
 
 	public void setDeleted() {
 		this.deleted = 1;
 	}
+	
+	
+	
 
 	@Override
 	public Object getPrimaryKey() {

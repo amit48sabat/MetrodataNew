@@ -17,8 +17,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.hibernate.annotations.Where;
-
 import com.incture.metrodata.util.SortDHDoByDeliveryOrder;
 
 import lombok.Data;
@@ -28,7 +26,6 @@ import lombok.ToString;
 @Data // for auto generation of getters and setters
 @ToString
 @Table(name = "TRIP_DETAILS")
-@Where(clause = "status != 'trip_cancelled'")
 public class TripDetailsDo implements BaseDo {
 
 	private static final long serialVersionUID = 1L;

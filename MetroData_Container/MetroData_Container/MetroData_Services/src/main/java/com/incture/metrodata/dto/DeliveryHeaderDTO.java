@@ -3,6 +3,7 @@ package com.incture.metrodata.dto;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.incture.metrodata.exceptions.InvalidInputFault;
@@ -59,6 +60,9 @@ public class DeliveryHeaderDTO extends BaseDto {
 	private WareHouseDetailsDTO wareHouseDetails;
 	private String validationStatus;
 	private String awbValidated;
+	private Double deliveredAtLongitude;
+	private Double deliveredAtLatitude;
+
 	@Override
 	public void validate(DB_Operation enOperation) throws InvalidInputFault {
 		// TODO Auto-generated method stub
