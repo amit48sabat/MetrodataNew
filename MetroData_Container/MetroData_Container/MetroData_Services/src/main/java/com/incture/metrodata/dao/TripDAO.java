@@ -545,7 +545,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		deliveryNoteStatusList.add("del_note_started");
 		deliveryNoteStatusList.add("created"); // as del_note_validated
 		deliveryNoteStatusList.add("del_note_completed");
-
+		
 		boolean isSuperAdmin = false;
 		String hql = "";
 		Query query;
@@ -575,6 +575,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		} else if (roleName.equals(RoleConstant.ADMIN_INSIDE_JAKARTA.getValue())
 				|| roleName.equals(RoleConstant.ADMIN_OUTSIDE_JAKARTA.getValue())) {
 			hql = "SELECT new map(count(distinct t.tripId) as TOTAL_TRIPS)  FROM TripDetailsDo AS t where t.createdBy = :userId AND (t.status != :status or t.status is null)";
+			hql = "SELECT new map(count(distinct t.tripId) as TOTAL_TRIPS)  FROM TripDetailsDo AS t where t.createdBy = :userId";
 
 			query = getSession().createQuery(hql);
 			query.setParameter("userId", userId);
@@ -617,10 +618,32 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			Long avgOrders = dashBoardCountMap.get("TOTAL_TRIPS") / totalOrders;
 			dashBoardCountMap.put("AVG_TRIP_ORDER", avgOrders);
 		}
-		if (ServicesUtil.isEmpty(dashBoardCountMap)) {
-			dashBoardCountMap = new HashMap<>();
-		}
-
+			
+		
+		if(!dashBoardCountMap.containsKey("AVG_TRIP_ORDER"))
+			dashBoardCountMap.put("AVG_TRIP_ORDER",0L);
+		
+		if(!dashBoardCountMap.containsKey("TOTAL_TRIPS"))
+			dashBoardCountMap.put("TOTAL_TRIPS", 0L);
+		
+		if(!dashBoardCountMap.containsKey("TOTAL_ORDERS"))
+			dashBoardCountMap.put("TOTAL_ORDERS", 0L);
+		
+		if(!dashBoardCountMap.containsKey("del_note_rejected"))
+			dashBoardCountMap.put("del_note_rejected",0L);
+		
+		if(!dashBoardCountMap.containsKey("del_note_started"))
+			dashBoardCountMap.put("del_note_started", 0L);
+		
+		if(!dashBoardCountMap.containsKey("del_note_partially_rejected"))
+			dashBoardCountMap.put("del_note_partially_rejected", 0L);
+		
+		if(!dashBoardCountMap.containsKey("created"))
+			dashBoardCountMap.put("created", 0L);
+		
+		if(!dashBoardCountMap.containsKey("del_note_completed"))
+			dashBoardCountMap.put("del_note_completed", 0L);
+		
 		return dashBoardCountMap;
 	}
 
