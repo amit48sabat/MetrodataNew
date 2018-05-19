@@ -17,9 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import com.incture.metrodata.constant.DeliveryNoteStatus;
 import com.incture.metrodata.constant.Message;
 import com.incture.metrodata.constant.RoleConstant;
@@ -90,13 +87,15 @@ public class TripService implements TripServiceLocal {
 			TripDetailsDo dos = new TripDetailsDo();
 
 			// setTripDoForTripCreate(dto, dos);
-			LOGGER.error("INSIDE CREATE TRIP SERVICE. TRIP ID "+tripId);
+			LOGGER.error("INSIDE CREATE TRIP SERVICE. REQUEST PAYLOAD => "+dto);
 			dto = tripDao.create(dto, dos);
 
 			responseDto.setStatus(true);
 			responseDto.setCode(200);
 			responseDto.setData(dto);
 			responseDto.setMessage(Message.SUCCESS.toString() + " : Trip created with id " + tripId);
+			
+			LOGGER.error("INSIDE CREATE TRIP SERVICE. RESPONSE PAYLOAD <= "+responseDto);
 		}
 		catch (InvalidInputFault e) {
 			// TODO Auto-generated catch block
@@ -165,13 +164,15 @@ public class TripService implements TripServiceLocal {
 			if (!ServicesUtil.isEmpty(dto.getUser())) {
 				setAssignedUserInDeliveryHeader(dto);
 			}
-			LOGGER.error("INSIDE UPDATE TRIP SERVICE. TRIP ID "+dto.getTripId());
+			LOGGER.error("INSIDE UPDATE TRIP SERVICE. REQUEST PAYLOAD => "+dto);
 			dto = tripDao.update(dto);
 
 			responseDto.setStatus(true);
 			responseDto.setCode(200);
 			responseDto.setData(dto);
 			responseDto.setMessage(Message.SUCCESS.toString() + " : Trip updated with id " + dto.getTripId());
+			
+			LOGGER.error("INSIDE UPDATE TRIP SERVICE. RESPONSE PAYLOAD <= "+responseDto);
 		}
 		catch (InvalidInputFault e) {
 			//LOGGER.error("ERROR WHILE CREATING TRIP : " +e.getMessage());
@@ -191,6 +192,9 @@ public class TripService implements TripServiceLocal {
 	}
 
 	private void setAssignedUserInDeliveryHeader(TripDetailsDTO dto) {
+		
+		LOGGER.error("INSIDE setAssignedUserInDeliveryHeader() OF TRIP SERVICE");
+		
 		if (!ServicesUtil.isEmpty(dto.getDeliveryHeader())) {
 			UserDetailsDTO user = dto.getUser();
 			Set<DeliveryHeaderDTO> deliveryHeader = dto.getDeliveryHeader();
@@ -201,7 +205,7 @@ public class TripService implements TripServiceLocal {
 	}
 
 	private void updateTripStatusConstraints(TripDetailsDTO dto) {
-
+		LOGGER.error("INSIDE updateTripStatusConstraints() OF TRIP SERVICE");
 		String status = dto.getStatus();
 		Date currDate = new Date();
 		// if trip status is ENROUTE
@@ -245,10 +249,11 @@ public class TripService implements TripServiceLocal {
 				List<TripDetailsDTO> tripList = tripDao.findTripByParam(dto, adminDto);
 				responseDto.setData(tripList);
 			}
-			LOGGER.error("INSIDE FIND TRIP BY PARAM SERVICE. TRIP ID "+dto.getTripId());
+			LOGGER.error("INSIDE FIND TRIP BY PARAM SERVICE. REQUEST PAYLOAD => "+dto);
 			responseDto.setStatus(true);
 			responseDto.setCode(200);
 			responseDto.setMessage(Message.SUCCESS.toString());
+			LOGGER.error("INSIDE FIND TRIP BY PARAM SERVICE. RESPONSE PAYLOAD <= "+responseDto);
 
 		} catch (Exception e) {
 			responseDto.setStatus(false);

@@ -128,7 +128,7 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 				dto.setLongitude(latAndLong.get("lng"));
 			}
 
-			LOGGER.error("INSIDE UPDATE DELIVERY NOTE SERVICE. DELIVERY NOTE ID " + dto.getDeliveryNoteId());
+			LOGGER.error("INSIDE UPDATE DELIVERY NOTE SERVICE. UPDATING USER ID ("+updatingUserDto.getUserId() +") . REQUEST PAYLOAD => " + dto);
 
 			setCreatedAtAndUpdatedAtForDto(dto);
 			dto = deliveryHeaderDao.update(dto);
@@ -145,6 +145,10 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 			responseDto.setCode(200);
 			responseDto.setData(dto);
 			responseDto.setMessage(Message.SUCCESS.toString());
+			
+			LOGGER.error("INSIDE UPDATE DELIVERY NOTE SERVICE. UPDATING USER ID ("+updatingUserDto.getUserId() +") . RESPONSE PAYLOAD <= " + responseDto);
+
+			
 		} catch (Exception e) {
 			responseDto.setStatus(false);
 			responseDto.setCode(417);

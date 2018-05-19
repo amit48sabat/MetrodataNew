@@ -18,6 +18,8 @@ import org.apache.chemistry.opencmis.commons.data.RepositoryInfo;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisNameConstraintViolationException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.incture.metrodata.util.ServicesUtil;
@@ -29,13 +31,16 @@ import com.sap.ecm.api.RepositoryOptions.Visibility;
 public class DocumentService implements DocumentServiceLocal {
 	private Session openCmisSession = null;
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(DocumentService.class);
+	
+	
 	/**
 	 * Connect to the document store service in SAP Cloud Platform and create or
 	 * look up sample repository.
 	 */
 	@Override
 	public String upload(byte[] file,String fileName,String fileType) {
-		
+		LOGGER.error("INSIDE UPLOAD SERVICE OF DOCUMENT SERVICE");
 		try {
 			connectToEcm();
 			return createFolderAndDoc(file,fileName,fileType);
@@ -48,6 +53,7 @@ public class DocumentService implements DocumentServiceLocal {
 
 	private void connectToEcm() {
 		
+		LOGGER.error("INSIDE connectToEcm() OF DOCUMENT SERVICE");
 		// Get a handle to the service by performing a JNDI lookup; EcmService
 		// must be a <resource-ref> in the web.xml
 		EcmService ecmService = null;
@@ -107,7 +113,7 @@ public class DocumentService implements DocumentServiceLocal {
 		if (openCmisSession == null) {
 			return null;
 		}
-
+		LOGGER.error("INSIDE createFolderAndDoc() OF DOCUMENT SERVICE");
 		// Get root folder from CMIS session
 		Folder rootFolder = openCmisSession.getRootFolder();
 
@@ -153,6 +159,7 @@ public class DocumentService implements DocumentServiceLocal {
 
 	@Override
 	public Document getDocById(String id){
+		LOGGER.error("INSIDE getDocById() OF DOCUMENT SERVICE");
 		if(ServicesUtil.isEmpty(openCmisSession)){
 			connectToEcm();
 		}

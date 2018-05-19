@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,16 +85,19 @@ public class ContainerService implements ContainerServiceLocal {
 	@Autowired
 	WareHouseDAO wareHouseDao;
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(ContainerService.class);
+	
 	@Override
 	public ResponseDto create(ContainerDTO dto) {
 		ResponseDto response = new ResponseDto();
-
+		LOGGER.debug("INSIDE CREATE CONTAINER SERVIE WITH REQUEST PAYLOAD => "+ dto);
 		if (!ServicesUtil.isEmpty(dto) && !ServicesUtil.isEmpty(dto.getDELIVERY())) {
 			try {
 				for (ContainerDetailsDTO d : dto.getDELIVERY().getITEM()) {
 					containerDao.create(d, new ContainerDetailsDo());
 				}
 				Object data = createEntryInDeliveryHeader(dto);
+				LOGGER.debug("INSIDE CREATE CONTAINER SERVIE WITH RESPONSE PAYLOAD <= "+ data);
 				response.setStatus(true);
 				response.setCode(HttpStatus.SC_OK);
 				response.setData(data);
@@ -116,6 +121,7 @@ public class ContainerService implements ContainerServiceLocal {
 
 
 	private Map<Long, DeliveryHeaderDo> createEntryInDeliveryHeader(ContainerDTO dto) throws Exception {
+		LOGGER.debug("INSIDE createEntryInDeliveryHeader() OF CONTAINER SERVIE");
 		Map<Long, DeliveryHeaderDo> headerMap = importDto(dto.getDELIVERY(), context);
 		DeliveryHeaderDo dos = null;
 		for (Map.Entry<Long, DeliveryHeaderDo> entry : headerMap.entrySet()) {
@@ -268,7 +274,7 @@ public class ContainerService implements ContainerServiceLocal {
 	
 	private void sendNotificationToDriverWhenAdminUpdateDnStatus(DeliveryHeaderDTO headerDto, UserDetailsDTO adminDto)
 			throws IOException {
-
+		LOGGER.debug("INSIDE sendNotificationToDriverWhenAdminUpdateDnStatus() OF CONTAINER SERVIE");
 		// getting the corresponding trip driver
 		UserDetailsDTO driverDto = tripDao.getDriverFromTripByDN(headerDto);
 		if (!ServicesUtil.isEmpty(driverDto.getMobileToken())) {
