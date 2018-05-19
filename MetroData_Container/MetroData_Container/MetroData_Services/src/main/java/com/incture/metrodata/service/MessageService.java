@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +48,8 @@ public class MessageService implements MessageServiceLocal {
 	@Autowired
 	UserDAO userDao;
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(MessageService.class);
+	
 	/**
 	 * api for creating message
 	 */
@@ -63,7 +67,7 @@ public class MessageService implements MessageServiceLocal {
 			} else {
 				throw new InvalidInputFault("Message type is required");
 			}
-
+			LOGGER.error("INSIDE CREATE MESSAGE SERVICE. MESSAGE ID "+dto.getMessageId());
 			UserDetailsDTO userDto = new UserDetailsDTO();
 			// if no user is set than send the mail to all the users
 			if (!ServicesUtil.isEmpty(dto.getUsers())) {
@@ -125,6 +129,7 @@ public class MessageService implements MessageServiceLocal {
 	 */
 	private void setMessageId(MessageDetailsDTO dto) {
 		String messageType = dto.getType();
+		LOGGER.error("INSIDE setMessageId() OF MESSAGE SERVICE.");
 		String seq = "";
 		if (messageType.equalsIgnoreCase(MessageType.FEED.getValue())) {
 			seq = "FD";
@@ -143,7 +148,7 @@ public class MessageService implements MessageServiceLocal {
 
 	private void setCreatedAtAndUpdatedAtForDto(MessageDetailsDTO dto, String createdBy) {
 		Date currdate = new Date();
-
+		LOGGER.error("INSIDE setCreatedAtAndUpdatedAtForDto() OF MESSAGE SERVICE.");
 		dto.setUpdatedAt(currdate);
 		dto.setUpdatedBy(createdBy);
 
@@ -195,7 +200,7 @@ public class MessageService implements MessageServiceLocal {
 			} else {
 				data = messageDetailsDao.findByParam(dto);
 			}
-
+			LOGGER.error("INSIDE FIND MESSAGE BY PARAM MESSAGE SERVICE.");
 			response.setStatus(true);
 			response.setCode(HttpStatus.SC_OK);
 			response.setData(data);
@@ -259,7 +264,7 @@ public class MessageService implements MessageServiceLocal {
 				userDto.setUserId(dto.getUserId());
 				
 				userDto = userDao.findById(userDto);
-			  
+				LOGGER.error("INSIDE FIND ALL MESSAGES SERVICE.");
 				List<MessageDetailsDTO> messageList = messageDetailsDao.findAllMessages(dto, userDto.getRole().getRoleName());
 				setUserDetailsDtoByCreatedAt(messageList);
 				response.setStatus(true);
@@ -285,6 +290,7 @@ public class MessageService implements MessageServiceLocal {
 		Map<String, UserDetailsDTO> userMap = new TreeMap<>();
 		UserDetailsDTO userDto = null;
 		String createdBy = null;
+		LOGGER.error("INSIDE setUserDetailsDtoByCreatedAt() OF MESSAGE SERVICE.");
 		for (MessageDetailsDTO m : messageList) {
 			createdBy = m.getCreatedBy().toString();
 			userDto = userMap.get(createdBy);

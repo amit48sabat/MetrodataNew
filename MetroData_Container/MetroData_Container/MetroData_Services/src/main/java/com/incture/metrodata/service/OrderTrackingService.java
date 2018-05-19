@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,14 +37,16 @@ public class OrderTrackingService implements OrderTrackingServiceLocal {
 
 	@Autowired
 	UserDAO userDao;
-
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(OrderTrackingService.class);
+	
 	@Override
 	public ResponseDto create(OrderTrackingVO trackingVO) {
 		ResponseDto response = new ResponseDto();
 		
 		try {
 			OrderTrackingDTO dto = new OrderTrackingDTO();
-			
+			LOGGER.error("INSIDE CREATE ORDER TRACKING. REQUESTING PAYLOAD => "+trackingVO);
 			dto.setTripId(trackingVO.getTripId());
 			dto.setDriverId(trackingVO.getDriverId());
 			
@@ -76,6 +80,7 @@ public class OrderTrackingService implements OrderTrackingServiceLocal {
 	}
 
 	private void updateDriversLatAndLng(OrderTrackingDTO dto) throws Exception {
+		LOGGER.error("INSIDE updateDriversLatAndLng() OF ORDER TRACKING SERVICE");
 		UserDetailsDTO userDto = new UserDetailsDTO();
 		userDto.setUserId(dto.getDriverId());
 		userDto.setLatitude(dto.getLatitude());
@@ -90,7 +95,7 @@ public class OrderTrackingService implements OrderTrackingServiceLocal {
 		try {
 
 			List<OrderTrackingDTO> data = orderTrackingDao.findByParam(dto);
-			
+			LOGGER.error("INSIDE FIND BY PARAM OF ORDER TRACKING SERVICE");
 			// added trip location as last updated driver location if driver is idle
 			if(ServicesUtil.isEmpty(data))
 			{
