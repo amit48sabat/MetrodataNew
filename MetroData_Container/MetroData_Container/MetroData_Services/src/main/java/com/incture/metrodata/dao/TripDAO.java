@@ -545,7 +545,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		deliveryNoteStatusList.add("del_note_started");
 		deliveryNoteStatusList.add("created"); // as del_note_validated
 		deliveryNoteStatusList.add("del_note_completed");
-		
+
 		boolean isSuperAdmin = false;
 		String hql = "";
 		Query query;
@@ -625,32 +625,30 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			}
 		}
 
-			
-		
-		if(!dashBoardCountMap.containsKey("AVG_TRIP_ORDER"))
-			dashBoardCountMap.put("AVG_TRIP_ORDER",0L);
-		
-		if(!dashBoardCountMap.containsKey("TOTAL_TRIPS"))
+		if (!dashBoardCountMap.containsKey("AVG_TRIP_ORDER"))
+			dashBoardCountMap.put("AVG_TRIP_ORDER", 0L);
+
+		if (!dashBoardCountMap.containsKey("TOTAL_TRIPS"))
 			dashBoardCountMap.put("TOTAL_TRIPS", 0L);
-		
-		if(!dashBoardCountMap.containsKey("TOTAL_ORDERS"))
+
+		if (!dashBoardCountMap.containsKey("TOTAL_ORDERS"))
 			dashBoardCountMap.put("TOTAL_ORDERS", 0L);
-		
-		if(!dashBoardCountMap.containsKey("del_note_rejected"))
-			dashBoardCountMap.put("del_note_rejected",0L);
-		
-		if(!dashBoardCountMap.containsKey("del_note_started"))
+
+		if (!dashBoardCountMap.containsKey("del_note_rejected"))
+			dashBoardCountMap.put("del_note_rejected", 0L);
+
+		if (!dashBoardCountMap.containsKey("del_note_started"))
 			dashBoardCountMap.put("del_note_started", 0L);
-		
-		if(!dashBoardCountMap.containsKey("del_note_partially_rejected"))
+
+		if (!dashBoardCountMap.containsKey("del_note_partially_rejected"))
 			dashBoardCountMap.put("del_note_partially_rejected", 0L);
-		
-		if(!dashBoardCountMap.containsKey("created"))
+
+		if (!dashBoardCountMap.containsKey("created"))
 			dashBoardCountMap.put("created", 0L);
-		
-		if(!dashBoardCountMap.containsKey("del_note_completed"))
+
+		if (!dashBoardCountMap.containsKey("del_note_completed"))
 			dashBoardCountMap.put("del_note_completed", 0L);
-		
+
 		return dashBoardCountMap;
 	}
 
@@ -809,5 +807,23 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		query.setParameter("deliveryNoteId", headerDto.getDeliveryNoteId());
 		UserDetailsDo dos = (UserDetailsDo) query.uniqueResult();
 		return userDAO.exportDto(dos);
+	}
+
+	public TripDetailsDTO getTripDeliveryNotesCountsByDeliveryNoteId(Long deliveryNoteId) {
+		String hql = "SELECT t from TripDetailsDo t  join t.deliveryHeader d where d.deliveryNoteId = :deliveryNoteId";
+		Query query = getSession().createQuery(hql);
+		query.setParameter("deliveryNoteId", deliveryNoteId);
+		TripDetailsDo tripDo =  (TripDetailsDo) query.uniqueResult();
+		return exportDto(tripDo);
+	}
+	
+	public int cancelTripById(String tripId){
+		String hql = " UPDATE TripDetailsDo t set t.status = :tripStatus where t.tripId = :tripId ";
+		Query query = getSession().createQuery(hql);
+		query.setParameter("tripStatus", TripStatus.TRIP_STATUS_CANCELLED.getValue());
+		query.setParameter("tripId", tripId);
+		int result = query.executeUpdate();
+		return result;
+		
 	}
 }

@@ -739,4 +739,9 @@ public class TripService implements TripServiceLocal {
 		return document;
 
 	}
+
+	@Override
+	public TripDetailsDTO getDeliveryNoteCountOfTripByDeliveryNoteId(String deliveryNoteId) {
+	return  tripDao.getTripDeliveryNotesCountsByDeliveryNoteId(Long.parseLong(deliveryNoteId));
+	}
 }

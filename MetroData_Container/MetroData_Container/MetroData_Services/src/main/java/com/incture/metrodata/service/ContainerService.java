@@ -3,6 +3,7 @@ package com.incture.metrodata.service;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +18,7 @@ import com.google.maps.GeoApiContext;
 import com.incture.metrodata.constant.DeliveryNoteStatus;
 import com.incture.metrodata.constant.Message;
 import com.incture.metrodata.constant.MessageType;
+import com.incture.metrodata.constant.TripStatus;
 import com.incture.metrodata.dao.ContainerDAO;
 import com.incture.metrodata.dao.ContainerToDeliveryHeaderDao;
 import com.incture.metrodata.dao.CourierDetailsDAO;
@@ -30,6 +32,7 @@ import com.incture.metrodata.dto.DefaultUserDetailsVO;
 import com.incture.metrodata.dto.DeliveryHeaderDTO;
 import com.incture.metrodata.dto.MessageDetailsDTO;
 import com.incture.metrodata.dto.ResponseDto;
+import com.incture.metrodata.dto.TripDetailsDTO;
 import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.entity.ContainerDetailsDo;
 import com.incture.metrodata.entity.DeliveryHeaderDo;
@@ -90,14 +93,14 @@ public class ContainerService implements ContainerServiceLocal {
 	@Override
 	public ResponseDto create(ContainerDTO dto) {
 		ResponseDto response = new ResponseDto();
-		LOGGER.debug("INSIDE CREATE CONTAINER SERVIE WITH REQUEST PAYLOAD => "+ dto);
+		LOGGER.error("INSIDE CREATE CONTAINER SERVIE WITH REQUEST PAYLOAD => "+ dto);
 		if (!ServicesUtil.isEmpty(dto) && !ServicesUtil.isEmpty(dto.getDELIVERY())) {
 			try {
 				for (ContainerDetailsDTO d : dto.getDELIVERY().getITEM()) {
 					containerDao.create(d, new ContainerDetailsDo());
 				}
 				Object data = createEntryInDeliveryHeader(dto);
-				LOGGER.debug("INSIDE CREATE CONTAINER SERVIE WITH RESPONSE PAYLOAD <= "+ data);
+				LOGGER.error("INSIDE CREATE CONTAINER SERVIE WITH RESPONSE PAYLOAD <= "+ data);
 				response.setStatus(true);
 				response.setCode(HttpStatus.SC_OK);
 				response.setData(data);
@@ -232,6 +235,19 @@ public class ContainerService implements ContainerServiceLocal {
 					adminDto.setEmail(defaultUserVo.getEmail());
 					adminDto = userService.getUserByEmail(adminDto);
 
+
+					// getting the delivery notes corresponding trip
+					/* TripDetailsDTO  tripDto = tripDao.getTripDeliveryNotesCountsByDeliveryNoteId(dos.getDeliveryNoteId());
+					 if(!ServicesUtil.isEmpty(tripDto.getTripId()) && tripDto.getDeliveryHeader().size() == 1)
+					 {
+						TripDetailsDTO tripDetailsDTO=  new TripDetailsDTO();
+						tripDetailsDTO.setTripId(tripDto.getTripId());
+						tripDetailsDTO.setStatus(TripStatus.TRIP_STATUS_CANCELLED.getValue());
+						tripDetailsDTO.setUpdatedAt(new Date());
+						tripDetailsDTO.setUpdatedBy(adminDto.getUserId());
+					   tripDao.cancelTripById(tripDto.getTripId());
+					 }*/
+					
 					DeliveryHeaderDTO headerDto = new DeliveryHeaderDTO();
 					headerDto.setDeliveryNoteId(dos.getDeliveryNoteId());  
 
@@ -239,7 +255,7 @@ public class ContainerService implements ContainerServiceLocal {
 
 					// deleting the mapping btw trip and delivery note if exits
 					deliveryHeaderDao.removeTripDeliveryNoteMapping(headerDto);
-
+					
 					// setting delivery note status as RFC_Invaidated and set
 					// tripped to false again
 					dos.setStatus(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue());

@@ -7,34 +7,34 @@ import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.dto.WebLeaderBoardVO;
 
 public interface TripServiceLocal {
-	
+
 	ResponseDto create(TripDetailsDTO dto);
 
-//	ResponseDto findById(String requestNo);
-	
+	// ResponseDto findById(String requestNo);
+
 	ResponseDto findByParam(TripDetailsDTO dto, UserDetailsDTO adminDto);
-    
+
 	ResponseDto delete(String tripId);
 
 	ResponseDto findAll();
 
 	ResponseDto update(TripDetailsDTO Dto);
-	
+
 	ResponseDto filter(FilterDTO dto);
 
 	ResponseDto driverDashboardService(String userId);
 
 	ResponseDto assigTripDriver(String tripId, String userId);
-	
+
 	ResponseDto getTripHistoryByDriverId(String userDto, Long start, Long end);
-	
+
 	ResponseDto leaderBoard(WebLeaderBoardVO dto);
-	
+
 	/***
 	 * api for finding all the trip as per admin's warehouse id
 	 */
 	ResponseDto getAllTripsAssociatedWithAdminsDrivers(UserDetailsDTO adminDto);
-	
+
 	/***
 	 * api for admin dashboard as per admin's warehouse id
 	 */
@@ -47,6 +47,7 @@ public interface TripServiceLocal {
 
 	/**
 	 * api for leaderboard report as per logged in admin or super_admin
+	 * 
 	 * @param dto
 	 * @param adminDto
 	 * @return
@@ -54,4 +55,6 @@ public interface TripServiceLocal {
 	ResponseDto getLeaderBoardAssociatedWithAdmin(WebLeaderBoardVO dto, UserDetailsDTO adminDto);
 
 	ResponseDto printTripManiFest(String tripId);
+
+	public TripDetailsDTO getDeliveryNoteCountOfTripByDeliveryNoteId(String deliveryNoteId);
 }
