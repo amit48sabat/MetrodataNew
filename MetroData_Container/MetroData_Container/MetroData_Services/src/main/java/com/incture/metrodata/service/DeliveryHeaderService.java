@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpStatus;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,7 @@ import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.entity.DeliveryHeaderDo;
 import com.incture.metrodata.exceptions.ExecutionFault;
 import com.incture.metrodata.firebasenotification.NotificationClass;
+import com.incture.metrodata.util.HciRestInvoker;
 import com.incture.metrodata.util.ServicesUtil;
 
 @Service("deliveryHeaderService")
@@ -56,6 +58,9 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 	@Autowired
 	MessageServiceLocal messageService;
 
+	@Autowired
+	HciRestInvoker invoker;
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DeliveryHeaderService.class);
 
 	/**
@@ -411,5 +416,41 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 		}
 		return responseDto;
 	}
+
+	
+	/**
+	 * api to refresh the delivery note list from ecc
+	 */
+	@Override
+	public ResponseDto refreshDeliveryNoteList(UserDetailsDTO dto) {
+		ResponseDto responseDto = new ResponseDto();
+
+		try {
+			LOGGER.error("INSIDE REFESH DELIVERY NOTE LIST FROM ECC. REQUEST PAYLOAD ");	
+			 
+			 fetchTheDeliveryNotesFromECC();
+			responseDto = getAllDeliveryNoteByAdminsWareHouse(dto);
+		} catch (Exception e) {
+			responseDto.setStatus(false);
+			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			responseDto.setMessage(Message.FAILED.getValue());
+			e.printStackTrace();
+		}
+		return responseDto;
+	}
+
+	private void fetchTheDeliveryNotesFromECC() {
+		Date date = new Date();
+		DateTime datetime = new DateTime(date);
+		
+        String day = datetime.toString("dd");
+        String month = datetime.toString("MM");
+        String year = datetime.toString("YYYY");
+		String data = year+month+day;
+		String payload = "{ \"DELIVERY\": { \"GI_DATE\": \""+data+"\" } }";
+		System.err.println("Hci refresh delivery note list request payload => "+payload);
+		String response = invoker.postDataToServer("/metrodatadetails", payload);
+		System.err.println("Hci  refresh delivery note list service response <= " +response);
+	} 
 
 }

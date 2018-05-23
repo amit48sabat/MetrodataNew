@@ -34,4 +34,6 @@ public interface DeliveryHeaderServiceLocal {
 	ResponseDto getDeliveryNoteByStatus(UserDetailsDTO adminDto,String deliveryNoteId);
 
 	ResponseDto updateList(List<DeliveryHeaderDTO> dtoList, UserDetailsDTO updaingUserDto);
+
+	ResponseDto refreshDeliveryNoteList(UserDetailsDTO dto);
 }

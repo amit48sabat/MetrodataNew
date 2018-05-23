@@ -137,4 +137,25 @@ class DeliveryHeaderController {
 			LOGGER.error("INSIDE LIST UPDATE DELIVERY NOTE CONTROLLER. USER ID "+userId);
 		return deliveryHeaderServiceLocal.updateList(dtoList,userDto);
 	}
+	
+	
+	@RequestMapping(value = "/refresh", method = RequestMethod.GET)
+	public ResponseDto refreshDeliveryNotes(HttpServletRequest request) {
+		ResponseDto res = new ResponseDto();
+		String userId = "";
+		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
+			userId = request.getUserPrincipal().getName();
+		} else {
+			return ServicesUtil.getUnauthorizedResponseDto();
+
+		}
+		// validating user role if action not permitted then return
+		res = userServiceLocal.validatedUserRoleByUserId(userId);
+		if (!res.isStatus())
+			return ServicesUtil.getUnauthorizedResponseDto();
+
+		UserDetailsDTO dto = (UserDetailsDTO) res.getData();
+		LOGGER.error("INSIDE REFRESH DELIVERY NOTE CONTROLLER. USER ID "+userId);
+		return deliveryHeaderServiceLocal.refreshDeliveryNoteList(dto);
+	}
 }
