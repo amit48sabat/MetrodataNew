@@ -3,7 +3,6 @@ package com.incture.metrodata.service;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -237,7 +236,7 @@ public class ContainerService implements ContainerServiceLocal {
 
 
 					// getting the delivery notes corresponding trip
-					/* TripDetailsDTO  tripDto = tripDao.getTripDeliveryNotesCountsByDeliveryNoteId(dos.getDeliveryNoteId());
+					 TripDetailsDTO  tripDto = tripDao.getTripDeliveryNotesCountsByDeliveryNoteId(dos.getDeliveryNoteId());
 					 if(!ServicesUtil.isEmpty(tripDto.getTripId()) && tripDto.getDeliveryHeader().size() == 1)
 					 {
 						TripDetailsDTO tripDetailsDTO=  new TripDetailsDTO();
@@ -245,8 +244,11 @@ public class ContainerService implements ContainerServiceLocal {
 						tripDetailsDTO.setStatus(TripStatus.TRIP_STATUS_CANCELLED.getValue());
 						tripDetailsDTO.setUpdatedAt(new Date());
 						tripDetailsDTO.setUpdatedBy(adminDto.getUserId());
-					   tripDao.cancelTripById(tripDto.getTripId());
-					 }*/
+						tripDao.cancelTripById(tripDto.getTripId());
+						tripDao.getSession().flush();
+						tripDao.getSession().clear();
+						
+					 }
 					
 					DeliveryHeaderDTO headerDto = new DeliveryHeaderDTO();
 					headerDto.setDeliveryNoteId(dos.getDeliveryNoteId());  
