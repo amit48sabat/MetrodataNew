@@ -247,6 +247,7 @@ public class TripService implements TripServiceLocal {
 			}
 
 			LOGGER.error("INSIDE FIND TRIP BY PARAM SERVICE. REQUEST PAYLOAD => "+dto);
+			responseDto.setStatus(true);
 			responseDto.setCode(200);
 			responseDto.setMessage(Message.SUCCESS.toString());
 			LOGGER.error("INSIDE FIND TRIP BY PARAM SERVICE. RESPONSE PAYLOAD <= "+responseDto);
