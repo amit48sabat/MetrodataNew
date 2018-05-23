@@ -1,6 +1,7 @@
 package com.incture.metrodata.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -166,6 +167,17 @@ public class ContainerService implements ContainerServiceLocal {
 				 */
 				if (ServicesUtil.isEmpty(map.get(d.getDELIVNO()))) {
 					dos = new DeliveryHeaderDo();
+					try{
+						dos.setDeliveryNoteId(d.getDELIVNO());
+						// fetching the delivery note if exits
+						dos = deliveryHeaderDao.find(dos);
+						List<DeliveryItemDo> deliveryItems = new ArrayList<DeliveryItemDo>();
+						dos.setDeliveryItems(deliveryItems);
+					}
+					catch (InvalidInputFault e) {
+						dos = new DeliveryHeaderDo();
+					}
+					
 					map.put(d.getDELIVNO(), dos);
 				}
 				dos = map.get(d.getDELIVNO());
@@ -221,10 +233,14 @@ public class ContainerService implements ContainerServiceLocal {
 
 				// set other params
 				dos.setCreatedDate(currDate);
-				dos.setCreatedAt(currDate);
 				dos.setUpdatedAt(currDate);
-				dos.setTripped(false);
-				dos.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
+				
+				if(ServicesUtil.isEmpty(dos.getStatus()))
+				{  
+					dos.setCreatedAt(currDate);
+					dos.setTripped(false);
+					dos.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
+				}
 
 				// if STAT = X means order is cancelled and we need to remove
 				// the mapping of trip and this delivery note and

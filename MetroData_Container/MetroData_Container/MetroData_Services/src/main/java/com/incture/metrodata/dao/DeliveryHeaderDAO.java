@@ -146,10 +146,10 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getDeliveredAtLongitude())) {
 				deliveryHeaderDo.setDeliveredAtLongitude(deliveryHeaderDTO.getDeliveredAtLongitude());
 			}
-			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getAirwayBillNo())
-					&& !deliveryHeaderDTO.getAirwayBillNo().equalsIgnoreCase("null")) {
+			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getAirwayBillNo())) {
 				deliveryHeaderDo.setAirwayBillNo(deliveryHeaderDTO.getAirwayBillNo());
-			} else
+			} 
+			else if(!ServicesUtil.isEmpty(deliveryHeaderDTO.getAirwayBillNo()) && deliveryHeaderDTO.getAirwayBillNo().equalsIgnoreCase("null"))
 				deliveryHeaderDo.setAirwayBillNo(null);
 
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getWareHouseDetails())) {
