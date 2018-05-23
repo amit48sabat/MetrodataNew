@@ -281,6 +281,9 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getDeliveredAtLongitude())) {
 				deliveryHeaderDTO.setDeliveredAtLongitude(deliveryHeaderDo.getDeliveredAtLongitude());
 			}
+			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getAirwayBillNo())) {
+				deliveryHeaderDTO.setAirwayBillNo(deliveryHeaderDo.getAirwayBillNo());
+			}
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getValidationStatus())) {
 				deliveryHeaderDTO.setValidationStatus(deliveryHeaderDo.getValidationStatus());
 			} else
