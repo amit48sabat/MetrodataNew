@@ -191,7 +191,7 @@ public class ContainerService implements ContainerServiceLocal {
 				if (!ServicesUtil.isEmpty(d.getPURCHORD()))
 					dos.setPurchaseOrder(d.getPURCHORD());
 				if (!ServicesUtil.isEmpty(d.getREFNO()))
-					dos.setRefNo(d.getREFNO());
+					dos.setRefNo(Long.parseLong(d.getREFNO()));
 				if (!ServicesUtil.isEmpty(d.getSLOC()))
 					dos.setStorageLocation(d.getSLOC());
 				if (!ServicesUtil.isEmpty(d.getSHIPADD())) {

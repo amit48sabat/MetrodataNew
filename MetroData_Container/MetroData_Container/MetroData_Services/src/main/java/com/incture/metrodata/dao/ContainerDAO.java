@@ -39,7 +39,7 @@ public class ContainerDAO extends BaseDao<ContainerDetailsDo, ContainerDetailsDT
 				dos.setPURCHORD(dto.getPURCHORD());
 			}
 			if(!ServicesUtil.isEmpty(dto.getREFNO())){
-				dos.setREFNO(dto.getREFNO());
+				dos.setREFNO(Long.parseLong(dto.getREFNO()));
 			}
 			if(!ServicesUtil.isEmpty(dto.getSLOC())){
 				dos.setSLOC(dto.getSLOC());
@@ -116,7 +116,7 @@ public class ContainerDAO extends BaseDao<ContainerDetailsDo, ContainerDetailsDT
 				dto.setPURCHORD(dos.getPURCHORD());
 			}
 			if(!ServicesUtil.isEmpty(dos.getREFNO())){
-				dto.setREFNO(dos.getREFNO());
+				dto.setREFNO(dos.getREFNO()+"");
 			}
 			if(!ServicesUtil.isEmpty(dos.getSLOC())){
 				dto.setSLOC(dos.getSLOC());
