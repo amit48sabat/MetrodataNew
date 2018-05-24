@@ -76,7 +76,9 @@ public class TripService implements TripServiceLocal {
 		try {
 			// setting created at and updated at for dto
 			setCreatedAtAndUpdatedAtForDto(dto);
-
+                
+			dto.setStatus(TripStatus.TRIP_STATUS_CREATED.getValue());
+			
 			// assigning tripId before processing
 			String tripId = SequenceNumberGen.getInstance().getNextSeqNumber("TRIP", 8, tripDao.getSession());
 			dto.setTripId(tripId);
@@ -355,7 +357,7 @@ public class TripService implements TripServiceLocal {
 		 try {
 		  
 		 // fetching driver trip report 
-			 HashMap<String,String> onGoingTrip=  (HashMap<String, String>) tripDao.getLatestOngoingTrip(userId);
+			 List<TripDetailsDTO> onGoingTrip=  (List<TripDetailsDTO>) tripDao.getLatestOngoingTrip(userId);
 		  
 		  HashMap<String, Long> tripReport =
 		  tripDao.getDriverDashboardDetails(userId); Object deliveryNoteReport
@@ -369,9 +371,9 @@ public class TripService implements TripServiceLocal {
 		  
 		  // setting up response 
 		  Map<String, Object> map = new HashMap<>();
-		  if(!ServicesUtil.isEmpty(onGoingTrip)){ map.put("trip_id",
-		  onGoingTrip.get("tripId")); map.put("trip_status",
-		  onGoingTrip.get("status")); }
+		  if(!ServicesUtil.isEmpty(onGoingTrip)){ 
+			  map.put("trips",onGoingTrip); 
+		  }
 		  
 		  map.put("profile", object); map.put("tripReport", tripReport);
 		  map.put("deliveryNoteReport", deliveryNoteReport);

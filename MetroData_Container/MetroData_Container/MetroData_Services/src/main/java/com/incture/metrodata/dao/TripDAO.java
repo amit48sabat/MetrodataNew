@@ -349,19 +349,35 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Map<String, String> getLatestOngoingTrip(String userId) {
+	public List<TripDetailsDTO> getLatestOngoingTrip(String userId) throws Exception {
+		
+		//
+		UserDetailsDTO userDto = new UserDetailsDTO();
+		userDto.setUserId(userId);
+		userDto = 	userDAO.findById(userDto);
+		
+		String roleName =  userDto.getRole().getRoleName();
+		String outsideDriver = RoleConstant.OUTSIDE_JAKARTA_DRIVER.getValue();
 		List<String> dnList = new ArrayList<>();
 		dnList.add(TripStatus.TRIP_STATUS_STARTED.getValue());
 		dnList.add(TripStatus.TRIP_STATUS_DRIVER_ASSIGNED.getValue());
+		
+		if(!outsideDriver.equalsIgnoreCase(roleName))
 		dnList.add(TripStatus.TRIP_STATUS_CANCELLED.getValue());
-		String hql = "select new map(t.tripId as tripId,t.status as status) from TripDetailsDo t "
+		
+		String hql = "select distinct t from TripDetailsDo t "
 				+ "where t.user.userId= :userId " + "and t.status in (:tripStatus) " + "order by t.createdAt desc";
 		Query query = getSession().createQuery(hql);
 		query.setParameterList("tripStatus", dnList);
 		query.setParameter("userId", userId);
-		query.setMaxResults(1);
-		Map<String, String> result = (Map<String, String>) query.uniqueResult();
-		return result;
+		
+		if(!outsideDriver.equalsIgnoreCase(roleName))
+		{
+			query.setMaxResults(1);
+		}
+		
+		List<TripDetailsDo> result = (List<TripDetailsDo>) query.list();
+		return exportList(result);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -717,7 +733,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			}
 
 			query.setMaxResults(10);
-			query.setString("searchParam", "%" + q.toLowerCase() + "%");
+			query.setParameter("searchParam", "%" + q.toLowerCase() + "%");
 			query.setParameter("status", TripStatus.TRIP_STATUS_CANCELLED.getValue());
 			data = (List<TripDetailsDo>) query.list();
 		}
