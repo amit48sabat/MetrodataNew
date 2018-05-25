@@ -20,7 +20,7 @@ import lombok.ToString;
 @XmlRootElement
 @Getter
 @Setter
-@ToString
+@ToString(exclude={"fileContent"})
 public class DeliveryHeaderDTO extends BaseDto {
 	private Long deliveryNoteId;
 	private Date createdDate;

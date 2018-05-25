@@ -115,7 +115,7 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 				detailsDo.setTrackFreq(userDetailsDTO.getTrackFreq());
 			}
 			else
-				detailsDo.setTrackFreq(30L);
+				detailsDo.setTrackFreq(30000L);
 		}
 		return detailsDo;
 	}
