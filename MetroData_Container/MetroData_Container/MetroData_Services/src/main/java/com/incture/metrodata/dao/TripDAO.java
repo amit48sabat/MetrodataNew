@@ -713,7 +713,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 						" AND ( lower(t.user.userId) like lower(:searchParam) Or lower(t.user.firstName) "
 								+ "like lower(:searchParam) Or" + " lower(t.user.lastName) like lower(:searchParam) ) ";
 			} else if (filterBy.equalsIgnoreCase("delivery_note")) {
-				hql += " AND  tdh.deliveryNoteId like :searchParam ";
+				hql += " AND  str(tdh.deliveryNoteId) like :searchParam ";
 			} else if (filterBy.equalsIgnoreCase("airwayBillNo")) {
 				hql += " AND  tdh.airwayBillNo like :searchParam ";
 			}
