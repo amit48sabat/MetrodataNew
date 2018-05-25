@@ -26,6 +26,7 @@ import com.incture.metrodata.dao.TripDAO;
 import com.incture.metrodata.dto.DeliveryHeaderDTO;
 import com.incture.metrodata.dto.MessageDetailsDTO;
 import com.incture.metrodata.dto.ResponseDto;
+import com.incture.metrodata.dto.TripDetailsDTO;
 import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.entity.DeliveryHeaderDo;
 import com.incture.metrodata.exceptions.ExecutionFault;
@@ -210,10 +211,15 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 					+ "  to " + DeliveryNoteStatus.getDnStatusDisplayValue(headerDto.getStatus());
 			// notification.sendNotification(title, driverDto.getMobileToken(),
 			// body);
-
+            
 			MessageDetailsDTO messageDto = new MessageDetailsDTO();
 			messageDto.setTitle(title);
 			messageDto.setBody(body);
+			
+			TripDetailsDTO  tripDto = tripDao.getTripDeliveryNotesCountsByDeliveryNoteId(headerDto.getDeliveryNoteId());
+            if(!ServicesUtil.isEmpty(tripDto) && !ServicesUtil.isEmpty(tripDto.getTripId()))
+    			messageDto.setTripId(tripDto.getTripId());
+			
 			messageDto.getUsers().add(driverDto);
 			messageDto.setCreatedBy(adminDto.getUserId());
 			messageDto.setUpdatedBy(adminDto.getUserId());

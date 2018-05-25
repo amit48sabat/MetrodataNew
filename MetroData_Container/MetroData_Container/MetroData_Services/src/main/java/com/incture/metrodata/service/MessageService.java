@@ -75,8 +75,13 @@ public class MessageService implements MessageServiceLocal {
 					for (UserDetailsDTO detailsDTO : dto.getUsers()) {
 						userDto.setUserId(detailsDTO.getUserId());
 						userDto = userDao.findById(userDto);
-						if (!ServicesUtil.isEmpty(userDto.getMobileToken()))
+						if (!ServicesUtil.isEmpty(userDto.getMobileToken())){
+							if(!ServicesUtil.isEmpty(dto.getTripId()))
+								notification.sendNotification(dto.getTitle(), userDto.getMobileToken(), dto.getBody(), dto.getTripId());
+							else	
 							notification.sendNotification(dto.getTitle(), userDto.getMobileToken(), dto.getBody());
+						}
+							
 					}
 				}
 				dto = messageDetailsDao.create(dto, new MessageDetailsDo());
@@ -99,7 +104,13 @@ public class MessageService implements MessageServiceLocal {
 					dto.setUsers(new HashSet<>(userList));
 					dto = messageDetailsDao.create(dto, new MessageDetailsDo());
 					if (!ServicesUtil.isEmpty(tokens))
-						notification.sendNotification(dto.getTitle(), tokens, dto.getBody());
+					{
+						if(!ServicesUtil.isEmpty(dto.getTripId()))
+						notification.sendNotification(dto.getTitle(), tokens, dto.getBody(),dto.getTripId());
+						else
+						 notification.sendNotification(dto.getTitle(), tokens, dto.getBody());
+					}
+						
 				}
 			}
 			response.setStatus(true);
