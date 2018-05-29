@@ -7,6 +7,8 @@ import java.io.InputStream;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.io.InputStreamResource;
@@ -21,9 +23,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import com.incture.metrodata.constant.Message;
 import com.incture.metrodata.dto.FilterDTO;
 import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.TripDetailsDTO;
@@ -70,8 +71,18 @@ public class TripController {
 		dto.setTrackFreq(adminDto.getTrackFreq());
 		
 		LOGGER.error("INSIDE CREATE TRIP CONTROLLER. TRIP CREATOR ID "+userId);
-		
-		return tripService.create(dto);
+		try{
+			res = tripService.create(dto);
+		}
+		catch (Exception e) {
+			res.setStatus(false);
+			//// LOGGER.error("ERROR WHILE CREATING TRIP : " +e.getMessage());
+			res.setCode(500);
+			res.setData(null);
+			res.setMessage(Message.FAILED + " : " + "delivery note is already a part of trip.");
+			//e.printStackTrace();
+		}
+		return res;
 	}
 
 	@RequestMapping(method = RequestMethod.GET)

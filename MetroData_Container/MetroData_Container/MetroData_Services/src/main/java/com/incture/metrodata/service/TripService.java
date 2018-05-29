@@ -11,9 +11,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.http.HttpStatus;
+import org.hibernate.HibernateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -107,7 +109,8 @@ public class TripService implements TripServiceLocal {
 			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			responseDto.setMessage(e.getMessage());
 
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			responseDto.setStatus(false);
 			//// LOGGER.error("ERROR WHILE CREATING TRIP : " +e.getMessage());
 			responseDto.setCode(500);

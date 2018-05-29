@@ -77,6 +77,8 @@ public abstract class BaseDao<E extends BaseDo, D extends BaseDto> {
 		// persisting the dto
 		E e = importDto(DB_Operation.CREATE, dto,dos);
 		persist(e);
+		getSession().flush();
+		getSession().clear();
 		return exportDto(e);
 	}
 
