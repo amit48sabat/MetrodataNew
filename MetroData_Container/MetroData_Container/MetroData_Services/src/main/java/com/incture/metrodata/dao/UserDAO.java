@@ -117,8 +117,8 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			else
 				detailsDo.setTrackFreq(30000L);
 			
-			if(!ServicesUtil.isEmpty(userDetailsDTO.isDeleted())){
-				detailsDo.setDeleted(userDetailsDTO.isDeleted());
+			if(!ServicesUtil.isEmpty(userDetailsDTO.getDeleted())){
+				detailsDo.setDeleted(userDetailsDTO.getDeleted());
 			}
 		}
 		return detailsDo;
@@ -202,8 +202,8 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			else
 				userDetailsDTO.setTrackFreq(30000L);
 
-			if(!ServicesUtil.isEmpty(detailsDo.isDeleted())){
-				userDetailsDTO.setDeleted(detailsDo.isDeleted());
+			if(!ServicesUtil.isEmpty(detailsDo.getDeleted())){
+				userDetailsDTO.setDeleted(detailsDo.getDeleted());
 			}
 
 		}

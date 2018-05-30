@@ -171,7 +171,7 @@ public class UserService implements UserServiceLocal {
 			String respData = restInvoker.putDataToServer("/Users/"+userId, userObj.toString());
 			if (!ServicesUtil.isEmpty(respData)) {
 				dto.setUserId(userId);
-				dto.setDeleted(true);
+				dto.setDeleted();
 				userDAO.update(dto);
 				responseDto.setStatus(true);
 				responseDto.setCode(HttpStatus.SC_OK);

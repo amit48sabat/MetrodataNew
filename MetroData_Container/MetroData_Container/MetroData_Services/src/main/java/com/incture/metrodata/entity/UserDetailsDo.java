@@ -30,7 +30,7 @@ import lombok.ToString;
 @ToString
 @Table(name = "USER_DETAILS")
 @DynamicUpdate(true)
-@Where(clause = "DELETED = 0")
+@Where(clause = "DELETE = 0")
 public class UserDetailsDo implements BaseDo {
 
 	private static final long serialVersionUID = 1L;
@@ -112,9 +112,14 @@ public class UserDetailsDo implements BaseDo {
 			@JoinColumn(name = "COURIER_ID") })
 	private Set<CourierDetailsDo> courierDetails = new HashSet<CourierDetailsDo>(0);
 	
-	@Column(name = "DELETED")
-	private boolean deleted;
+	@Column(name = "DELETE")
+	@ColumnDefault("'0'")
+	private Integer deleted = 0;
 
+	public void setDeleted() {
+		this.deleted = 1;
+	}
+	
 	@Override
 	public Object getPrimaryKey() {
 		return userId;
