@@ -103,9 +103,19 @@ public class UserDetailController {
 	}
 
 	@RequestMapping(value = "/{userId}", method = RequestMethod.DELETE)
-	public ResponseDto delete(@PathVariable String userId) {
+	public ResponseDto delete(@PathVariable String userId, HttpServletRequest request) {
+		ResponseDto res = new ResponseDto();
+		String updatedBy = "";
+		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
+			updatedBy = request.getUserPrincipal().getName();
+		} else {
+			return ServicesUtil.getUnauthorizedResponseDto();
+
+		}
+
 		UserDetailsDTO dto = new UserDetailsDTO();
 		dto.setUserId(userId);
+		dto.setUpdatedBy(updatedBy);
 		return userServiceLocal.delete(dto);
 	}
 

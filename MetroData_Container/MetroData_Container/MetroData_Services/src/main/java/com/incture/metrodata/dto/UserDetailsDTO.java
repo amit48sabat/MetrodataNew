@@ -37,7 +37,7 @@ public class UserDetailsDTO extends BaseDto {
 	private String updatedBy;
 	private Set<WareHouseDetailsDTO> wareHouseDetails = new HashSet<WareHouseDetailsDTO>(0);
 	private Set<CourierDetailsDTO> courierDetails = new HashSet<CourierDetailsDTO>(0);
-
+	private boolean deleted;
 	/*
 	 * private Long wareHouseId; private Long courierId;
 	 */
