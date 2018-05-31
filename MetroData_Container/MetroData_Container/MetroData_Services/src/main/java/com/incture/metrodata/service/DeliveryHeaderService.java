@@ -22,6 +22,7 @@ import com.incture.metrodata.constant.Message;
 import com.incture.metrodata.constant.MessageType;
 import com.incture.metrodata.constant.RoleConstant;
 import com.incture.metrodata.dao.DeliveryHeaderDAO;
+import com.incture.metrodata.dao.DeliveryItemDAO;
 import com.incture.metrodata.dao.TripDAO;
 import com.incture.metrodata.dto.DeliveryHeaderDTO;
 import com.incture.metrodata.dto.MessageDetailsDTO;
@@ -61,6 +62,9 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 
 	@Autowired
 	HciRestInvoker invoker;
+	
+	@Autowired
+	DeliveryItemDAO itemDao;
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DeliveryHeaderService.class);
 
@@ -454,9 +458,17 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
         String year = datetime.toString("YYYY");
 		String data = year+month+day;
 		String payload = "{ \"DELIVERY\": { \"GI_DATE\": \""+data+"\" } }";
-		System.err.println("Hci refresh delivery note list request payload => "+payload);
+		LOGGER.error("Hci refresh delivery note list request payload => "+payload);
 		String response = invoker.postDataToServer("/metrodatadetails", payload);
-		System.err.println("Hci  refresh delivery note list service response <= " +response);
+		LOGGER.error("Hci  refresh delivery note list service response <= " +response);
+		
+		
+		// DELETE THE UNLINK DELIVERY ITEM FROM DELIVERY ITEM TABLE KEEP ONLY ITEMS WHICH ARE MAPPED TO SOME DELIVERY NOTES ONLY
+		int rowAffected = itemDao.deleteUnlinkDeliveryItems();
+		
+		LOGGER.error("Delivery note refesh from ECC. Deleted <"+rowAffected+"> unlinked delivery items from delivery_item table");
+		
+		
 	} 
 
 }
