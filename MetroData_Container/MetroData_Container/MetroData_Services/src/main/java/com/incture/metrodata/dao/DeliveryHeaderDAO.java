@@ -149,7 +149,7 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getAirwayBillNo())) {
 				deliveryHeaderDo.setAirwayBillNo(deliveryHeaderDTO.getAirwayBillNo());
 			} 
-			else if(!ServicesUtil.isEmpty(deliveryHeaderDTO.getAirwayBillNo()) && deliveryHeaderDTO.getAirwayBillNo().equalsIgnoreCase("null"))
+			else if(!ServicesUtil.isEmpty(deliveryHeaderDTO.getAirwayBillNo()) && deliveryHeaderDTO.getAirwayBillNo().trim().equalsIgnoreCase("null"))
 				deliveryHeaderDo.setAirwayBillNo(null);
 
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getWareHouseDetails())) {
@@ -282,7 +282,13 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 				deliveryHeaderDTO.setDeliveredAtLongitude(deliveryHeaderDo.getDeliveredAtLongitude());
 			}
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getAirwayBillNo())) {
-				deliveryHeaderDTO.setAirwayBillNo(deliveryHeaderDo.getAirwayBillNo());
+				
+				if(deliveryHeaderDo.getAirwayBillNo().trim().equalsIgnoreCase("null"))
+					deliveryHeaderDTO.setAirwayBillNo(null);
+				else
+				{
+					deliveryHeaderDTO.setAirwayBillNo(deliveryHeaderDo.getAirwayBillNo());
+				}
 			}
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getValidationStatus())) {
 				deliveryHeaderDTO.setValidationStatus(deliveryHeaderDo.getValidationStatus());

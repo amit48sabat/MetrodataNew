@@ -68,7 +68,7 @@ public class DocumentService implements DocumentServiceLocal {
 
 		// Create a key secured repository identified by a unique name and a
 		// secret key (minimum length 10 characters)
-		String uniqueName = "PODRepo";
+		String uniqueName = "POD_PROD_Repo";
 		String secretKey = "MetroSCP.2018";
 		try {
 			// Connect to ECM service accessing the repository

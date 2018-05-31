@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
 import com.google.maps.GeoApiContext;
 import com.incture.metrodata.constant.DeliveryNoteStatus;
 import com.incture.metrodata.constant.Message;
@@ -63,7 +66,7 @@ public class ContainerService implements ContainerServiceLocal {
 
 	@Autowired
 	HciRestInvoker hciRestInvoker;
-	
+
 	@Autowired
 	CourierDetailsDAO courierDao;
 
@@ -89,21 +92,44 @@ public class ContainerService implements ContainerServiceLocal {
 	WareHouseDAO wareHouseDao;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ContainerService.class);
-	
+
 	@Override
-	public ResponseDto create(ContainerDTO dto) {
+	public ResponseDto create(String controllerJson) {
+		
 		ResponseDto response = new ResponseDto();
-		LOGGER.error("INSIDE CREATE CONTAINER SERVIE WITH REQUEST PAYLOAD => "+ dto);
+		Map<Object, Object>  inputDataMap = new LinkedHashMap<>();
+		inputDataMap.put("inputString", controllerJson);
+		
+		Gson gson = new Gson();
+		ContainerDTO dto = gson.fromJson(controllerJson.toString(), ContainerDTO.class);
+		List<ContainerDetailsDTO> list = new ArrayList<>();
+		System.out.println(dto.getDELIVERY().getITEM());
+		if (dto.getDELIVERY().getITEM() instanceof LinkedTreeMap) {
+			LinkedTreeMap<String, String> item2 = (LinkedTreeMap) dto.getDELIVERY().getITEM();
+			ContainerDetailsDTO d = getLinkedTreeMapToContainerDetailsDto(item2);
+			list.add(d);
+			System.out.println(d.getAREACODE());
+		} else if (dto.getDELIVERY().getITEM() instanceof ArrayList) {
+			List<LinkedTreeMap> item2 = (List<LinkedTreeMap>) dto.getDELIVERY().getITEM();
+			for (LinkedTreeMap i : item2) {
+				ContainerDetailsDTO d = getLinkedTreeMapToContainerDetailsDto(i);
+				list.add(d);
+			}
+		}
+		dto.getDELIVERY().setITEM(list);
+		inputDataMap.put("processObject",dto );
+		LOGGER.error("INSIDE CREATE CONTAINER SERVIE WITH REQUEST PAYLOAD => " + dto);
 		if (!ServicesUtil.isEmpty(dto) && !ServicesUtil.isEmpty(dto.getDELIVERY())) {
+			List<ContainerDetailsDTO> containerDetailsDTOs = (List<ContainerDetailsDTO>)dto.getDELIVERY().getITEM();
 			try {
-				for (ContainerDetailsDTO d : dto.getDELIVERY().getITEM()) {
-					containerDao.create(d, new ContainerDetailsDo());
-				}
+				  for (ContainerDetailsDTO d : containerDetailsDTOs) {
+				  containerDao.create(d, new ContainerDetailsDo()); }
+				 
 				Object data = createEntryInDeliveryHeader(dto);
-				LOGGER.error("INSIDE CREATE CONTAINER SERVIE WITH RESPONSE PAYLOAD <= "+ data);
+				LOGGER.error("INSIDE CREATE CONTAINER SERVIE WITH RESPONSE PAYLOAD <= " + data);
 				response.setStatus(true);
 				response.setCode(HttpStatus.SC_OK);
-				response.setData(data);
+				response.setData(inputDataMap);
 				response.setMessage(Message.SUCCESS + "");
 			} catch (Exception e) {
 				response.setStatus(false);
@@ -122,13 +148,56 @@ public class ContainerService implements ContainerServiceLocal {
 		return response;
 	}
 
-
 	private Map<Long, DeliveryHeaderDo> createEntryInDeliveryHeader(ContainerDTO dto) throws Exception {
 		LOGGER.debug("INSIDE createEntryInDeliveryHeader() OF CONTAINER SERVIE");
 		Map<Long, DeliveryHeaderDo> headerMap = importDto(dto.getDELIVERY(), context);
 		DeliveryHeaderDo dos = null;
 		for (Map.Entry<Long, DeliveryHeaderDo> entry : headerMap.entrySet()) {
 			dos = entry.getValue();
+
+			UserDetailsDTO adminDto = new UserDetailsDTO();
+			adminDto.setEmail(defaultUserVo.getEmail());
+			adminDto = userService.getUserByEmail(adminDto);
+
+			DeliveryHeaderDTO headerDto = new DeliveryHeaderDTO();
+			headerDto.setDeliveryNoteId(dos.getDeliveryNoteId());
+
+			if (dos.getStatus().equals(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue())) {
+
+				sendNotificationToDriverWhenAdminUpdateDnStatus(headerDto, adminDto);
+
+				// deleting the mapping btw trip and delivery note if exits
+				
+
+				// getting the delivery notes corresponding trip
+				TripDetailsDTO tripDto = tripDao.getTripDeliveryNotesCountsByDeliveryNoteId(dos.getDeliveryNoteId());
+				if (!ServicesUtil.isEmpty(tripDto.getTripId()) && tripDto.getDeliveryHeader().size() == 1) {
+					TripDetailsDTO tripDetailsDTO = new TripDetailsDTO();
+					tripDetailsDTO.setTripId(tripDto.getTripId());
+					tripDetailsDTO.setStatus(TripStatus.TRIP_STATUS_CANCELLED.getValue());
+					tripDetailsDTO.setUpdatedAt(new Date());
+					tripDetailsDTO.setUpdatedBy(adminDto.getUserId());
+					tripDao.cancelTripById(tripDto.getTripId());
+					tripDao.getSession().flush();
+					tripDao.getSession().clear();
+
+				}
+				deliveryHeaderDao.removeTripDeliveryNoteMapping(headerDto);
+				dos.setTripped(false);
+			}
+			if (dos.getStatus().equals(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue())) {
+				dos.setTripped(false);
+			}
+
+			if(!ServicesUtil.isEmpty(dos.getShipToAddress()))
+			try {
+				// also set corresponding lat and lng
+				Map<String, Double> latAndLong = ServicesUtil.getLatAndLong(dos.getShipToAddress(), context);
+				dos.setLatitude(latAndLong.get("lat"));
+				dos.setLongitude(latAndLong.get("lng"));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			headerDao.persist(dos);
 		}
 
@@ -147,12 +216,15 @@ public class ContainerService implements ContainerServiceLocal {
 		// List<DeliveryHeaderDo> headerList = new
 		// ArrayList<DeliveryHeaderDo>();
 		Map<Long, DeliveryHeaderDo> map = new HashMap<>();
+		Map<Long, String> currentStatusMap = new HashMap<>();
+		Map<Long, String> prevStatusMap = new HashMap<>();
 		DeliveryHeaderDo dos = null;
 		// Multimap<DeliveryHeaderDo, DeliveryItemDo> map =
 		// ArrayListMultimap.create();
 		// Set<Long> isVisited = new HashSet<>();
 		if (!ServicesUtil.isEmpty(dto)) {
-			List<ContainerDetailsDTO> items = dto.getITEM();
+			@SuppressWarnings("unchecked")
+			List<ContainerDetailsDTO> items = (List<ContainerDetailsDTO>) dto.getITEM();
 			Date currDate = new Date();
 			/*
 			 * ContainerDetailsDTO t = items.get(0);
@@ -167,18 +239,20 @@ public class ContainerService implements ContainerServiceLocal {
 				 */
 				if (ServicesUtil.isEmpty(map.get(d.getDELIVNO()))) {
 					dos = new DeliveryHeaderDo();
-					try{
+					try {
 						dos.setDeliveryNoteId(d.getDELIVNO());
 						// fetching the delivery note if exits
 						dos = deliveryHeaderDao.find(dos);
 						List<DeliveryItemDo> deliveryItems = new ArrayList<DeliveryItemDo>();
 						dos.setDeliveryItems(deliveryItems);
-					}
-					catch (InvalidInputFault e) {
+					} catch (InvalidInputFault e) {
 						dos = new DeliveryHeaderDo();
 					}
-					
+
 					map.put(d.getDELIVNO(), dos);
+					if (!currentStatusMap.containsKey(d.getDELIVNO()))
+						currentStatusMap.put(d.getDELIVNO(), "");
+						prevStatusMap.put(d.getDELIVNO(), dos.getStatus());
 				}
 				dos = map.get(d.getDELIVNO());
 				DeliveryItemDo itemDo = new DeliveryItemDo();
@@ -197,11 +271,6 @@ public class ContainerService implements ContainerServiceLocal {
 				if (!ServicesUtil.isEmpty(d.getSHIPADD())) {
 					String shipToAddress = d.getSHIPADD();
 					dos.setShipToAddress(shipToAddress);
-
-					// also set corresponding lat and lng
-					Map<String, Double> latAndLong = ServicesUtil.getLatAndLong(shipToAddress, context);
-					dos.setLatitude(latAndLong.get("lat"));
-					dos.setLongitude(latAndLong.get("lng"));
 				}
 				if (!ServicesUtil.isEmpty(d.getCITY()))
 					dos.setCity(d.getCITY());
@@ -220,13 +289,12 @@ public class ContainerService implements ContainerServiceLocal {
 				if (!ServicesUtil.isEmpty(d.getSLOC())) {
 					WareHouseDetailsDo warehouseDo = new WareHouseDetailsDo();
 					warehouseDo.setWareHouseId(d.getSLOC());
-					
-					try{
+
+					try {
 						// find warehouse by id and assigned to delivery note
 						warehouseDo = wareHouseDao.find(warehouseDo);
-					}
-					catch (Exception e) {
-						throw new InvalidInputFault("Invalid SLOC id '"+d.getSLOC()+"' no warehouse found");
+					} catch (Exception e) {
+						throw new InvalidInputFault("Invalid SLOC id '" + d.getSLOC() + "' no warehouse found");
 					}
 					dos.setWareHouseDetails(warehouseDo);
 				}
@@ -234,66 +302,63 @@ public class ContainerService implements ContainerServiceLocal {
 				// set other params
 				dos.setCreatedDate(currDate);
 				dos.setUpdatedAt(currDate);
-				
-				if(ServicesUtil.isEmpty(dos.getStatus()))
-				{  
+
+				if (ServicesUtil.isEmpty(d.getSTAT())) {
 					dos.setCreatedAt(currDate);
-					dos.setTripped(false);
-					dos.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
+					if (currentStatusMap.get(dos.getDeliveryNoteId())
+							.equals(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue())
+							|| currentStatusMap.get(dos.getDeliveryNoteId()).equals("")) {
+						dos.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
+						currentStatusMap.put(dos.getDeliveryNoteId(),
+								DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
+					} else {
+						if(!prevStatusMap.get(dos.getDeliveryNoteId()).equals(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue()))
+							dos.setStatus(prevStatusMap.get(dos.getDeliveryNoteId()));
+							else{
+								dos.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());	
+							}
+
+					}
 				}
 
 				// if STAT = X means order is cancelled and we need to remove
 				// the mapping of trip and this delivery note and
 				// set status as RFC_invalidated
-				if (!ServicesUtil.isEmpty(d.getSTAT()) && d.getSTAT().equals(DeliveryNoteStatus.STAT.getValue())) {
-					UserDetailsDTO adminDto = new UserDetailsDTO();
-					adminDto.setEmail(defaultUserVo.getEmail());
-					adminDto = userService.getUserByEmail(adminDto);
+				if ((!ServicesUtil.isEmpty(d.getSTAT()) && d.getSTAT().equals(DeliveryNoteStatus.STAT.getValue()))) {
 
-
-					// getting the delivery notes corresponding trip
-					 TripDetailsDTO  tripDto = tripDao.getTripDeliveryNotesCountsByDeliveryNoteId(dos.getDeliveryNoteId());
-					 if(!ServicesUtil.isEmpty(tripDto.getTripId()) && tripDto.getDeliveryHeader().size() == 1)
-					 {
-						TripDetailsDTO tripDetailsDTO=  new TripDetailsDTO();
-						tripDetailsDTO.setTripId(tripDto.getTripId());
-						tripDetailsDTO.setStatus(TripStatus.TRIP_STATUS_CANCELLED.getValue());
-						tripDetailsDTO.setUpdatedAt(new Date());
-						tripDetailsDTO.setUpdatedBy(adminDto.getUserId());
-						tripDao.cancelTripById(tripDto.getTripId());
-						tripDao.getSession().flush();
-						tripDao.getSession().clear();
-						
-					 }
-					
-					DeliveryHeaderDTO headerDto = new DeliveryHeaderDTO();
-					headerDto.setDeliveryNoteId(dos.getDeliveryNoteId());  
-
-					sendNotificationToDriverWhenAdminUpdateDnStatus(headerDto, adminDto);
-
-					// deleting the mapping btw trip and delivery note if exits
-					deliveryHeaderDao.removeTripDeliveryNoteMapping(headerDto);
-					
 					// setting delivery note status as RFC_Invaidated and set
 					// tripped to false again
-					dos.setStatus(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue());
-					dos.setTripped(false);
+					if (currentStatusMap.get(dos.getDeliveryNoteId())
+							.equals(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue())
+							|| currentStatusMap.get(dos.getDeliveryNoteId()).equals("")) {
+						dos.setStatus(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue());
+						currentStatusMap.put(dos.getDeliveryNoteId(), DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue());
+					} else {
+						if(!prevStatusMap.get(dos.getDeliveryNoteId()).equals(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue()))
+						dos.setStatus(prevStatusMap.get(dos.getDeliveryNoteId()));
+						else{
+							dos.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());	
+						}
+					}
+
 				}
 
-				// parsing item do
-				if (!ServicesUtil.isEmpty(d.getSERNUM()))
-					itemDo.setSerialNum(d.getSERNUM());
-				if (!ServicesUtil.isEmpty(d.getMAT()))
-					itemDo.setMaterial(d.getMAT());
-				if (!ServicesUtil.isEmpty(d.getBATCH()))
-					itemDo.setBatch(d.getBATCH());
-				if (!ServicesUtil.isEmpty(d.getDESC()))
-					itemDo.setDescription(d.getDESC());
-				if (!ServicesUtil.isEmpty(d.getQTY()))
-					itemDo.setQuantity(d.getQTY());
-				if (!ServicesUtil.isEmpty(d.getVOL()))
-					itemDo.setVolume(d.getVOL());
-				dos.getDeliveryItems().add(itemDo);
+				if (ServicesUtil.isEmpty(d.getSTAT()) || !d.getSTAT().equals(DeliveryNoteStatus.STAT.getValue())) {
+					// parsing item do
+					if (!ServicesUtil.isEmpty(d.getSERNUM()))
+						itemDo.setSerialNum(d.getSERNUM());
+					if (!ServicesUtil.isEmpty(d.getMAT()))
+						itemDo.setMaterial(d.getMAT());
+					if (!ServicesUtil.isEmpty(d.getBATCH()))
+						itemDo.setBatch(d.getBATCH());
+					if (!ServicesUtil.isEmpty(d.getDESC()))
+						itemDo.setDescription(d.getDESC());
+					if (!ServicesUtil.isEmpty(d.getQTY()))
+						itemDo.setQuantity(d.getQTY());
+					if (!ServicesUtil.isEmpty(d.getVOL()))
+						itemDo.setVolume(d.getVOL());
+					dos.getDeliveryItems().add(itemDo);
+				}
 				// map.get(d.getDELIVNO()).getDeliveryItems().add(itemDo);
 				// map.put(dos, itemDo);
 			}
@@ -302,20 +367,18 @@ public class ContainerService implements ContainerServiceLocal {
 
 		return map;
 	}
-	
 
-	
-	
 	private void sendNotificationToDriverWhenAdminUpdateDnStatus(DeliveryHeaderDTO headerDto, UserDetailsDTO adminDto)
 			throws IOException {
 		LOGGER.debug("INSIDE sendNotificationToDriverWhenAdminUpdateDnStatus() OF CONTAINER SERVIE");
-		// getting the corresponding trip driver
+		// getting the corresponding trip drive
 		UserDetailsDTO driverDto = tripDao.getDriverFromTripByDN(headerDto);
 		if (!ServicesUtil.isEmpty(driverDto.getMobileToken())) {
 			String title = "Delivery Note Cancelled";
-			String body = "The delivery note with id (" + headerDto.getDeliveryNoteId() +") has been cancelled. Please pull "
-					+ "to refresh for getting the updated delivery notes list.";
-			//notification.sendNotification(title, driverDto.getMobileToken(), body);
+			String body = "The delivery note with id (" + headerDto.getDeliveryNoteId()
+					+ ") has been cancelled. Please pull " + "to refresh for getting the updated delivery notes list.";
+			// notification.sendNotification(title, driverDto.getMobileToken(),
+			// body);
 
 			MessageDetailsDTO messageDto = new MessageDetailsDTO();
 			messageDto.setTitle(title);
@@ -327,7 +390,57 @@ public class ContainerService implements ContainerServiceLocal {
 			messageService.create(messageDto, adminDto.getUserId());
 		}
 
-		
 	}
 	
+	static ContainerDetailsDTO getLinkedTreeMapToContainerDetailsDto(LinkedTreeMap<String, String> map) {
+		ContainerDetailsDTO dto = new ContainerDetailsDTO();
+		if (!ServicesUtil.isEmpty(map.get("id")))
+			dto.setId(Long.parseLong(map.get("id")));
+		if (!ServicesUtil.isEmpty(map.get("DELIVNO")))
+			dto.setDELIVNO(Long.parseLong(map.get("DELIVNO")));
+		if (!ServicesUtil.isEmpty(map.get("CREATEDT")))
+			dto.setCREATEDT(map.get("CREATEDT"));
+		if (!ServicesUtil.isEmpty(map.get("CREATETM")))
+			dto.setCREATETM(map.get("CREATETM"));
+		if (!ServicesUtil.isEmpty(map.get("SALESGRP")))
+			dto.setSALESGRP(map.get("SALESGRP"));
+		if (!ServicesUtil.isEmpty(map.get("PURCHORD")))
+			dto.setPURCHORD(map.get("PURCHORD"));
+		if (!ServicesUtil.isEmpty(map.get("REFNO")))
+			dto.setREFNO(map.get("REFNO"));
+		if (!ServicesUtil.isEmpty(map.get("SLOC")))
+			dto.setSLOC(map.get("SLOC"));
+		if (!ServicesUtil.isEmpty(map.get("SHIPADD")))
+			dto.setSHIPADD(map.get("SHIPADD"));
+		if (!ServicesUtil.isEmpty(map.get("CITY")))
+			dto.setCITY(map.get("CITY"));
+		if (!ServicesUtil.isEmpty(map.get("AREACODE")))
+			dto.setAREACODE(map.get("AREACODE"));
+		if (!ServicesUtil.isEmpty(map.get("TELP")))
+			dto.setTELP(map.get("TELP"));
+		if (!ServicesUtil.isEmpty(map.get("SOLDADD")))
+			dto.setSOLDADD(map.get("SOLDADD"));
+		if (!ServicesUtil.isEmpty(map.get("SHIPTYP")))
+			dto.setSHIPTYP(map.get("SHIPTYP"));
+		if (!ServicesUtil.isEmpty(map.get("INSTDELV")))
+			dto.setINSTDELV(map.get("INSTDELV"));
+		if (!ServicesUtil.isEmpty(map.get("SERNUM")))
+			dto.setSERNUM(map.get("SERNUM"));
+		if (!ServicesUtil.isEmpty(map.get("MAT")))
+			dto.setMAT(map.get("MAT"));
+		if (!ServicesUtil.isEmpty(map.get("BATCH")))
+			dto.setBATCH(map.get("BATCH"));
+		if (!ServicesUtil.isEmpty(map.get("DESC")))
+			dto.setDESC(map.get("DESC"));
+		if (!ServicesUtil.isEmpty(map.get("QTY")))
+			dto.setQTY(map.get("QTY"));
+		if (!ServicesUtil.isEmpty(map.get("VOL")))
+			dto.setVOL(map.get("VOL"));
+		if (!ServicesUtil.isEmpty(map.get("STAT")))
+			dto.setSTAT(map.get("STAT"));
+
+		return dto;
+	}
+
+
 }

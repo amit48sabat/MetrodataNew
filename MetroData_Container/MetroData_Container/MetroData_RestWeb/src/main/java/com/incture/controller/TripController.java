@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.incture.metrodata.constant.Message;
 import com.incture.metrodata.dto.FilterDTO;
 import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.TripDetailsDTO;
@@ -46,12 +47,12 @@ public class TripController {
 	UserServiceLocal userServiceLocal;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TripController.class);
-	
+
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseDto create(@RequestBody TripDetailsDTO dto, HttpServletRequest request) {
 		String userId = "";
 		ResponseDto res = new ResponseDto();
-		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
+		/*if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
 			userId = request.getUserPrincipal().getName();
 		} else {
 			return ServicesUtil.getUnauthorizedResponseDto();
@@ -67,21 +68,32 @@ public class TripController {
 		dto.setCreatedBy(userId);
 		dto.setUpdatedBy(userId);
 		// setting tracking feq for trip as per admin frq.
-		dto.setTrackFreq(adminDto.getTrackFreq());
-		
-		LOGGER.error("INSIDE CREATE TRIP CONTROLLER. TRIP CREATOR ID "+userId);
-		
-		return tripService.create(dto);
+		dto.setTrackFreq(adminDto.getTrackFreq());*/
+
+		//LOGGER.error("INSIDE CREATE TRIP CONTROLLER. TRIP CREATOR ID " + userId);
+
+		try {
+			res = tripService.create(dto);
+		}
+
+		catch (Exception e) {
+			res.setStatus(false);
+			res.setCode(500);
+			res.setData(null);
+			res.setMessage(Message.FAILED + " : " + "delivery note is already a part of trip.");
+
+		}
+		return res;
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
 	public ResponseDto findAllTrips(HttpServletRequest request,
 			@RequestParam(value = "firstResult", defaultValue = "0") String firstResult,
 			@RequestParam(value = "maxResult", defaultValue = "0") String maxResult) {
-		
+
 		// setting pagination
-				ServicesUtil.setPagination(firstResult, maxResult);
-		
+		ServicesUtil.setPagination(firstResult, maxResult);
+
 		ResponseDto res = new ResponseDto();
 		String userId = "";
 		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
@@ -97,7 +109,7 @@ public class TripController {
 
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
 
-		LOGGER.error("INSIDE FIND ALL TRIPS CONTROLLER. ADMIN ID "+adminDto.getUserId());
+		LOGGER.error("INSIDE FIND ALL TRIPS CONTROLLER. ADMIN ID " + adminDto.getUserId());
 		return tripService.getAllTripsAssociatedWithAdminsDrivers(adminDto);
 	}
 
@@ -115,11 +127,10 @@ public class TripController {
 		res = userServiceLocal.validatedUserRoleByUserId(userId);
 		if (!res.isStatus())
 			return ServicesUtil.getUnauthorizedResponseDto();
-		
 
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
-		LOGGER.error("INSIDE FIND TRIP CONTROLLER WITH USER ID "+userId);
-		return tripService.findByParam(dto,adminDto);
+		LOGGER.error("INSIDE FIND TRIP CONTROLLER WITH USER ID " + userId);
+		return tripService.findByParam(dto, adminDto);
 	}
 
 	@RequestMapping(value = "/{tripId}", method = RequestMethod.PUT)
@@ -132,7 +143,7 @@ public class TripController {
 		dto.setUpdatedBy(userId);
 
 		dto.setTripId(tripId);
-		LOGGER.error("INSIDE UPDATE TRIP CONTROLLER WITH USER ID "+userId);
+		LOGGER.error("INSIDE UPDATE TRIP CONTROLLER WITH USER ID " + userId);
 		return tripService.update(dto);
 	}
 
@@ -155,10 +166,9 @@ public class TripController {
 		res = userServiceLocal.validatedUserRoleByUserId(userId);
 		if (!res.isStatus())
 			return ServicesUtil.getUnauthorizedResponseDto();
-		
 
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
-		LOGGER.error("INSIDE FILTER TRIP CONTROLLER WITH USER ID "+userId);
+		LOGGER.error("INSIDE FILTER TRIP CONTROLLER WITH USER ID " + userId);
 		return tripService.filterTripsAsPerAdmin(adminDto, dto);
 		// return tripService.filter(dto);
 	}
@@ -176,7 +186,7 @@ public class TripController {
 		Long s, e;
 		s = Long.parseLong(start);
 		e = Long.parseLong(end);
-		LOGGER.error("INSIDE ASSIGN DRIVER TO TRIP CONTROLLER WITH USER ID "+userId);
+		LOGGER.error("INSIDE ASSIGN DRIVER TO TRIP CONTROLLER WITH USER ID " + userId);
 		return tripService.getTripHistoryByDriverId(userId, s, e);
 	}
 
@@ -184,10 +194,10 @@ public class TripController {
 	public ResponseDto webLeaderBoard(@RequestBody WebLeaderBoardVO dto, HttpServletRequest request,
 			@RequestParam(value = "firstResult", defaultValue = "0") String firstResult,
 			@RequestParam(value = "maxResult", defaultValue = "0") String maxResult) {
-		
+
 		// setting pagination
-				ServicesUtil.setPagination(firstResult, maxResult);
-				
+		ServicesUtil.setPagination(firstResult, maxResult);
+
 		ResponseDto res = new ResponseDto();
 		String userId = "";
 		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
@@ -200,10 +210,9 @@ public class TripController {
 		res = userServiceLocal.validatedUserRoleByUserId(userId);
 		if (!res.isStatus())
 			return ServicesUtil.getUnauthorizedResponseDto();
-		
 
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
-		LOGGER.error("INSIDE LEADERBOARD TRIP CONTROLLER WITH USER ID "+userId);
+		LOGGER.error("INSIDE LEADERBOARD TRIP CONTROLLER WITH USER ID " + userId);
 		return tripService.getLeaderBoardAssociatedWithAdmin(dto, adminDto);
 		// return tripService.leaderBoard(dto);
 	}

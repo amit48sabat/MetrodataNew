@@ -11,7 +11,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -62,12 +62,11 @@ public class TripDetailsDo implements BaseDo {
 	@Column(name = "REASON_FOR_CANCELLATION")
 	private String reasonForCancellation;
 
-	// @OneToMany(targetEntity = DeliveryHeaderDo.class, fetch =
-	// FetchType.EAGER, cascade = CascadeType.ALL)
-	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	//@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinTable(name = "TRIP_DELIVERY_HEADER_MAPPING", joinColumns = {
 			@JoinColumn(name = "TRIP_ID") }, inverseJoinColumns = { @JoinColumn(name = "DELIVERY_NOTE_ID") })
-	private Set<DeliveryHeaderDo> deliveryHeader = new TreeSet<DeliveryHeaderDo>(new SortDHDoByDeliveryOrder());
+	private Set<DeliveryHeaderDo> deliveryHeader = new TreeSet<DeliveryHeaderDo>(new SortDHDoByDeliveryOrder()); 
 
 	@Column(name = "TRACK_FREQ")
 	private Long trackFreq;

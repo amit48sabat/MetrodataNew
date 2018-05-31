@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpStatus;
@@ -116,7 +117,7 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 
 				byte[] decodedString;
 				decodedString = Base64.decodeBase64(dto.getFileContent());
-				String fileId = documentServiceLocal.upload(decodedString, dto.getFileName(), dto.getFileType());
+				String fileId = documentServiceLocal.upload(decodedString, "sign_"+dto.getDeliveryNoteId()+UUID.randomUUID()+".png", dto.getFileType());
 				if (ServicesUtil.isEmpty(fileId)) {
 					throw new ExecutionFault("delivery completion failed due sign upload");
 				}

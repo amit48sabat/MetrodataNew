@@ -10,9 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.gson.Gson;
 import com.incture.metrodata.constant.Message;
-import com.incture.metrodata.dto.ContainerDTO;
 import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.service.ContainerServiceLocal;
 
@@ -21,30 +19,26 @@ import com.incture.metrodata.service.ContainerServiceLocal;
 @ComponentScan("com.incture")
 @RequestMapping(value = "/Container", produces = "application/json")
 public class ContainerController {
-  
+
 	@Autowired
 	ContainerServiceLocal containerService;
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(ContainerController.class);
-	
-	@RequestMapping( method = RequestMethod.POST)
+
+	@RequestMapping(method = RequestMethod.POST)
 	public ResponseDto create(@RequestBody String controllerJson) {
 		ResponseDto response = new ResponseDto();
-	  try{
-		    Gson gson = new Gson();
-		    
-		    LOGGER.error("INSIDE CREATE CONTAINER CONTROLLER");
-		    
-			ContainerDTO dto = gson.fromJson(controllerJson.toString(), ContainerDTO.class);
-			 response = containerService.create(dto);
-	   }catch(Exception e){
-		    response.setStatus(false);
+		try {
+			LOGGER.error("INSIDE CREATE CONTAINER CONTROLLER " + controllerJson);
+			response = containerService.create(controllerJson);
+		} catch (Exception e) {
+			response.setStatus(false);
 			response.setMessage(Message.FAILED.getValue());
 			response.setData(controllerJson);
 			response.setCode(500);
 			e.printStackTrace();
-	   }
-	 
+		}
+
 		return response;
-	}	
+	}
 }
