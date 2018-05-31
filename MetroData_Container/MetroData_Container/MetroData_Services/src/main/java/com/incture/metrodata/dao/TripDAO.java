@@ -70,7 +70,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 				if (checkTripStatus(dto.getStatus()))
 					tripDetailsDo.setStatus(dto.getStatus());
 			}
-			if (!ServicesUtil.isEmpty(dto.getCreatedBy())) {
+			if (!ServicesUtil.isEmpty(dto.getCreatedBy()) && ServicesUtil.isEmpty(tripDetailsDo.getCreatedBy())) {
 				tripDetailsDo.setCreatedBy(dto.getCreatedBy());
 			}
 			if (!ServicesUtil.isEmpty(dto.getUpdatedBy())) {

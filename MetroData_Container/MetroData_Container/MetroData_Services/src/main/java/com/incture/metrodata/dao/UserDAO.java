@@ -84,7 +84,9 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			if (!ServicesUtil.isEmpty(userDetailsDTO.getParentId())) {
 				detailsDo.setParentId(userDetailsDTO.getParentId());
 			}
-			if (!ServicesUtil.isEmpty(userDetailsDTO.getCreatedBy())) {
+			
+			// created by for user will set only when dto holds the value of creating user and Do's created by is empty
+			if (!ServicesUtil.isEmpty(userDetailsDTO.getCreatedBy()) && ServicesUtil.isEmpty(detailsDo.getCreatedBy())) {
 				detailsDo.setCreatedBy(userDetailsDTO.getCreatedBy());
 			}
 			if (!ServicesUtil.isEmpty(userDetailsDTO.getUpdatedBy())) {
