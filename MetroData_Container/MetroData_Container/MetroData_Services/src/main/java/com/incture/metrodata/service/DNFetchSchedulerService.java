@@ -6,6 +6,8 @@ import org.joda.time.DateTime;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.AbstractApplicationContext;
 
@@ -16,7 +18,9 @@ import com.incture.metrodata.util.HciRestInvoker;
 public class DNFetchSchedulerService implements DNFetchSchedulerServiceLocal,Job {
 
 	static AbstractApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
-
+ 
+	private static final Logger LOGGER = LoggerFactory.getLogger(DNFetchSchedulerService.class);
+	
 	@Override
 	public void execute(JobExecutionContext con) throws JobExecutionException {
 
@@ -32,9 +36,9 @@ public class DNFetchSchedulerService implements DNFetchSchedulerServiceLocal,Job
         String year = datetime.toString("YYYY");
 		String data = year+month+day;
 		String payload = "{ \"DELIVERY\": { \"GI_DATE\": \""+data+"\" } }";
-		System.err.println("Hci service request payload => "+payload);
+		LOGGER.error("Hci service request payload => "+payload);
 		String response = invoker.postDataToServer("/metrodatadetails", payload);
-		System.err.println("Hci service response <= " +response);
+		LOGGER.error("Hci service response <= " +response);
 
 	}
 
