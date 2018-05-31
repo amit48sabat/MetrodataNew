@@ -171,16 +171,20 @@ public class HibernateConfiguration {
 	@Bean
 	public SchedulerFactory schedulerFactoryBean() {
 		SchedulerFactory sf = new StdSchedulerFactory();
-		try {
-			Scheduler scheduler = sf.getScheduler();
-			scheduler.scheduleJob(jobDetailFactoryBean(), cronTriggerFactoryBean());
-			scheduler.start();
-		} catch (SchedulerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		
+		String isSchedulerStart = environment.getRequiredProperty("scheduler.start").trim();
+		if(isSchedulerStart.equalsIgnoreCase("true".trim())){
+			try {
+				Scheduler scheduler = sf.getScheduler();
+				scheduler.scheduleJob(jobDetailFactoryBean(), cronTriggerFactoryBean());
+				scheduler.start();
+			} catch (SchedulerException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	
 		}
 		return sf;
-
+	
 	}
 	
 	private static String decrypt(String property) throws GeneralSecurityException, IOException {
