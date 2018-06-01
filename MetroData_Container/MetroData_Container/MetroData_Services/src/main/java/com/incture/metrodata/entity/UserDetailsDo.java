@@ -20,6 +20,7 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Where;
 
 import lombok.Data;
 import lombok.ToString;
@@ -29,34 +30,35 @@ import lombok.ToString;
 @ToString
 @Table(name = "USER_DETAILS")
 @DynamicUpdate(true)
+@Where(clause = "DELETE = 0")
 public class UserDetailsDo implements BaseDo {
 
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@Column(name = "USER_ID")
+	@Column(name = "USER_ID",length=50)
 	private String userId;
 	
-	@Column(name = "FIRST_NAME",length=50)
+	@Column(name = "FIRST_NAME",length=100)
 	private String firstName;
 
-	@Column(name = "LAST_NAME",length=50)
+	@Column(name = "LAST_NAME",length=100)
 	private String lastName;
 	
 	//@Formula(value = " concat(FIRST_NAME, ' ', LAST_NAME) ")
-	@Column(name = "NAME",length=50)
+	@Column(name = "NAME",length=100)
 	private String name;
 	
 	@ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
 	private RoleDetailsDo role;
 	
-	@Column(name = "TELEPHONE")
+	@Column(name = "TELEPHONE",length=50)
 	private String telephone;
 	
-	@Column(name = "CREATED_BY")
+	@Column(name = "CREATED_BY",length=50)
 	private String createdBy;
 	
-	@Column(name = "UPDATED_BY")
+	@Column(name = "UPDATED_BY",length=50)
 	private String updatedBy;
 	
 	
@@ -86,10 +88,10 @@ public class UserDetailsDo implements BaseDo {
 	@Column(name = "UPDATED_AT")
 	private Date updateAt;
 	
-	@Column(name = "EMAIL",length=50)
+	@Column(name = "EMAIL",length=100)
 	private String email;
 	
-	@Column(name = "PARENT_ID",length=50)
+	@Column(name = "PARENT_ID",length=100)
 	private String parentId;
 	
 	@Temporal(TemporalType.TIMESTAMP)
@@ -110,11 +112,13 @@ public class UserDetailsDo implements BaseDo {
 			@JoinColumn(name = "COURIER_ID") })
 	private Set<CourierDetailsDo> courierDetails = new HashSet<CourierDetailsDo>(0);
 	
-	/*@Column(name = "WAREHOUSE_ID")
-	private Long wareHouseId;
-	
-	@Column(name = "COURIER_ID")
-	private Long courierId;*/
+	@Column(name = "DELETE")
+	@ColumnDefault("'0'")
+	private Integer deleted = 0;
+
+	public void setDeleted() {
+		this.deleted = 1;
+	}
 	
 	@Override
 	public Object getPrimaryKey() {

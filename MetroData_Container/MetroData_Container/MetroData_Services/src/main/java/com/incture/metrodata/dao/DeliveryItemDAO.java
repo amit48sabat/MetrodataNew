@@ -1,5 +1,6 @@
 package com.incture.metrodata.dao;
 
+import org.hibernate.Query;
 import org.springframework.stereotype.Repository;
 
 import com.incture.metrodata.dto.DeliveryItemDTO;
@@ -77,5 +78,15 @@ public class DeliveryItemDAO extends BaseDao<DeliveryItemDo, DeliveryItemDTO> {
 
 		}
 		return deliveryItemDo;
+	}
+	
+	public int deleteUnlinkDeliveryItems(){
+		
+		String sql = "DELETE FROM delivery_item WHERE delivery_item_id "
+				     + " NOT IN "
+				     + "(SELECT DELIVERYITEMS_DELIVERY_ITEM_ID FROM DELIVERY_HEADER_DELIVERY_ITEM )";
+		Query query =  getSession().createSQLQuery(sql);
+		int rowAffected = query.executeUpdate();
+		return rowAffected;
 	}
 }

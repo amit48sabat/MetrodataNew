@@ -52,7 +52,7 @@ public class TripController {
 	public ResponseDto create(@RequestBody TripDetailsDTO dto, HttpServletRequest request) {
 		String userId = "";
 		ResponseDto res = new ResponseDto();
-		/*if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
+		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
 			userId = request.getUserPrincipal().getName();
 		} else {
 			return ServicesUtil.getUnauthorizedResponseDto();
@@ -67,21 +67,19 @@ public class TripController {
 
 		dto.setCreatedBy(userId);
 		dto.setUpdatedBy(userId);
-		// setting tracking feq for trip as per admin frq.
-		dto.setTrackFreq(adminDto.getTrackFreq());*/
-
-		//LOGGER.error("INSIDE CREATE TRIP CONTROLLER. TRIP CREATOR ID " + userId);
-
-		try {
+		dto.setTrackFreq(adminDto.getTrackFreq());
+		
+		LOGGER.error("INSIDE CREATE TRIP CONTROLLER. TRIP CREATOR ID "+userId);
+		try{
 			res = tripService.create(dto);
 		}
-
 		catch (Exception e) {
 			res.setStatus(false);
+			//// LOGGER.error("ERROR WHILE CREATING TRIP : " +e.getMessage());
 			res.setCode(500);
 			res.setData(null);
 			res.setMessage(Message.FAILED + " : " + "delivery note is already a part of trip.");
-
+			//e.printStackTrace();
 		}
 		return res;
 	}

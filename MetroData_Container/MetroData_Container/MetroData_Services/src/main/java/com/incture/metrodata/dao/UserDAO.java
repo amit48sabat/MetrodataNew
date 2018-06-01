@@ -84,7 +84,9 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			if (!ServicesUtil.isEmpty(userDetailsDTO.getParentId())) {
 				detailsDo.setParentId(userDetailsDTO.getParentId());
 			}
-			if (!ServicesUtil.isEmpty(userDetailsDTO.getCreatedBy())) {
+			
+			// created by for user will set only when dto holds the value of creating user and Do's created by is empty
+			if (!ServicesUtil.isEmpty(userDetailsDTO.getCreatedBy()) && ServicesUtil.isEmpty(detailsDo.getCreatedBy())) {
 				detailsDo.setCreatedBy(userDetailsDTO.getCreatedBy());
 			}
 			if (!ServicesUtil.isEmpty(userDetailsDTO.getUpdatedBy())) {
@@ -115,7 +117,11 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 				detailsDo.setTrackFreq(userDetailsDTO.getTrackFreq());
 			}
 			else
-				detailsDo.setTrackFreq(30L);
+				detailsDo.setTrackFreq(30000L);
+			
+			if(!ServicesUtil.isEmpty(userDetailsDTO.getDeleted())){
+				detailsDo.setDeleted(userDetailsDTO.getDeleted());
+			}
 		}
 		return detailsDo;
 	}
@@ -197,6 +203,10 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 			}
 			else
 				userDetailsDTO.setTrackFreq(30000L);
+
+			if(!ServicesUtil.isEmpty(detailsDo.getDeleted())){
+				userDetailsDTO.setDeleted(detailsDo.getDeleted());
+			}
 
 		}
 		return userDetailsDTO;

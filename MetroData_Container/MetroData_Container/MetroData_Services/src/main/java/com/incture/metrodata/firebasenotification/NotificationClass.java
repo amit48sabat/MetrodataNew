@@ -23,12 +23,31 @@ public class NotificationClass {
 		sender.send(message, tokenList, 4);
 
 	}
+	
+	public void sendNotification(String msgTitle, List<String> tokenList, String msgBody, String tripId) throws IOException {
+		String serverkey = environment.getProperty("fcm.serverkey");
+		Sender sender = new Sender(serverkey);
+		Message message = new Message.Builder().addData("title", msgTitle).addData("body", msgBody).addData("tripId", tripId)
+				.collapseKey("type_a").build();
+		sender.send(message, tokenList, 4);
+
+	}
 
 	public void sendNotification(String msgTitle, String token, String msgBody) throws IOException {
 
 		String serverkey = environment.getProperty("fcm.serverkey");
 		Sender sender = new Sender(serverkey);
 		Message message = new Message.Builder().addData("title", msgTitle).addData("body", msgBody)
+				.collapseKey("type_a").build();
+		sender.send(message, token, 4);
+
+	}
+	
+	public void sendNotification(String msgTitle, String token, String msgBody, String tripId) throws IOException {
+
+		String serverkey = environment.getProperty("fcm.serverkey");
+		Sender sender = new Sender(serverkey);
+		Message message = new Message.Builder().addData("title", msgTitle).addData("body", msgBody).addData("tripId", tripId)
 				.collapseKey("type_a").build();
 		sender.send(message, token, 4);
 

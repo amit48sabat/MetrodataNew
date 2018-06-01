@@ -162,12 +162,28 @@ public class UserService implements UserServiceLocal {
 	public ResponseDto delete(UserDetailsDTO dto) {
 		ResponseDto responseDto = new ResponseDto();
 		try {
-			// setting created at and updated at
-			userDAO.deleteById(dto);
-			responseDto.setStatus(true);
-			responseDto.setCode(HttpStatus.SC_OK);
+			String userId = dto.getUserId().trim();
+			// deactivating the user
+			JsonObject userObj = new JsonObject();
+			userObj.addProperty("id", userId);
+			userObj.addProperty("active", false);
+			
+			String respData = restInvoker.putDataToServer("/Users/"+userId, userObj.toString());
+			if (!ServicesUtil.isEmpty(respData)) {
+				dto.setUserId(userId);
+				dto.setDeleted();
+				userDAO.update(dto);
+				responseDto.setStatus(true);
+				responseDto.setCode(HttpStatus.SC_OK);
+				responseDto.setMessage(Message.SUCCESS.getValue());
+			}
+			else{
 
-			responseDto.setMessage(Message.SUCCESS.getValue());
+				responseDto.setStatus(false);
+				responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+				responseDto.setMessage(Message.FAILED.getValue());
+				
+			}
 		} catch (Exception e) {
 			responseDto.setStatus(false);
 			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);

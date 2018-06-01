@@ -85,5 +85,38 @@ public class RESTInvoker {
 		return sb.toString();
 
 	}
+	
+	public String putDataToServer(String path, String data) {
+		URL url;
+		StringBuilder sb = new StringBuilder();
+		try {
+			url = new URL(baseUrl + path);
+			HttpURLConnection urlConnection = (HttpURLConnection) setUsernamePassword(url);
+			urlConnection.setDoOutput(true);
+			urlConnection.setRequestMethod("PUT");
+			urlConnection.setRequestProperty("Content-Type", "application/scim+json");
+			OutputStream os = urlConnection.getOutputStream();
+			os.write(data.getBytes());
+			os.flush();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				sb.append(line);
+			}
+			reader.close();
+
+			
+		} catch (MalformedURLException e) {
+
+			e.printStackTrace();
+			return null;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		return sb.toString();
+
+	}
 
 }
