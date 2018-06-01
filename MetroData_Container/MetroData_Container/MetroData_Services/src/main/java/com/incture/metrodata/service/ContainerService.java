@@ -95,11 +95,11 @@ public class ContainerService implements ContainerServiceLocal {
 
 	@Override
 	public ResponseDto create(String controllerJson) {
-		
+
 		ResponseDto response = new ResponseDto();
-		Map<Object, Object>  inputDataMap = new LinkedHashMap<>();
+		Map<Object, Object> inputDataMap = new LinkedHashMap<>();
 		inputDataMap.put("inputString", controllerJson);
-		
+
 		Gson gson = new Gson();
 		ContainerDTO dto = gson.fromJson(controllerJson.toString(), ContainerDTO.class);
 		List<ContainerDetailsDTO> list = new ArrayList<>();
@@ -117,14 +117,15 @@ public class ContainerService implements ContainerServiceLocal {
 			}
 		}
 		dto.getDELIVERY().setITEM(list);
-		inputDataMap.put("processObject",dto );
+		inputDataMap.put("processObject", dto);
 		LOGGER.error("INSIDE CREATE CONTAINER SERVIE WITH REQUEST PAYLOAD => " + dto);
 		if (!ServicesUtil.isEmpty(dto) && !ServicesUtil.isEmpty(dto.getDELIVERY())) {
-			List<ContainerDetailsDTO> containerDetailsDTOs = (List<ContainerDetailsDTO>)dto.getDELIVERY().getITEM();
+			List<ContainerDetailsDTO> containerDetailsDTOs = (List<ContainerDetailsDTO>) dto.getDELIVERY().getITEM();
 			try {
-				  for (ContainerDetailsDTO d : containerDetailsDTOs) {
-				  containerDao.create(d, new ContainerDetailsDo()); }
-				 
+				for (ContainerDetailsDTO d : containerDetailsDTOs) {
+					containerDao.create(d, new ContainerDetailsDo());
+				}
+
 				Object data = createEntryInDeliveryHeader(dto);
 				LOGGER.error("INSIDE CREATE CONTAINER SERVIE WITH RESPONSE PAYLOAD <= " + data);
 				response.setStatus(true);
@@ -150,7 +151,9 @@ public class ContainerService implements ContainerServiceLocal {
 
 	private Map<Long, DeliveryHeaderDo> createEntryInDeliveryHeader(ContainerDTO dto) throws Exception {
 		LOGGER.debug("INSIDE createEntryInDeliveryHeader() OF CONTAINER SERVIE");
-		Map<Long, DeliveryHeaderDo> headerMap = importDto(dto.getDELIVERY(), context);
+		Map<Long, String> delNoteAddrMap = new HashMap<>();
+
+		Map<Long, DeliveryHeaderDo> headerMap = importDto(dto.getDELIVERY(), context, delNoteAddrMap);
 		DeliveryHeaderDo dos = null;
 		for (Map.Entry<Long, DeliveryHeaderDo> entry : headerMap.entrySet()) {
 			dos = entry.getValue();
@@ -167,7 +170,6 @@ public class ContainerService implements ContainerServiceLocal {
 				sendNotificationToDriverWhenAdminUpdateDnStatus(headerDto, adminDto);
 
 				// deleting the mapping btw trip and delivery note if exits
-				
 
 				// getting the delivery notes corresponding trip
 				TripDetailsDTO tripDto = tripDao.getTripDeliveryNotesCountsByDeliveryNoteId(dos.getDeliveryNoteId());
@@ -186,18 +188,19 @@ public class ContainerService implements ContainerServiceLocal {
 				dos.setTripped(false);
 			}
 			if (dos.getStatus().equals(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue())) {
-				dos.setTripped(false);
+				if (!dos.getTripped())
+					dos.setTripped(false);
 			}
 
-			if(!ServicesUtil.isEmpty(dos.getShipToAddress()))
-			try {
-				// also set corresponding lat and lng
-				Map<String, Double> latAndLong = ServicesUtil.getLatAndLong(dos.getShipToAddress(), context);
-				dos.setLatitude(latAndLong.get("lat"));
-				dos.setLongitude(latAndLong.get("lng"));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			if (!ServicesUtil.isEmpty(dos.getShipToAddress()) && !(dos.getShipToAddress()).equalsIgnoreCase(delNoteAddrMap.get(dos.getDeliveryNoteId())))
+				try {
+					// also set corresponding lat and lng
+					Map<String, Double> latAndLong = ServicesUtil.getLatAndLong(dos.getShipToAddress(), context);
+					dos.setLatitude(latAndLong.get("lat"));
+					dos.setLongitude(latAndLong.get("lng"));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			headerDao.persist(dos);
 		}
 
@@ -211,8 +214,8 @@ public class ContainerService implements ContainerServiceLocal {
 		return hciRestInvoker;
 	}
 
-	public Map<Long, DeliveryHeaderDo> importDto(ContainerItemsDTO dto, GeoApiContext context)
-			throws InvalidInputFault, ExecutionFault, NoResultFault, Exception {
+	public Map<Long, DeliveryHeaderDo> importDto(ContainerItemsDTO dto, GeoApiContext context,
+			Map<Long, String> delNoteAddrMap) throws InvalidInputFault, ExecutionFault, NoResultFault, Exception {
 		// List<DeliveryHeaderDo> headerList = new
 		// ArrayList<DeliveryHeaderDo>();
 		Map<Long, DeliveryHeaderDo> map = new HashMap<>();
@@ -243,6 +246,7 @@ public class ContainerService implements ContainerServiceLocal {
 						dos.setDeliveryNoteId(d.getDELIVNO());
 						// fetching the delivery note if exits
 						dos = deliveryHeaderDao.find(dos);
+						delNoteAddrMap.put(dos.getDeliveryNoteId(), dos.getShipToAddress());
 						List<DeliveryItemDo> deliveryItems = new ArrayList<DeliveryItemDo>();
 						dos.setDeliveryItems(deliveryItems);
 					} catch (InvalidInputFault e) {
@@ -252,7 +256,7 @@ public class ContainerService implements ContainerServiceLocal {
 					map.put(d.getDELIVNO(), dos);
 					if (!currentStatusMap.containsKey(d.getDELIVNO()))
 						currentStatusMap.put(d.getDELIVNO(), "");
-						prevStatusMap.put(d.getDELIVNO(), dos.getStatus());
+					prevStatusMap.put(d.getDELIVNO(), dos.getStatus());
 				}
 				dos = map.get(d.getDELIVNO());
 				DeliveryItemDo itemDo = new DeliveryItemDo();
@@ -312,11 +316,12 @@ public class ContainerService implements ContainerServiceLocal {
 						currentStatusMap.put(dos.getDeliveryNoteId(),
 								DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
 					} else {
-						if(!prevStatusMap.get(dos.getDeliveryNoteId()).equals(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue()))
+						if (!prevStatusMap.get(dos.getDeliveryNoteId())
+								.equals(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue()))
 							dos.setStatus(prevStatusMap.get(dos.getDeliveryNoteId()));
-							else{
-								dos.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());	
-							}
+						else {
+							dos.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
+						}
 
 					}
 				}
@@ -334,10 +339,11 @@ public class ContainerService implements ContainerServiceLocal {
 						dos.setStatus(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue());
 						currentStatusMap.put(dos.getDeliveryNoteId(), DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue());
 					} else {
-						if(!prevStatusMap.get(dos.getDeliveryNoteId()).equals(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue()))
-						dos.setStatus(prevStatusMap.get(dos.getDeliveryNoteId()));
-						else{
-							dos.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());	
+						if (!prevStatusMap.get(dos.getDeliveryNoteId())
+								.equals(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue()))
+							dos.setStatus(prevStatusMap.get(dos.getDeliveryNoteId()));
+						else {
+							dos.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
 						}
 					}
 
@@ -391,7 +397,7 @@ public class ContainerService implements ContainerServiceLocal {
 		}
 
 	}
-	
+
 	static ContainerDetailsDTO getLinkedTreeMapToContainerDetailsDto(LinkedTreeMap<String, String> map) {
 		ContainerDetailsDTO dto = new ContainerDetailsDTO();
 		if (!ServicesUtil.isEmpty(map.get("id")))
@@ -441,6 +447,5 @@ public class ContainerService implements ContainerServiceLocal {
 
 		return dto;
 	}
-
 
 }
