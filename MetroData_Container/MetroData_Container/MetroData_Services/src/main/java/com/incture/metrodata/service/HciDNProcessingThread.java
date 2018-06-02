@@ -1,28 +1,20 @@
 package com.incture.metrodata.service;
 
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.http.HttpStatus;
-import org.quartz.JobBuilder;
-import org.quartz.JobDetail;
-import org.quartz.Scheduler;
-import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
-import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 import com.google.maps.GeoApiContext;
 import com.incture.metrodata.constant.DeliveryNoteStatus;
@@ -41,10 +33,8 @@ import com.incture.metrodata.dto.ContainerItemsDTO;
 import com.incture.metrodata.dto.DefaultUserDetailsVO;
 import com.incture.metrodata.dto.DeliveryHeaderDTO;
 import com.incture.metrodata.dto.MessageDetailsDTO;
-import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.TripDetailsDTO;
 import com.incture.metrodata.dto.UserDetailsDTO;
-import com.incture.metrodata.entity.ContainerDetailsDo;
 import com.incture.metrodata.entity.DeliveryHeaderDo;
 import com.incture.metrodata.entity.DeliveryItemDo;
 import com.incture.metrodata.entity.WareHouseDetailsDo;
@@ -55,10 +45,16 @@ import com.incture.metrodata.firebasenotification.NotificationClass;
 import com.incture.metrodata.util.HciRestInvoker;
 import com.incture.metrodata.util.ServicesUtil;
 
-@Service("containerService")
-@Transactional
-public class ContainerService implements ContainerServiceLocal {
+import lombok.Getter;
+import lombok.Setter;
 
+@Component
+@Scope("prototype")
+@Getter
+@Setter
+public class HciDNProcessingThread  extends Thread{
+
+	
 	@Autowired
 	ContainerDAO containerDao;
 
@@ -97,97 +93,49 @@ public class ContainerService implements ContainerServiceLocal {
 
 	@Autowired
 	WareHouseDAO wareHouseDao;
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(ContainerService.class);
-
-	private Integer BATCH_SIZE   = 25;
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+    private ContainerDTO containerDTO;
+
+    private Integer BATCH_SIZE   = 25;
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(HciDNProcessingThread.class);
+    
 	@Override
-	public ResponseDto create(String controllerJson) {
-
-		ResponseDto response = new ResponseDto();
-		Map<Object, Object> inputDataMap = new LinkedHashMap<>();
-		inputDataMap.put("inputString", controllerJson);
-
-		Gson gson = new Gson();
-		ContainerDTO dto = gson.fromJson(controllerJson.toString(), ContainerDTO.class);
-		List<ContainerDetailsDTO> list = new ArrayList<>();
-		// System.out.println(dto.getDELIVERY().getITEM());
-		if (dto.getDELIVERY().getITEM() instanceof LinkedTreeMap) {
-			LinkedTreeMap<String, String> item2 = (LinkedTreeMap) dto.getDELIVERY().getITEM();
-			ContainerDetailsDTO d = getLinkedTreeMapToContainerDetailsDto(item2);
-			list.add(d);
-			// System.out.println(d.getAREACODE());
-		} else if (dto.getDELIVERY().getITEM() instanceof ArrayList) {
-			List<LinkedTreeMap> item2 = (List<LinkedTreeMap>) dto.getDELIVERY().getITEM();
-			for (LinkedTreeMap i : item2) {
-				ContainerDetailsDTO d = getLinkedTreeMapToContainerDetailsDto(i);
-				list.add(d);
-			}
+	public void run() {
+		try {
+			processDNInThread(containerDTO);
+		} catch (Exception e) {
+			 e.printStackTrace();
 		}
-		dto.getDELIVERY().setITEM(list);
-		inputDataMap.put("processObject", dto);
-		LOGGER.error("INSIDE CREATE CONTAINER SERVIE WITH REQUEST PAYLOAD => " + dto);
-		if (!ServicesUtil.isEmpty(dto) && !ServicesUtil.isEmpty(dto.getDELIVERY())) {
-			List<ContainerDetailsDTO> containerDetailsDTOs = (List<ContainerDetailsDTO>) dto.getDELIVERY().getITEM();
-			LOGGER.error(" system time1 " + System.currentTimeMillis());
-			try {
-				//int i=1;
-				for (ContainerDetailsDTO d : containerDetailsDTOs) {
-					containerDao.create(d, new ContainerDetailsDo());
-					
-					/*if(i % BATCH_SIZE ==0)
-					{
-						containerDao.getSession().flush();
-						containerDao.getSession().clear();
-					}
-					
-					i++; */
-					
-				}
-				
-				/*// flushing the session data
-				containerDao.getSession().flush();
-				containerDao.getSession().clear();*/
-				
-				LOGGER.error(" system time2 " + System.currentTimeMillis());
-				
-				JobDetail job = JobBuilder.newJob(ContainerToDeliveryNoteProcessingJob.class).withIdentity("DnProcessJob", "group1").build();
-				Trigger trigger = TriggerBuilder.newTrigger().withIdentity("DnProcessTrigger", "group1")
-						.startNow().build();
-				Scheduler scheduler = new StdSchedulerFactory().getScheduler();
-				
-				scheduler.start();
-				scheduler.scheduleJob(job, trigger);
-				try {
-					Thread.sleep(500);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				scheduler.shutdown(true);
-				/*Object data = createEntryInDeliveryHeader(dto);
-				LOGGER.error("INSIDE CREATE CONTAINER SERVIE WITH RESPONSE PAYLOAD <= " + data);*/
-				response.setStatus(true);
-				response.setCode(HttpStatus.SC_OK);
-				response.setMessage(Message.SUCCESS + "");
-			} catch (Exception e) {
-				response.setStatus(false);
-				response.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-				response.setMessage(Message.FAILED + " : " + e.toString());
-				e.printStackTrace();
-			}
-		} else {
-			response.setStatus(true);
-			response.setMessage(Message.SUCCESS.getValue());
-			response.setCode(HttpStatus.SC_OK);
-		}
-
-		return response;
 	}
 
-	public Map<Long, DeliveryHeaderDo> createEntryInDeliveryHeader(ContainerDTO dto) throws Exception {
+	
+	@SuppressWarnings({ "unchecked", "unused" })
+	private void processDNInThread(ContainerDTO containerDTO){
+
+		List<ContainerDetailsDTO> containerDetailsDTOs = (List<ContainerDetailsDTO>) containerDTO.getDELIVERY().getITEM();
+		LOGGER.error(" system time1 " + System.currentTimeMillis());
+		try {
+			/*int i=1;
+			for (ContainerDetailsDTO d : containerDetailsDTOs) {
+				containerDao.create(d, new ContainerDetailsDo());
+				
+				if(i % BATCH_SIZE ==0)
+					containerDao.getSession().flush();
+				
+				i++; 
+				
+			}*/
+			LOGGER.error(" system time2 " + System.currentTimeMillis());
+			Object data = createEntryInDeliveryHeader(containerDTO);
+			LOGGER.error("INSIDE CREATE CONTAINER SERVIE WITH RESPONSE PAYLOAD <= " + data);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private Map<Long, DeliveryHeaderDo> createEntryInDeliveryHeader(ContainerDTO dto) throws Exception {
 		LOGGER.debug("INSIDE createEntryInDeliveryHeader() OF CONTAINER SERVIE");
 		Map<Long, String> delNoteAddrMap = new HashMap<>();
 
@@ -246,38 +194,19 @@ public class ContainerService implements ContainerServiceLocal {
 				}
 
 			headerDao.persist(dos);
+			
 			if(i % BATCH_SIZE ==0)
-			{
 				headerDao.getSession().flush();
-				headerDao.getSession().clear();
-			}
 			
 			i++;
 			
 		}
-        
-		
-		
-		//marking items as deleted as they are processed
-		Set<Long> deliveryNoteIDsSet = headerMap.keySet();
-		int rowAffected = 0;
-		if(!ServicesUtil.isEmpty(deliveryNoteIDsSet))
-		rowAffected =  containerDao.markAsItemsAsProcessed(deliveryNoteIDsSet);
-		
-		/*// flushing the session data
-		containerDao.getSession().flush();
-		containerDao.getSession().clear();*/
-		LOGGER.error(" INSIDE createEntryInDeliveryHeader(). TOTAL ITEMS < "+rowAffected+" > WERE PROCESSED SUCCESSFULLY AND MARKED AS DELETED");
+
 		return headerMap;
 
 	}
 
-	@Override
-	public HciRestInvoker getHciRestInvoker() {
-		// TODO Auto-generated method stub
-		return hciRestInvoker;
-	}
-
+	
 	public Map<Long, DeliveryHeaderDo> importDto(ContainerItemsDTO dto, GeoApiContext context,
 			Map<Long, String> delNoteAddrMap) throws InvalidInputFault, ExecutionFault, NoResultFault, Exception {
 		// List<DeliveryHeaderDo> headerList = new
@@ -414,22 +343,21 @@ public class ContainerService implements ContainerServiceLocal {
 
 				}
 
-				if (ServicesUtil.isEmpty(d.getSTAT()) ) {
-					
-						// parsing item do
-						if (!ServicesUtil.isEmpty(d.getSERNUM()))
-							itemDo.setSerialNum(d.getSERNUM());
-						if (!ServicesUtil.isEmpty(d.getMAT()))
-							itemDo.setMaterial(d.getMAT());
-						if (!ServicesUtil.isEmpty(d.getBATCH()))
-							itemDo.setBatch(d.getBATCH());
-						if (!ServicesUtil.isEmpty(d.getDESC()))
-							itemDo.setDescription(d.getDESC());
-						if (!ServicesUtil.isEmpty(d.getQTY()))
-							itemDo.setQuantity(d.getQTY());
-						if (!ServicesUtil.isEmpty(d.getVOL()))
-							itemDo.setVolume(d.getVOL());
-						dos.getDeliveryItems().add(itemDo);
+				if (ServicesUtil.isEmpty(d.getSTAT()) || !d.getSTAT().equals(DeliveryNoteStatus.STAT.getValue())) {
+					// parsing item do
+					if (!ServicesUtil.isEmpty(d.getSERNUM()))
+						itemDo.setSerialNum(d.getSERNUM());
+					if (!ServicesUtil.isEmpty(d.getMAT()))
+						itemDo.setMaterial(d.getMAT());
+					if (!ServicesUtil.isEmpty(d.getBATCH()))
+						itemDo.setBatch(d.getBATCH());
+					if (!ServicesUtil.isEmpty(d.getDESC()))
+						itemDo.setDescription(d.getDESC());
+					if (!ServicesUtil.isEmpty(d.getQTY()))
+						itemDo.setQuantity(d.getQTY());
+					if (!ServicesUtil.isEmpty(d.getVOL()))
+						itemDo.setVolume(d.getVOL());
+					dos.getDeliveryItems().add(itemDo);
 				}
 				// map.get(d.getDELIVNO()).getDeliveryItems().add(itemDo);
 				// map.put(dos, itemDo);
@@ -513,20 +441,5 @@ public class ContainerService implements ContainerServiceLocal {
 
 		return dto;
 	}
-
-	@Override
-	public List<ContainerDetailsDTO> findAll() {
-		ContainerDetailsDTO dto = new ContainerDetailsDTO();
-		List<ContainerDetailsDTO> list = null;
-		try {
-			list = containerDao.findAll(dto);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return list;
-	}
 	
-	
-
 }

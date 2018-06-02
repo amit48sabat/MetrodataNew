@@ -1,5 +1,10 @@
 package com.incture.metrodata.dao;
 
+import java.util.Set;
+
+import javax.transaction.Transactional;
+
+import org.hibernate.Query;
 import org.springframework.stereotype.Repository;
 
 import com.incture.metrodata.dto.ContainerDetailsDTO;
@@ -9,6 +14,7 @@ import com.incture.metrodata.exceptions.InvalidInputFault;
 import com.incture.metrodata.exceptions.NoResultFault;
 import com.incture.metrodata.util.ServicesUtil;
 
+@Transactional
 @Repository("containerDao")
 public class ContainerDAO extends BaseDao<ContainerDetailsDo, ContainerDetailsDTO> {
 
@@ -160,12 +166,20 @@ public class ContainerDAO extends BaseDao<ContainerDetailsDo, ContainerDetailsDT
 			if(!ServicesUtil.isEmpty(dos.getVOL())){
 				dto.setVOL(dos.getVOL());
 			}
-			if(!ServicesUtil.isEmpty(dto.getSTAT())){
-				dos.setSTAT(dto.getSTAT());
+			if(!ServicesUtil.isEmpty(dos.getSTAT())){
+				dto.setSTAT(dos.getSTAT());
 			}
 		}
 		
 		return dto;
+	}
+
+	public int markAsItemsAsProcessed(Set<Long> deliveryNoteIDsSet) {
+		String hql  = "UPDATE ContainerDetailsDo c set c.deleted = 1  where c.DELIVNO in (:deliveryNoteIDsSet)";
+		Query  query = getSession().createQuery(hql);
+		query.setParameterList("deliveryNoteIDsSet", deliveryNoteIDsSet);
+		int rowAffected = query.executeUpdate();
+		return rowAffected;
 	}
 
 }

@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import javax.transaction.Transactional;
+
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
@@ -26,6 +28,7 @@ import com.incture.metrodata.exceptions.InvalidInputFault;
 import com.incture.metrodata.util.PaginationUtil;
 import com.incture.metrodata.util.ServicesUtil;
 
+@Transactional
 @Repository("DeliveryHeaderDao")
 public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderDTO> {
 	@Autowired

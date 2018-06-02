@@ -31,6 +31,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.hibernate4.HibernateTransactionManager;
 import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.google.maps.GeoApiContext;
@@ -199,6 +200,16 @@ public class HibernateConfiguration {
 	private static byte[] base64Decode(String property) throws IOException {
 		// NB: This class is internal, and you probably should use another impl
 		return new BASE64Decoder().decodeBuffer(property);
+	}
+	
+	
+	@Bean
+	public ThreadPoolTaskExecutor taskExecutor() {
+		ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
+		pool.setCorePoolSize(5);
+		pool.setMaxPoolSize(10);
+		pool.setWaitForTasksToCompleteOnShutdown(true);
+		return pool;
 	}
 	
 }

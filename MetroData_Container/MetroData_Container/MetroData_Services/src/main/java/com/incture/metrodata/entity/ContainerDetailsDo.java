@@ -1,5 +1,7 @@
 package com.incture.metrodata.entity;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,6 +10,10 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import org.hibernate.annotations.Where;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -18,6 +24,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Table(name = "CONTAINER_DETAILS")
+@Where(clause = "DELETED = 0 ")
 public class ContainerDetailsDo implements BaseDo {
 
 	/**
@@ -94,6 +101,13 @@ public class ContainerDetailsDo implements BaseDo {
 	@Column(name = "STAT")
 	private String STAT;
 
+	@Column(name = "DELETED", columnDefinition="int default 0", nullable=false)
+	private Integer deleted = 0;
+	
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "CREATED_AT")
+	private Date createdAt;
+	
 	@Override
 	public Object getPrimaryKey() {
 		return id;

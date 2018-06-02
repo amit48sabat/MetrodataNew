@@ -1,5 +1,7 @@
 package com.incture.metrodata.dao;
 
+import javax.transaction.Transactional;
+
 import org.hibernate.Query;
 import org.springframework.stereotype.Repository;
 
@@ -7,6 +9,7 @@ import com.incture.metrodata.dto.DeliveryItemDTO;
 import com.incture.metrodata.entity.DeliveryItemDo;
 import com.incture.metrodata.util.ServicesUtil;
 
+@Transactional
 @Repository("DeliveryItemDAO")
 public class DeliveryItemDAO extends BaseDao<DeliveryItemDo, DeliveryItemDTO> {
 
