@@ -20,7 +20,7 @@ import com.incture.metrodata.util.ServicesUtil;
 public class ContainerToDeliveryNoteProcessingJob implements Job {
 	static AbstractApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
 	ContainerServiceLocal containerService = (ContainerServiceLocal) context.getBean("containerService");
-
+	DeliveryItemServiceLocal itemService = (DeliveryItemServiceLocal) context.getBean("deliveryItemService");
 	private static final Logger LOGGER = LoggerFactory.getLogger(ContainerToDeliveryNoteProcessingJob.class);
 
 	public void execute(JobExecutionContext con) throws JobExecutionException {
@@ -28,14 +28,18 @@ public class ContainerToDeliveryNoteProcessingJob implements Job {
 		try {
 			Scheduler scheduler = con.getScheduler();
 			
-			LOGGER.error("SCHEDULER STARTED "+scheduler.isStarted());
+			LOGGER.error(" INSIDE DN_PROCESSING_SCHEDULER STARTED "+scheduler.isStarted());
 			if (!ServicesUtil.isEmpty(scheduler.getContext().get("data"))) {
 				ContainerDTO containerDTO = (ContainerDTO) con.getScheduler().getContext().get("data");
-
+                
 				if (!ServicesUtil.isEmpty(containerDTO)) {
 					LOGGER.error(" INSIDE CONTAINER_TO_DN_PROS_JOB.");
 					containerService.createEntryInDeliveryHeader(containerDTO);
 
+					
+					// DELETE THE UNLINK DELIVERY ITEM FROM DELIVERY ITEM TABLE KEEP ONLY ITEMS WHICH ARE MAPPED TO SOME DELIVERY NOTES ONLY
+					int rowAffected = itemService.deleteUnlinkDeliveryItems();
+					LOGGER.error(" DN_PROCESSING_SCHEDULER. Deleted <"+rowAffected+"> unlinked delivery items from delivery_item table");
 				}
 			}
 

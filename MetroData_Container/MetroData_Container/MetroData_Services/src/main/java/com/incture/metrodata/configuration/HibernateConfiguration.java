@@ -39,6 +39,7 @@ import com.incture.metrodata.dto.DefaultUserDetailsVO;
 import com.incture.metrodata.service.DNFetchSchedulerService;
 import com.incture.metrodata.util.HciRestInvoker;
 import com.incture.metrodata.util.RESTInvoker;
+import com.incture.metrodata.util.ServicesUtil;
 
 import sun.misc.BASE64Decoder;
 
@@ -88,7 +89,18 @@ public class HibernateConfiguration {
 		properties.put("hibernate.dialect", environment.getRequiredProperty("hibernate.dialect"));
 		properties.put("hibernate.show_sql", environment.getRequiredProperty("hibernate.show_sql"));
 		properties.put("hibernate.format_sql", environment.getRequiredProperty("hibernate.format_sql"));
-		properties.put("hibernate.hbm2ddl.auto", environment.getRequiredProperty("hibernate.hbm2ddl.auto"));
+		properties.put("hibernate.jdbc.batch_size", environment.getRequiredProperty("hibernate.jdbc.batch_size"));
+		
+		String tableCreateOrUpdate = "update";
+		
+		String tableStatus = environment.getRequiredProperty("hibernate.hbm2ddl.auto");
+		
+		// if tableStatus if force_create than only drop the existing table and create again
+		if(!ServicesUtil.isEmpty(tableStatus) && tableStatus.equals("force_create"))
+			tableCreateOrUpdate = "create";
+		
+		properties.put("hibernate.hbm2ddl.auto", tableCreateOrUpdate);
+		
 		return properties;
 	}
 

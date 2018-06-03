@@ -12,4 +12,6 @@ public interface DeliveryItemServiceLocal {
 	ResponseDto delete(Long requestNo);
 
 	ResponseDto update(DeliveryItemDTO Dto);
+	
+	Integer deleteUnlinkDeliveryItems();
 }

@@ -9,6 +9,9 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
+
 import lombok.Data;
 import lombok.ToString;
 
@@ -19,18 +22,20 @@ import lombok.ToString;
 public class DeliveryItemDo implements BaseDo {
 	
 	private static final long serialVersionUID = 1L;
-
+  
 	@Id
-	@TableGenerator(
-            name="itemGen", 
-            table="ID_GEN_TBL", 
-            pkColumnName="GEN_KEY", 
-            valueColumnName="GEN_VALUE", 
-            pkColumnValue="GEN_ID", 
-            allocationSize=1)
-    @GeneratedValue(strategy=GenerationType.TABLE, generator="itemGen")
 	@Column(name = "DELIVERY_ITEM_ID")
-	private long deliveryItemId;
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hilo_sequence_generator")
+    @GenericGenerator(
+            name = "hilo_sequence_generator",
+            strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
+            parameters = {
+                    @Parameter(name = "sequence_name", value = "delivery_item_sequence"),
+                    @Parameter(name = "initial_value", value = "1"),
+                    @Parameter(name = "increment_size", value = "5"),
+                    @Parameter(name = "optimizer", value = "hilo")
+            })
+	private Long deliveryItemId;
 
 	@Column(name = "SERIAL_NUM")
 	private String serialNum;

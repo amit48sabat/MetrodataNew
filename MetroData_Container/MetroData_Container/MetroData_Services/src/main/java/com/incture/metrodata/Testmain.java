@@ -1,24 +1,13 @@
 package com.incture.metrodata;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.quartz.JobBuilder;
-import org.quartz.JobDetail;
 import org.quartz.SchedulerException;
-import org.quartz.SimpleScheduleBuilder;
-import org.quartz.SimpleTrigger;
-import org.quartz.TriggerBuilder;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.AbstractApplicationContext;
 
-import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 import com.incture.metrodata.configuration.AppConfig;
-import com.incture.metrodata.dto.ContainerDTO;
 import com.incture.metrodata.dto.ContainerDetailsDTO;
 import com.incture.metrodata.service.ContainerServiceLocal;
-import com.incture.metrodata.service.ContainerToDeliveryNoteProcessingJob;
 import com.incture.metrodata.util.ServicesUtil;
 
 
@@ -28,12 +17,12 @@ public class Testmain {
 	
 	public static void main( String[] args ) throws SchedulerException
     {
-		String controllerJson = "{\"DELIVERY\":{\"ITEM\":[{\"SALESGRP\":\"55V-IvanaKamoto\",\"DELIVNO\":\"6569259483\",\"CREATEDT\":\"2018-01-25\",\"CREATETM\":\"14:50:30\",\"PURCHORD\":\"ponum-123\",\"REFNO\":\"2560010911\",\"SLOC\":\"W001\",\"SHIPADD\":\"item1EXECUTIVECENTREBLOKIINO.1-2JL.LAKSAMANABINTAN-SEIPANAS\",\"CITY\":\"BATAM\",\"AREACODE\":\"008-Batam\",\"TELP\":\"0778-433007\",\"SOLDADD\":\"KOMPLEKSEXECUTIVECENTREBLOKIINO.1-2JL.LAKSAMANABINTAN-SEIPANAS\",\"SHIPTYP\":\"01-Regular\",\"INSTDELV\":\"FormHeader,headernote1,headernote11,headernote111,headernote3,headernote4,\",\"SERNUM\":\"123\",\"MAT\":\"90PT01U1-M02280\",\"BATCH\":\"item1\",\"DESC\":\"ASUSAIOV221ICUK-BA035D-I36006U/4GB/\",\"QTY\":\"6.000\",\"VOL\":\"191.520\"},{\"SALESGRP\":\"55V-IvanaKamoto\",\"DELIVNO\":\"6569259483\",\"CREATEDT\":\"2018-01-25\",\"CREATETM\":\"14:50:30\",\"PURCHORD\":\"ponum-123\",\"REFNO\":\"2560010911\",\"SLOC\":\"W001\",\"SHIPADD\":\"item2EXECUTIVECENTREBLOKIINO.1-2JL.LAKSAMANABINTAN-SEIPANAS\",\"CITY\":\"BATAM\",\"AREACODE\":\"008-Batam\",\"TELP\":\"0778-433007\",\"SOLDADD\":\"KOMPLEKSEXECUTIVECENTREBLOKIINO.1-2JL.LAKSAMANABINTAN-SEIPANAS\",\"SHIPTYP\":\"01-Regular\",\"INSTDELV\":\"FormHeader,headernote1,headernote11,headernote111,headernote3,headernote4,\",\"SERNUM\":\"123\",\"MAT\":\"90PT01U1-M02280\",\"BATCH\":\"item2\",\"DESC\":\"ASUSAIOV221ICUK-BA035D-I36006U/4GB/\",\"QTY\":\"6.000\",\"VOL\":\"191.520\",\"STAT\":\"X\"},{\"SALESGRP\":\"55V-IvanaKamoto\",\"DELIVNO\":\"6569259483\",\"CREATEDT\":\"2018-01-25\",\"CREATETM\":\"14:50:30\",\"PURCHORD\":\"ponum-123\",\"REFNO\":\"2560010911\",\"SLOC\":\"W001\",\"SHIPADD\":\"KOMPLEKSEXECUTIVECENTREBLOKIINO.1-2JL.LAKSAMANABINTAN-SEIPANAS\",\"CITY\":\"BATAM\",\"AREACODE\":\"008-Batam\",\"TELP\":\"0778-433007\",\"SOLDADD\":\"item3EXECUTIVECENTREBLOKIINO.1-2JL.LAKSAMANABINTAN-SEIPANAS\",\"SHIPTYP\":\"01-Regular\",\"INSTDELV\":\"FormHeader,headernote1,headernote11,headernote111,headernote3,headernote4,\",\"SERNUM\":\"2345\",\"MAT\":\"90PT01U1-M02281\",\"BATCH\":\"item3\",\"DESC\":\"ASUSAIOV221ICUK-BA035D-I36006U/4GB/\",\"QTY\":\"6.000\",\"VOL\":\"191.520\",\"STAT\":\"X\"}]}}";
+		String controllerJson = "{\"DELIVERY\":{\"ITEM\":[{\"SALESGRP\":\"55V-IvanaKamoto\",\"DELIVNO\":\"6569259483\",\"CREATEDT\":\"2018-01-25\",\"CREATETM\":\"14:50:30\",\"PURCHORD\":\"ponum-123\",\"REFNO\":\"2560010911\",\"SLOC\":\"W001\",\"SHIPADD\":\"item1EXECUTIVECENTREBLOKIINO.1-2JL.LAKSAMANABINTAN-SEIPANAS\",\"CITY\":\"BATAM\",\"AREACODE\":\"008-Batam\",\"TELP\":\"0778-433007\",\"SOLDADD\":\"KOMPLEKSEXECUTIVECENTREBLOKIINO.1-2JL.LAKSAMANABINTAN-SEIPANAS\",\"SHIPTYP\":\"01-Regular\",\"INSTDELV\":\"FormHeader,headernote1,headernote11,headernote111,headernote3,headernote4,\",\"SERNUM\":\"123\",\"MAT\":\"90PT01U1-M02280\",\"BATCH\":\"item1\",\"DESC\":\"ASUSAIOV221ICUK-BA035D-I36006U/4GB/\",\"QTY\":\"6.000\",\"VOL\":\"191.520\"},{\"SALESGRP\":\"55V-IvanaKamoto\",\"DELIVNO\":\"6569259483\",\"CREATEDT\":\"2018-01-25\",\"CREATETM\":\"14:50:30\",\"PURCHORD\":\"ponum-123\",\"REFNO\":\"2560010911\",\"SLOC\":\"W001\",\"SHIPADD\":\"item2EXECUTIVECENTREBLOKIINO.1-2JL.LAKSAMANABINTAN-SEIPANAS\",\"CITY\":\"BATAM\",\"AREACODE\":\"008-Batam\",\"TELP\":\"0778-433007\",\"SOLDADD\":\"KOMPLEKSEXECUTIVECENTREBLOKIINO.1-2JL.LAKSAMANABINTAN-SEIPANAS\",\"SHIPTYP\":\"01-Regular\",\"INSTDELV\":\"FormHeader,headernote1,headernote11,headernote111,headernote3,headernote4,\",\"SERNUM\":\"123\",\"MAT\":\"90PT01U1-M02280\",\"BATCH\":\"item2\",\"DESC\":\"ASUSAIOV221ICUK-BA035D-I36006U/4GB/\",\"QTY\":\"6.000\",\"VOL\":\"191.520\",\"STAT\":\"\"},{\"SALESGRP\":\"55V-IvanaKamoto\",\"DELIVNO\":\"6569259483\",\"CREATEDT\":\"2018-01-25\",\"CREATETM\":\"14:50:30\",\"PURCHORD\":\"ponum-123\",\"REFNO\":\"2560010911\",\"SLOC\":\"W001\",\"SHIPADD\":\"KOMPLEKSEXECUTIVECENTREBLOKIINO.1-2JL.LAKSAMANABINTAN-SEIPANAS\",\"CITY\":\"BATAM\",\"AREACODE\":\"008-Batam\",\"TELP\":\"0778-433007\",\"SOLDADD\":\"item3EXECUTIVECENTREBLOKIINO.1-2JL.LAKSAMANABINTAN-SEIPANAS\",\"SHIPTYP\":\"01-Regular\",\"INSTDELV\":\"FormHeader,headernote1,headernote11,headernote111,headernote3,headernote4,\",\"SERNUM\":\"2345\",\"MAT\":\"90PT01U1-M02281\",\"BATCH\":\"item3\",\"DESC\":\"ASUSAIOV221ICUK-BA035D-I36006U/4GB/\",\"QTY\":\"6.000\",\"VOL\":\"191.520\",\"STAT\":\"\"}]}}";
 		
 		ContainerServiceLocal containerService = (ContainerServiceLocal) context.getBean("containerService");
 		containerService.create(controllerJson);
-		/*
-		Gson gson = new Gson();
+		
+		/*Gson gson = new Gson();
 		ContainerDTO dto = gson.fromJson(controllerJson.toString(), ContainerDTO.class);
 		List<ContainerDetailsDTO> list = new ArrayList<>();
 		// System.out.println(dto.getDELIVERY().getITEM());
@@ -49,12 +38,14 @@ public class Testmain {
 				list.add(d);
 			}
 		}
-		dto.getDELIVERY().setITEM(list);*/
+		dto.getDELIVERY().setITEM(list);
 		
-		 /*JobDetail job = JobBuilder.newJob(ContainerToDeliveryNoteProcessingJob.class).withIdentity("dummyJobName", "group1").build();
+		 JobDetail job = JobBuilder.newJob(ContainerToDeliveryNoteProcessingJob.class).withIdentity("dummyJobName", "group1").build();
 		Trigger trigger = TriggerBuilder.newTrigger().withIdentity("DnProcessTrigger", "group1")
 				.startNow().build();
 		Scheduler scheduler = new StdSchedulerFactory().getScheduler();
+		scheduler.getContext().put("data", dto);
+		
 		scheduler.start();
 		scheduler.scheduleJob(job, trigger);
 		try {

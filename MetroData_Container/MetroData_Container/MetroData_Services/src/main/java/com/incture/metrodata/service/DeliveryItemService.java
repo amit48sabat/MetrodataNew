@@ -108,5 +108,11 @@ public class DeliveryItemService implements DeliveryItemServiceLocal{
 		}
 		return responseDto;
 	}
+
+	@Override
+	public Integer deleteUnlinkDeliveryItems() {
+		// TODO Auto-generated method stub
+		return deliveryItemDao.deleteUnlinkDeliveryItems();
+	}
 	
 }

@@ -16,7 +16,7 @@ import lombok.ToString;
 @Setter
 @ToString
 public class DeliveryItemDTO extends BaseDto {
-	private long deliveryItemId;
+	private Long deliveryItemId;
 	private String serialNum;
 	private String material;
 	private String description;
