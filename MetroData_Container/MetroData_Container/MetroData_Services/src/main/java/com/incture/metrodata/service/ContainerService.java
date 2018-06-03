@@ -100,12 +100,13 @@ public class ContainerService implements ContainerServiceLocal {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ContainerService.class);
 
-	private Integer BATCH_SIZE   = 25;
+	private Integer BATCH_SIZE   = 50;
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public ResponseDto create(String controllerJson) {
 
+		
 		ResponseDto response = new ResponseDto();
 		Map<Object, Object> inputDataMap = new LinkedHashMap<>();
 		inputDataMap.put("inputString", controllerJson);
@@ -128,45 +129,50 @@ public class ContainerService implements ContainerServiceLocal {
 		}
 		dto.getDELIVERY().setITEM(list);
 		inputDataMap.put("processObject", dto);
-		LOGGER.error("INSIDE CREATE CONTAINER SERVIE WITH REQUEST PAYLOAD => " + dto);
+		//LOGGER.error("INSIDE CREATE CONTAINER SERVIE WITH REQUEST PAYLOAD => " + dto);
 		if (!ServicesUtil.isEmpty(dto) && !ServicesUtil.isEmpty(dto.getDELIVERY())) {
 			List<ContainerDetailsDTO> containerDetailsDTOs = (List<ContainerDetailsDTO>) dto.getDELIVERY().getITEM();
-			LOGGER.error(" system time1 " + System.currentTimeMillis());
+			
 			try {
-				//int i=1;
-				for (ContainerDetailsDTO d : containerDetailsDTOs) {
-					containerDao.create(d, new ContainerDetailsDo());
-					
-					/*if(i % BATCH_SIZE ==0)
-					{
-						containerDao.getSession().flush();
-						containerDao.getSession().clear();
-					}
-					
-					i++; */
-					
-				}
-				
-				/*// flushing the session data
-				containerDao.getSession().flush();
-				containerDao.getSession().clear();*/
-				
-				LOGGER.error(" system time2 " + System.currentTimeMillis());
-				
 				JobDetail job = JobBuilder.newJob(ContainerToDeliveryNoteProcessingJob.class).withIdentity("DnProcessJob", "group1").build();
 				Trigger trigger = TriggerBuilder.newTrigger().withIdentity("DnProcessTrigger", "group1")
 						.startNow().build();
 				Scheduler scheduler = new StdSchedulerFactory().getScheduler();
 				
+				// adding data to scheduler context
+				scheduler.getContext().put("data", dto);
+				
+				int i=1;
+				for (ContainerDetailsDTO d : containerDetailsDTOs) {
+					containerDao.create(d, new ContainerDetailsDo());
+					
+					if(i % BATCH_SIZE ==0)
+					{
+						containerDao.getSession().flush();
+						containerDao.getSession().clear();
+					}
+					
+					i++;
+					
+				}
+				
+				// flushing the session data
+				containerDao.getSession().flush();
+				containerDao.getSession().clear();
+				
+				
 				scheduler.start();
 				scheduler.scheduleJob(job, trigger);
 				try {
-					Thread.sleep(500);
+					Thread.sleep(2000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				
 				scheduler.shutdown(true);
+				
+
 				/*Object data = createEntryInDeliveryHeader(dto);
 				LOGGER.error("INSIDE CREATE CONTAINER SERVIE WITH RESPONSE PAYLOAD <= " + data);*/
 				response.setStatus(true);
@@ -227,11 +233,11 @@ public class ContainerService implements ContainerServiceLocal {
 				deliveryHeaderDao.removeTripDeliveryNoteMapping(headerDto);
 				dos.setTripped(false);
 			}
-			if (!ServicesUtil.isEmpty(dos.getStatus())
+			/*if (!ServicesUtil.isEmpty(dos.getStatus())
 					&& dos.getStatus().equals(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue())) {
 				if (!ServicesUtil.isEmpty(dos.getTripped()) && !dos.getTripped())
 					dos.setTripped(false);
-			}
+			}*/
 
 			if (!ServicesUtil.isEmpty(dos.getShipToAddress()))
 				if (!(dos.getShipToAddress()).equalsIgnoreCase(delNoteAddrMap.get(dos.getDeliveryNoteId()))) {
@@ -244,6 +250,14 @@ public class ContainerService implements ContainerServiceLocal {
 						e.printStackTrace();
 					}
 				}
+			
+			
+			// if status is created set tripped =false
+			String isStatusCreated = DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue();
+			if(!ServicesUtil.isEmpty(dos.getStatus()) && dos.getStatus().equalsIgnoreCase(isStatusCreated))
+			{
+				dos.setTripped(false);
+			}
 
 			headerDao.persist(dos);
 			if(i % BATCH_SIZE ==0)
@@ -264,9 +278,9 @@ public class ContainerService implements ContainerServiceLocal {
 		if(!ServicesUtil.isEmpty(deliveryNoteIDsSet))
 		rowAffected =  containerDao.markAsItemsAsProcessed(deliveryNoteIDsSet);
 		
-		/*// flushing the session data
+		// flushing the session data
 		containerDao.getSession().flush();
-		containerDao.getSession().clear();*/
+		containerDao.getSession().clear();
 		LOGGER.error(" INSIDE createEntryInDeliveryHeader(). TOTAL ITEMS < "+rowAffected+" > WERE PROCESSED SUCCESSFULLY AND MARKED AS DELETED");
 		return headerMap;
 
