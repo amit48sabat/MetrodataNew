@@ -134,8 +134,14 @@ public class ContainerService implements ContainerServiceLocal {
 			List<ContainerDetailsDTO> containerDetailsDTOs = (List<ContainerDetailsDTO>) dto.getDELIVERY().getITEM();
 			
 			try {
-				JobDetail job = JobBuilder.newJob(ContainerToDeliveryNoteProcessingJob.class).withIdentity("DnProcessJob", "group1").build();
-				Trigger trigger = TriggerBuilder.newTrigger().withIdentity("DnProcessTrigger", "group1")
+				
+				long timeStamp = System.currentTimeMillis();
+				String jobIdentity = "DnProcessJob"+timeStamp;
+				String group   = "group"+timeStamp;
+				String triggerName = "DnProcessTrigger"+timeStamp;
+				
+				JobDetail job = JobBuilder.newJob(ContainerToDeliveryNoteProcessingJob.class).withIdentity(jobIdentity,group).build();
+				Trigger trigger = TriggerBuilder.newTrigger().withIdentity(triggerName, group)
 						.startNow().build();
 				Scheduler scheduler = new StdSchedulerFactory().getScheduler();
 				
