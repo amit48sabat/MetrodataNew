@@ -3,6 +3,7 @@ package com.incture.metrodata.dao;
 import java.util.List;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
@@ -121,5 +122,14 @@ public class OrderTrackingDAO extends BaseDao<OrderTrackingDo, OrderTrackingDTO>
 		List<OrderTrackingDo> resultDos = criteria.setMaxResults(1).list();
 		List<OrderTrackingDTO> resultDtos = exportList(resultDos);
 		return resultDtos;
+	}
+
+
+	public int deleteTripTrackingData(String tripId) {
+		String hql = "DELETE OrderTrackingDo as d where d.tripId = :tripId"; 
+		Query  query = getSession().createQuery(hql);
+		query.setParameter("tripId", tripId);
+		int rowAffected = query.executeUpdate();
+		return rowAffected;
 	}
 }

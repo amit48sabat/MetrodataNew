@@ -27,6 +27,7 @@ import com.incture.metrodata.constant.Message;
 import com.incture.metrodata.constant.RoleConstant;
 import com.incture.metrodata.constant.TripStatus;
 import com.incture.metrodata.dao.DeliveryHeaderDAO;
+import com.incture.metrodata.dao.OrderTrackingDAO;
 import com.incture.metrodata.dao.TripDAO;
 import com.incture.metrodata.dao.UserDAO;
 import com.incture.metrodata.dto.DeliveryHeaderDTO;
@@ -66,6 +67,9 @@ public class TripService implements TripServiceLocal {
 
 	@Autowired
 	RESTInvoker restInvoker;
+	
+	@Autowired
+	OrderTrackingDAO orderTrackingDAO;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TripService.class);
 
@@ -172,6 +176,15 @@ public class TripService implements TripServiceLocal {
 			LOGGER.error("INSIDE UPDATE TRIP SERVICE. REQUEST PAYLOAD => "+dto);
 			dto = tripDao.update(dto);
 
+			
+			String status  =  TripStatus.TRIP_STATUS_COMPLETED.getValue();
+			if(dto.getStatus().equals(status)){
+				
+				// deleting the tracking data for the trip
+				int rowAffected = orderTrackingDAO.deleteTripTrackingData(dto.getTripId());
+				LOGGER.error(" DELETED < "+rowAffected+" > TRACKING DATA FOR TRIP "+dto.getTripId());
+			}
+			
 			responseDto.setStatus(true);
 			responseDto.setCode(200);
 			responseDto.setData(dto);
