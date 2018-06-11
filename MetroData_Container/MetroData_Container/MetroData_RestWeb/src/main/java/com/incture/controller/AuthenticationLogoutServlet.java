@@ -29,13 +29,13 @@ public class AuthenticationLogoutServlet extends HttpServlet {
         	// Check if a user is logged in
             if (request.getUserPrincipal() != null) {
                 logout();
-                response.reset();
+                /* response.reset();
                 response.setHeader("Cache-Control","no-cache");
                 response.setHeader("Pragma","no-cache");
                 response.setHeader("Cache-Control","no-store");
                 response.setHeader("Cache-Control","must-revalidate");
                 response.setDateHeader("Expires",0); 
-                /*Cookie[] cookies = request.getCookies();
+                Cookie[] cookies = request.getCookies();
                 
                 // Delete all the cookies
                 if (cookies != null) {

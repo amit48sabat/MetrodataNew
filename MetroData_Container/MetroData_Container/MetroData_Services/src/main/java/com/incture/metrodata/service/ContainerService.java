@@ -1,6 +1,7 @@
 package com.incture.metrodata.service;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -388,9 +389,12 @@ public class ContainerService implements ContainerServiceLocal {
 				}
 
 				// set other params
-				dos.setCreatedDate(currDate);
-				dos.setUpdatedAt(currDate);
-
+				if(!ServicesUtil.isEmpty(d.getCREATEDT())){
+					Date eccCreatedDate =new SimpleDateFormat("yyyy-MM-dd").parse(d.getCREATEDT());  
+					dos.setCreatedDate(eccCreatedDate);
+				}
+				
+				dos.setUpdatedAt(currDate);	
 				if (ServicesUtil.isEmpty(d.getSTAT())) {
 					dos.setCreatedAt(currDate);
 					if (!ServicesUtil.isEmpty(currentStatusMap.get(dos.getDeliveryNoteId()))
