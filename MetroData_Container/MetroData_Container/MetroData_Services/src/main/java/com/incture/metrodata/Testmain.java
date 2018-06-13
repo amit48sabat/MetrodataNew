@@ -21,7 +21,7 @@ public class Testmain {
 		
 		ContainerServiceLocal containerService = (ContainerServiceLocal) context.getBean("containerService");
 		containerService.create(controllerJson);
-		containerService.findAll();
+		//containerService.findAll();
 		/*Gson gson = new Gson();
 		ContainerDTO dto = gson.fromJson(controllerJson.toString(), ContainerDTO.class);
 		List<ContainerDetailsDTO> list = new ArrayList<>();

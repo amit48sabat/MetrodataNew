@@ -31,6 +31,7 @@ import com.incture.metrodata.constant.Message;
 import com.incture.metrodata.constant.MessageType;
 import com.incture.metrodata.constant.TripStatus;
 import com.incture.metrodata.dao.ContainerDAO;
+import com.incture.metrodata.dao.ContainerRecordsDAO;
 import com.incture.metrodata.dao.ContainerToDeliveryHeaderDao;
 import com.incture.metrodata.dao.CourierDetailsDAO;
 import com.incture.metrodata.dao.DeliveryHeaderDAO;
@@ -46,6 +47,7 @@ import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.TripDetailsDTO;
 import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.entity.ContainerDetailsDo;
+import com.incture.metrodata.entity.ContainerRecordsDo;
 import com.incture.metrodata.entity.DeliveryHeaderDo;
 import com.incture.metrodata.entity.DeliveryItemDo;
 import com.incture.metrodata.entity.WareHouseDetailsDo;
@@ -99,16 +101,19 @@ public class ContainerService implements ContainerServiceLocal {
 	@Autowired
 	WareHouseDAO wareHouseDao;
 
+	@Autowired
+	ContainerRecordsDAO containerRecordsDAO;
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(ContainerService.class);
 
-	private Integer BATCH_SIZE   = 50;
-	
+	private Integer BATCH_SIZE = 50;
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public ResponseDto create(String controllerJson) {
 
-		
 		ResponseDto response = new ResponseDto();
+		
 		Map<Object, Object> inputDataMap = new LinkedHashMap<>();
 		inputDataMap.put("inputString", controllerJson);
 
@@ -130,44 +135,51 @@ public class ContainerService implements ContainerServiceLocal {
 		}
 		dto.getDELIVERY().setITEM(list);
 		inputDataMap.put("processObject", dto);
-		//LOGGER.error("INSIDE CREATE CONTAINER SERVIE WITH REQUEST PAYLOAD => " + dto);
+		// LOGGER.error("INSIDE CREATE CONTAINER SERVIE WITH REQUEST PAYLOAD =>
+		// " + dto);
 		if (!ServicesUtil.isEmpty(dto) && !ServicesUtil.isEmpty(dto.getDELIVERY())) {
 			List<ContainerDetailsDTO> containerDetailsDTOs = (List<ContainerDetailsDTO>) dto.getDELIVERY().getITEM();
-			
+
 			try {
-				
+
 				long timeStamp = System.currentTimeMillis();
-				String jobIdentity = "DnProcessJob"+timeStamp;
-				String group   = "group"+timeStamp;
-				String triggerName = "DnProcessTrigger"+timeStamp;
-				
-				JobDetail job = JobBuilder.newJob(ContainerToDeliveryNoteProcessingJob.class).withIdentity(jobIdentity,group).build();
-				Trigger trigger = TriggerBuilder.newTrigger().withIdentity(triggerName, group)
-						.startNow().build();
+				String jobIdentity = "DnProcessJob" + timeStamp;
+				String group = "group" + timeStamp;
+				String triggerName = "DnProcessTrigger" + timeStamp;
+				Date currdate = new Date();
+
+				JobDetail job = JobBuilder.newJob(ContainerToDeliveryNoteProcessingJob.class)
+						.withIdentity(jobIdentity, group).build();
+				Trigger trigger = TriggerBuilder.newTrigger().withIdentity(triggerName, group).startNow().build();
 				Scheduler scheduler = new StdSchedulerFactory().getScheduler();
+
 				
+				
+				ContainerRecordsDo recordsDo = new ContainerRecordsDo();
+				recordsDo.setPayload(controllerJson.trim());
+				recordsDo.setCreatedAt(currdate);
+				containerRecordsDAO.persist(recordsDo);
+
 				// adding data to scheduler context
 				scheduler.getContext().put("data", dto);
-				
-				int i=1;
-				for (ContainerDetailsDTO d : containerDetailsDTOs) {
-					containerDao.create(d, new ContainerDetailsDo());
-					
-					if(i % BATCH_SIZE ==0)
-					{
-						containerDao.getSession().flush();
-						containerDao.getSession().clear();
-					}
-					
-					i++;
-					
-				}
-				
-				// flushing the session data
-				containerDao.getSession().flush();
-				containerDao.getSession().clear();
-				
-				
+				scheduler.getContext().put("timeStamp", currdate);
+				scheduler.getContext().put("containerRecordId", recordsDo.getId());
+				/*
+				 * int i=1; for (ContainerDetailsDTO d : containerDetailsDTOs) {
+				 * containerDao.create(d, new ContainerDetailsDo());
+				 * 
+				 * if(i % BATCH_SIZE ==0) { containerDao.getSession().flush();
+				 * containerDao.getSession().clear(); }
+				 * 
+				 * i++;
+				 * 
+				 * }
+				 * 
+				 * // flushing the session data
+				 * containerDao.getSession().flush();
+				 * containerDao.getSession().clear();
+				 */
+
 				scheduler.start();
 				scheduler.scheduleJob(job, trigger);
 				try {
@@ -176,12 +188,14 @@ public class ContainerService implements ContainerServiceLocal {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
-				scheduler.shutdown(true);
-				
 
-				/*Object data = createEntryInDeliveryHeader(dto);
-				LOGGER.error("INSIDE CREATE CONTAINER SERVIE WITH RESPONSE PAYLOAD <= " + data);*/
+				scheduler.shutdown(true);
+
+				/*
+				 * Object data = createEntryInDeliveryHeader(dto); LOGGER.
+				 * error("INSIDE CREATE CONTAINER SERVIE WITH RESPONSE PAYLOAD <= "
+				 * + data);
+				 */
 				response.setStatus(true);
 				response.setCode(HttpStatus.SC_OK);
 				response.setMessage(Message.SUCCESS + "");
@@ -200,15 +214,16 @@ public class ContainerService implements ContainerServiceLocal {
 		return response;
 	}
 
-	public Map<Long, DeliveryHeaderDo> createEntryInDeliveryHeader(ContainerDTO dto) throws Exception {
+	public Integer createEntryInDeliveryHeader(ContainerDTO dto) throws Exception {
 		LOGGER.debug("INSIDE createEntryInDeliveryHeader() OF CONTAINER SERVIE");
 		Map<Long, String> delNoteAddrMap = new HashMap<>();
 
 		Map<Long, DeliveryHeaderDo> headerMap = importDto(dto.getDELIVERY(), context, delNoteAddrMap);
 		DeliveryHeaderDo dos = null;
-		int i=1;
+		int i = 0;
 		for (Map.Entry<Long, DeliveryHeaderDo> entry : headerMap.entrySet()) {
 			dos = entry.getValue();
+			i++;
 			LOGGER.error(" Processing DN no => " + dos.getDeliveryNoteId());
 			UserDetailsDTO adminDto = new UserDetailsDTO();
 			adminDto.setEmail(defaultUserVo.getEmail());
@@ -216,80 +231,98 @@ public class ContainerService implements ContainerServiceLocal {
 
 			DeliveryHeaderDTO headerDto = new DeliveryHeaderDTO();
 			headerDto.setDeliveryNoteId(dos.getDeliveryNoteId());
+			String tripId = "";
+			try {
+				if (!ServicesUtil.isEmpty(dos.getStatus())
+						&& dos.getStatus().equals(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue())) {
 
-			if (!ServicesUtil.isEmpty(dos.getStatus())
-					&& dos.getStatus().equals(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue())) {
+					// deleting the mapping btw trip and delivery note if exits
 
-				sendNotificationToDriverWhenAdminUpdateDnStatus(headerDto, adminDto);
+					// getting the delivery notes corresponding trip
+					TripDetailsDTO tripDto = tripDao
+							.getTripDeliveryNotesCountsByDeliveryNoteId(dos.getDeliveryNoteId());
+					if (!ServicesUtil.isEmpty(tripDto.getTripId()) && tripDto.getDeliveryHeader().size() == 1) {
 
-				// deleting the mapping btw trip and delivery note if exits
+						// send notification to driver
+						sendNotificationToDriverWhenAdminUpdateDnStatus(headerDto, adminDto, tripDto);
 
-				// getting the delivery notes corresponding trip
-				TripDetailsDTO tripDto = tripDao.getTripDeliveryNotesCountsByDeliveryNoteId(dos.getDeliveryNoteId());
-				if (!ServicesUtil.isEmpty(tripDto.getTripId()) && tripDto.getDeliveryHeader().size() == 1) {
-					TripDetailsDTO tripDetailsDTO = new TripDetailsDTO();
-					tripDetailsDTO.setTripId(tripDto.getTripId());
-					tripDetailsDTO.setStatus(TripStatus.TRIP_STATUS_CANCELLED.getValue());
-					tripDetailsDTO.setUpdatedAt(new Date());
-					tripDetailsDTO.setUpdatedBy(adminDto.getUserId());
-					tripDao.cancelTripById(tripDto.getTripId());
-					tripDao.getSession().flush();
-					tripDao.getSession().clear();
+						TripDetailsDTO tripDetailsDTO = new TripDetailsDTO();
+						tripId = tripDto.getTripId();
+						tripDetailsDTO.setTripId(tripId);
+						tripDetailsDTO.setStatus(TripStatus.TRIP_STATUS_CANCELLED.getValue());
+						tripDetailsDTO.setUpdatedAt(new Date());
+						tripDetailsDTO.setUpdatedBy(adminDto.getUserId());
+						tripDao.cancelTripById(tripDto.getTripId());
+						tripDao.getSession().flush();
+						tripDao.getSession().clear();
 
-				}
-				deliveryHeaderDao.removeTripDeliveryNoteMapping(headerDto);
-				dos.setTripped(false);
-			}
-			/*if (!ServicesUtil.isEmpty(dos.getStatus())
-					&& dos.getStatus().equals(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue())) {
-				if (!ServicesUtil.isEmpty(dos.getTripped()) && !dos.getTripped())
-					dos.setTripped(false);
-			}*/
+						// setting to default value
+						dos.setAirwayBillNo(null);
+						dos.setValidationStatus("false");
+						dos.setAwbValidated("false");
 
-			if (!ServicesUtil.isEmpty(dos.getShipToAddress()))
-				if (!(dos.getShipToAddress()).equalsIgnoreCase(delNoteAddrMap.get(dos.getDeliveryNoteId()))) {
-					try {
-						// also set corresponding lat and lng
-						Map<String, Double> latAndLong = ServicesUtil.getLatAndLong(dos.getShipToAddress(), context);
-						dos.setLatitude(latAndLong.get("lat"));
-						dos.setLongitude(latAndLong.get("lng"));
-					} catch (Exception e) {
-						e.printStackTrace();
 					}
+					deliveryHeaderDao.removeTripDeliveryNoteMapping(headerDto);
+					dos.setTripped(false);
 				}
-			
-			
-			// if status is created set tripped =false
-			String isStatusCreated = DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue();
-			if(!ServicesUtil.isEmpty(dos.getStatus()) && dos.getStatus().equalsIgnoreCase(isStatusCreated))
-			{
-				dos.setTripped(false);
-			}
 
-			headerDao.persist(dos);
-			if(i % BATCH_SIZE ==0)
-			{
-				headerDao.getSession().flush();
-				headerDao.getSession().clear();
+				if (!ServicesUtil.isEmpty(dos.getShipToAddress()))
+					if (!(dos.getShipToAddress()).equalsIgnoreCase(delNoteAddrMap.get(dos.getDeliveryNoteId()))) {
+						try {
+							// also set corresponding lat and lng
+							Map<String, Double> latAndLong = ServicesUtil.getLatAndLong(dos.getShipToAddress(),
+									context);
+							dos.setLatitude(latAndLong.get("lat"));
+							dos.setLongitude(latAndLong.get("lng"));
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+
+				// if status is created set tripped =false
+				String isStatusCreated = DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue();
+				if (!ServicesUtil.isEmpty(dos.getStatus()) && dos.getStatus().equalsIgnoreCase(isStatusCreated)) {
+					dos.setTripped(false);
+					dos.setAirwayBillNo(null);
+					dos.setValidationStatus("false");
+					dos.setAwbValidated("false");
+				}
+
+				headerDao.persist(dos);
+				if (i % BATCH_SIZE == 0) {
+					headerDao.getSession().flush();
+					headerDao.getSession().clear();
+				}
+
+			} catch (Exception e) {
+				LOGGER.error(" ERROR IN WHILE RFC INVALIDATING DELIVERY NOTE " + dos.getDeliveryNoteId()
+						+ " WITH TRIP ID " + tripId + ". EXCEPTION => " + e.getMessage());
 			}
-			
-			i++;
-			
+			/*
+			 * if (!ServicesUtil.isEmpty(dos.getStatus()) &&
+			 * dos.getStatus().equals(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.
+			 * getValue())) { if (!ServicesUtil.isEmpty(dos.getTripped()) &&
+			 * !dos.getTripped()) dos.setTripped(false); }
+			 */
+
 		}
-        
-		
-		
-		//marking items as deleted as they are processed
-		Set<Long> deliveryNoteIDsSet = headerMap.keySet();
-		int rowAffected = 0;
-		if(!ServicesUtil.isEmpty(deliveryNoteIDsSet))
-		rowAffected =  containerDao.markAsItemsAsProcessed(deliveryNoteIDsSet);
-		
-		// flushing the session data
-		containerDao.getSession().flush();
-		containerDao.getSession().clear();
-		LOGGER.error(" INSIDE createEntryInDeliveryHeader(). TOTAL ITEMS < "+rowAffected+" > WERE PROCESSED SUCCESSFULLY AND MARKED AS DELETED");
-		return headerMap;
+
+		// marking items as deleted as they are processed
+
+		/*
+		 * int rowAffected = 0; Set<Long> deliveryNoteIDsSet =
+		 * headerMap.keySet(); if (!ServicesUtil.isEmpty(deliveryNoteIDsSet))
+		 * rowAffected =
+		 * containerDao.markAsItemsAsProcessed(deliveryNoteIDsSet);
+		 * 
+		 * // flushing the session data containerDao.getSession().flush();
+		 * containerDao.getSession().clear();
+		 * LOGGER.error(" INSIDE createEntryInDeliveryHeader(). TOTAL ITEMS < "
+		 * + rowAffected +
+		 * " > WERE PROCESSED SUCCESSFULLY AND MARKED AS DELETED");
+		 */
+
+		return i;
 
 	}
 
@@ -389,12 +422,12 @@ public class ContainerService implements ContainerServiceLocal {
 				}
 
 				// set other params
-				if(!ServicesUtil.isEmpty(d.getCREATEDT())){
-					Date eccCreatedDate =new SimpleDateFormat("yyyy-MM-dd").parse(d.getCREATEDT());  
+				if (!ServicesUtil.isEmpty(d.getCREATEDT())) {
+					Date eccCreatedDate = new SimpleDateFormat("yyyy-MM-dd").parse(d.getCREATEDT());
 					dos.setCreatedDate(eccCreatedDate);
 				}
-				
-				dos.setUpdatedAt(currDate);	
+
+				dos.setUpdatedAt(currDate);
 				if (ServicesUtil.isEmpty(d.getSTAT())) {
 					dos.setCreatedAt(currDate);
 					if (!ServicesUtil.isEmpty(currentStatusMap.get(dos.getDeliveryNoteId()))
@@ -422,14 +455,15 @@ public class ContainerService implements ContainerServiceLocal {
 
 					// setting delivery note status as RFC_Invaidated and set
 					// tripped to false again
-					if ( !ServicesUtil.isEmpty(currentStatusMap.get(dos.getDeliveryNoteId())) && currentStatusMap.get(dos.getDeliveryNoteId())
-							.equals(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue())
+					if (!ServicesUtil.isEmpty(currentStatusMap.get(dos.getDeliveryNoteId()))
+							&& currentStatusMap.get(dos.getDeliveryNoteId())
+									.equals(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue())
 							|| currentStatusMap.get(dos.getDeliveryNoteId()).equals("")) {
 						dos.setStatus(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue());
 						currentStatusMap.put(dos.getDeliveryNoteId(), DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue());
 					} else {
-						if (!ServicesUtil.isEmpty(prevStatusMap.get(dos.getDeliveryNoteId())) && !prevStatusMap.get(dos.getDeliveryNoteId())
-								.equals(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue()))
+						if (!ServicesUtil.isEmpty(prevStatusMap.get(dos.getDeliveryNoteId())) && !prevStatusMap
+								.get(dos.getDeliveryNoteId()).equals(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue()))
 							dos.setStatus(prevStatusMap.get(dos.getDeliveryNoteId()));
 						else {
 							dos.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
@@ -438,22 +472,22 @@ public class ContainerService implements ContainerServiceLocal {
 
 				}
 
-				if (ServicesUtil.isEmpty(d.getSTAT()) ) {
-					
-						// parsing item do
-						if (!ServicesUtil.isEmpty(d.getSERNUM()))
-							itemDo.setSerialNum(d.getSERNUM());
-						if (!ServicesUtil.isEmpty(d.getMAT()))
-							itemDo.setMaterial(d.getMAT());
-						if (!ServicesUtil.isEmpty(d.getBATCH()))
-							itemDo.setBatch(d.getBATCH());
-						if (!ServicesUtil.isEmpty(d.getDESC()))
-							itemDo.setDescription(d.getDESC());
-						if (!ServicesUtil.isEmpty(d.getQTY()))
-							itemDo.setQuantity(d.getQTY());
-						if (!ServicesUtil.isEmpty(d.getVOL()))
-							itemDo.setVolume(d.getVOL());
-						dos.getDeliveryItems().add(itemDo);
+				if (ServicesUtil.isEmpty(d.getSTAT())) {
+
+					// parsing item do
+					if (!ServicesUtil.isEmpty(d.getSERNUM()))
+						itemDo.setSerialNum(d.getSERNUM());
+					if (!ServicesUtil.isEmpty(d.getMAT()))
+						itemDo.setMaterial(d.getMAT());
+					if (!ServicesUtil.isEmpty(d.getBATCH()))
+						itemDo.setBatch(d.getBATCH());
+					if (!ServicesUtil.isEmpty(d.getDESC()))
+						itemDo.setDescription(d.getDESC());
+					if (!ServicesUtil.isEmpty(d.getQTY()))
+						itemDo.setQuantity(d.getQTY());
+					if (!ServicesUtil.isEmpty(d.getVOL()))
+						itemDo.setVolume(d.getVOL());
+					dos.getDeliveryItems().add(itemDo);
 				}
 				// map.get(d.getDELIVNO()).getDeliveryItems().add(itemDo);
 				// map.put(dos, itemDo);
@@ -464,11 +498,11 @@ public class ContainerService implements ContainerServiceLocal {
 		return map;
 	}
 
-	private void sendNotificationToDriverWhenAdminUpdateDnStatus(DeliveryHeaderDTO headerDto, UserDetailsDTO adminDto)
-			throws IOException {
+	private void sendNotificationToDriverWhenAdminUpdateDnStatus(DeliveryHeaderDTO headerDto, UserDetailsDTO adminDto,
+			TripDetailsDTO tripDetailsDTO) throws IOException {
 		LOGGER.debug("INSIDE sendNotificationToDriverWhenAdminUpdateDnStatus() OF CONTAINER SERVIE");
 		// getting the corresponding trip drive
-		UserDetailsDTO driverDto = tripDao.getDriverFromTripByDN(headerDto);
+		UserDetailsDTO driverDto = tripDetailsDTO.getUser();
 		if (!ServicesUtil.isEmpty(driverDto.getMobileToken())) {
 			String title = "Delivery Note Cancelled";
 			String body = "The delivery note with id (" + headerDto.getDeliveryNoteId()
@@ -479,6 +513,7 @@ public class ContainerService implements ContainerServiceLocal {
 			MessageDetailsDTO messageDto = new MessageDetailsDTO();
 			messageDto.setTitle(title);
 			messageDto.setBody(body);
+			messageDto.setTripId(tripDetailsDTO.getTripId());
 			messageDto.getUsers().add(driverDto);
 			messageDto.setCreatedBy(adminDto.getUserId());
 			messageDto.setUpdatedBy(adminDto.getUserId());
@@ -490,7 +525,7 @@ public class ContainerService implements ContainerServiceLocal {
 
 	static ContainerDetailsDTO getLinkedTreeMapToContainerDetailsDto(LinkedTreeMap<String, String> map) {
 		ContainerDetailsDTO dto = new ContainerDetailsDTO();
-		if ( map.containsKey("id") && !ServicesUtil.isEmpty(map.get("id")))
+		if (map.containsKey("id") && !ServicesUtil.isEmpty(map.get("id")))
 			dto.setId(Long.parseLong(map.get("id")));
 		if (map.containsKey("DELIVNO") && !ServicesUtil.isEmpty(map.get("DELIVNO")))
 			dto.setDELIVNO(Long.parseLong(map.get("DELIVNO")));
@@ -550,7 +585,10 @@ public class ContainerService implements ContainerServiceLocal {
 		}
 		return list;
 	}
-	
-	
+
+	@Override
+	public void markPayloadAsDeleted(ContainerRecordsDo dos) {
+		containerRecordsDAO.markPatloadAsDeleted(dos);
+	}
 
 }

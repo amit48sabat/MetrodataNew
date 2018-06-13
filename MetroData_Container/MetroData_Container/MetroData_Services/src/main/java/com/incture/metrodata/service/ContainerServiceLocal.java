@@ -6,6 +6,7 @@ import java.util.Map;
 import com.incture.metrodata.dto.ContainerDTO;
 import com.incture.metrodata.dto.ContainerDetailsDTO;
 import com.incture.metrodata.dto.ResponseDto;
+import com.incture.metrodata.entity.ContainerRecordsDo;
 import com.incture.metrodata.entity.DeliveryHeaderDo;
 import com.incture.metrodata.util.HciRestInvoker;
 
@@ -17,5 +18,7 @@ public interface ContainerServiceLocal {
 	 
 	 List<ContainerDetailsDTO> findAll();
 	 
-	 public Map<Long, DeliveryHeaderDo> createEntryInDeliveryHeader(ContainerDTO dto) throws Exception;
+	 public Integer createEntryInDeliveryHeader(ContainerDTO dto) throws Exception;
+
+	void markPayloadAsDeleted(ContainerRecordsDo dos);
 }

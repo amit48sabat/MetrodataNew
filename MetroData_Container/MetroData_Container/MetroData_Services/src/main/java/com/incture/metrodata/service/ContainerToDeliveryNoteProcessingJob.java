@@ -1,5 +1,8 @@
 package com.incture.metrodata.service;
 
+import java.util.Date;
+import java.util.List;
+
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -13,6 +16,8 @@ import org.springframework.stereotype.Component;
 
 import com.incture.metrodata.configuration.AppConfig;
 import com.incture.metrodata.dto.ContainerDTO;
+import com.incture.metrodata.dto.ContainerDetailsDTO;
+import com.incture.metrodata.entity.ContainerRecordsDo;
 import com.incture.metrodata.util.ServicesUtil;
 
 @Component
@@ -28,18 +33,35 @@ public class ContainerToDeliveryNoteProcessingJob implements Job {
 		try {
 			Scheduler scheduler = con.getScheduler();
 			
-			LOGGER.error(" INSIDE DN_PROCESSING_SCHEDULER STARTED "+scheduler.isStarted());
+			
 			if (!ServicesUtil.isEmpty(scheduler.getContext().get("data"))) {
+				
+			 Date timeStamp = (Date) scheduler.getContext().get("timeStamp");
+			 LOGGER.error(" INSIDE DN_PROCESSING_SCHEDULER STARTED => "+scheduler.getSchedulerInstanceId() +" FOR TIMESTAMP "+timeStamp);
+			 Long totalItems = 0L;
+			 Long containerRecordId =  (Long) scheduler.getContext().get("containerRecordId");
+			 Long totalDns = 0L;
 				ContainerDTO containerDTO = (ContainerDTO) con.getScheduler().getContext().get("data");
                 
 				if (!ServicesUtil.isEmpty(containerDTO)) {
 					LOGGER.error(" INSIDE CONTAINER_TO_DN_PROS_JOB.");
-					containerService.createEntryInDeliveryHeader(containerDTO);
-
+					totalDns = (long) containerService.createEntryInDeliveryHeader(containerDTO);
+					List<ContainerDetailsDTO> items = (List<ContainerDetailsDTO>) containerDTO.getDELIVERY().getITEM();
+					totalItems = (long) items.size();
+					
+					ContainerRecordsDo dos = new ContainerRecordsDo();
+					dos.setCreatedAt(timeStamp);
+					dos.setDeleted(1);
+					dos.setTotalDns(totalDns);
+					dos.setTotalItems(totalItems);
+					dos.setId(containerRecordId);
+				    containerService.markPayloadAsDeleted(dos);
+					LOGGER.error(" DELETED MARKED THE PAYLOAD OF TIMESTAMP "+timeStamp );
 					
 					// DELETE THE UNLINK DELIVERY ITEM FROM DELIVERY ITEM TABLE KEEP ONLY ITEMS WHICH ARE MAPPED TO SOME DELIVERY NOTES ONLY
 					int rowAffected = itemService.deleteUnlinkDeliveryItems();
 					LOGGER.error(" DN_PROCESSING_SCHEDULER. Deleted <"+rowAffected+"> unlinked delivery items from delivery_item table");
+					LOGGER.error(" INSIDE DN_PROCESSING_SCHEDULER STOPPING SCHEDULER => "+scheduler.getSchedulerInstanceId());
 				}
 			}
 

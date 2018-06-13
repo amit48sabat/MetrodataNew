@@ -29,14 +29,14 @@ public class ContainerController {
 	public ResponseDto create(@RequestBody String controllerJson) {
 		ResponseDto response = new ResponseDto();
 		try {
-			LOGGER.error("INSIDE CREATE CONTAINER CONTROLLER " + controllerJson);
+			LOGGER.error("INSIDE CREATE CONTAINER CONTROLLER ");
 			response = containerService.create(controllerJson);
 		} catch (Exception e) {
 			response.setStatus(false);
 			response.setMessage(Message.FAILED.getValue());
 			response.setData(controllerJson);
 			response.setCode(500);
-			e.printStackTrace();
+			LOGGER.error("INSIDE CREATE CONTAINER CONTROLLER CATCH EXCEPTION " + e.getMessage());
 		}
 
 		return response;

@@ -830,6 +830,8 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		Query query = getSession().createQuery(hql);
 		query.setParameter("deliveryNoteId", deliveryNoteId);
 		TripDetailsDo tripDo =  (TripDetailsDo) query.uniqueResult();
+		getSession().flush();
+		getSession().clear();
 		return exportDto(tripDo);
 	}
 	
