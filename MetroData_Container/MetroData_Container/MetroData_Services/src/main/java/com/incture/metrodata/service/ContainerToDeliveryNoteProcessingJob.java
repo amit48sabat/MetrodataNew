@@ -15,8 +15,10 @@ import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.incture.metrodata.configuration.AppConfig;
+import com.incture.metrodata.dao.ContainerRecordsDAO;
 import com.incture.metrodata.dto.ContainerDTO;
 import com.incture.metrodata.dto.ContainerDetailsDTO;
+import com.incture.metrodata.dto.ContainerRecordsDTO;
 import com.incture.metrodata.entity.ContainerRecordsDo;
 import com.incture.metrodata.util.ServicesUtil;
 
@@ -26,8 +28,10 @@ public class ContainerToDeliveryNoteProcessingJob implements Job {
 	static AbstractApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
 	ContainerServiceLocal containerService = (ContainerServiceLocal) context.getBean("containerService");
 	DeliveryItemServiceLocal itemService = (DeliveryItemServiceLocal) context.getBean("deliveryItemService");
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ContainerToDeliveryNoteProcessingJob.class);
 
+	@SuppressWarnings("unchecked")
 	public void execute(JobExecutionContext con) throws JobExecutionException {
 
 		try {
@@ -49,13 +53,14 @@ public class ContainerToDeliveryNoteProcessingJob implements Job {
 					List<ContainerDetailsDTO> items = (List<ContainerDetailsDTO>) containerDTO.getDELIVERY().getITEM();
 					totalItems = (long) items.size();
 					
-					ContainerRecordsDo dos = new ContainerRecordsDo();
-					dos.setCreatedAt(timeStamp);
-					dos.setDeleted(1);
-					dos.setTotalDns(totalDns);
-					dos.setTotalItems(totalItems);
-					dos.setId(containerRecordId);
-				    containerService.markPayloadAsDeleted(dos);
+					ContainerRecordsDTO dto = new ContainerRecordsDTO();
+					
+					dto.setCreatedAt(timeStamp);
+					dto.setDeleted(1);
+					dto.setTotalDns(totalDns);
+					dto.setTotalItems(totalItems);
+					dto.setId(containerRecordId);
+					containerService.update(dto);
 					LOGGER.error(" DELETED MARKED THE PAYLOAD OF TIMESTAMP "+timeStamp );
 					
 					// DELETE THE UNLINK DELIVERY ITEM FROM DELIVERY ITEM TABLE KEEP ONLY ITEMS WHICH ARE MAPPED TO SOME DELIVERY NOTES ONLY

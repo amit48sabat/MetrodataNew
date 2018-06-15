@@ -1,9 +1,12 @@
 package com.incture.controller;
 
+import org.hibernate.HibernateException;
+import org.hibernate.TransactionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,12 +34,16 @@ public class ContainerController {
 		try {
 			LOGGER.error("INSIDE CREATE CONTAINER CONTROLLER ");
 			response = containerService.create(controllerJson);
+		} catch (TransactionSystemException e) {
+			LOGGER.error(" NESTED TRANSACTION EXCEPTION SHOULD NOT BE A ISSUE " + e.getMessage());
+			response.setStatus(true);
+			response.setMessage(Message.SUCCESS.getValue());
+			response.setCode(200);
 		} catch (Exception e) {
+			LOGGER.error("INSIDE CREATE CONTAINER CONTROLLER CATCH EXCEPTION " + e.getMessage());
 			response.setStatus(false);
 			response.setMessage(Message.FAILED.getValue());
-			response.setData(controllerJson);
 			response.setCode(500);
-			LOGGER.error("INSIDE CREATE CONTAINER CONTROLLER CATCH EXCEPTION " + e.getMessage());
 		}
 
 		return response;

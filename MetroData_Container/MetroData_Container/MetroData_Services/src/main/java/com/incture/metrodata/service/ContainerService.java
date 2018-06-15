@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.http.HttpStatus;
 import org.quartz.JobBuilder;
@@ -40,13 +39,13 @@ import com.incture.metrodata.dao.WareHouseDAO;
 import com.incture.metrodata.dto.ContainerDTO;
 import com.incture.metrodata.dto.ContainerDetailsDTO;
 import com.incture.metrodata.dto.ContainerItemsDTO;
+import com.incture.metrodata.dto.ContainerRecordsDTO;
 import com.incture.metrodata.dto.DefaultUserDetailsVO;
 import com.incture.metrodata.dto.DeliveryHeaderDTO;
 import com.incture.metrodata.dto.MessageDetailsDTO;
 import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.TripDetailsDTO;
 import com.incture.metrodata.dto.UserDetailsDTO;
-import com.incture.metrodata.entity.ContainerDetailsDo;
 import com.incture.metrodata.entity.ContainerRecordsDo;
 import com.incture.metrodata.entity.DeliveryHeaderDo;
 import com.incture.metrodata.entity.DeliveryItemDo;
@@ -104,6 +103,9 @@ public class ContainerService implements ContainerServiceLocal {
 	@Autowired
 	ContainerRecordsDAO containerRecordsDAO;
 
+	@Autowired
+	ContainerRecordsServiceLocal containerRecordService;
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ContainerService.class);
 
 	private Integer BATCH_SIZE = 50;
@@ -158,9 +160,15 @@ public class ContainerService implements ContainerServiceLocal {
 				ContainerRecordsDo recordsDo = new ContainerRecordsDo();
 				recordsDo.setPayload(controllerJson.trim());
 				recordsDo.setCreatedAt(currdate);
-				containerRecordsDAO.persist(recordsDo);
-
-				// adding data to scheduler context
+				
+                 //containerRecordService.create(recordsDo);
+				
+				containerRecordsDAO.getSession().persist(recordsDo);
+				
+                containerRecordsDAO.getSession().flush();
+                containerRecordsDAO.getSession().clear();
+                containerRecordsDAO.getSession().getTransaction().commit();
+                // adding data to scheduler context
 				scheduler.getContext().put("data", dto);
 				scheduler.getContext().put("timeStamp", currdate);
 				scheduler.getContext().put("containerRecordId", recordsDo.getId());
@@ -587,8 +595,16 @@ public class ContainerService implements ContainerServiceLocal {
 	}
 
 	@Override
-	public void markPayloadAsDeleted(ContainerRecordsDo dos) {
-		containerRecordsDAO.markPatloadAsDeleted(dos);
+	public void update(ContainerRecordsDTO dto) {
+		try {
+			containerRecordsDAO.update(dto);
+			containerRecordsDAO.getSession().flush();
+			containerRecordsDAO.getSession().clear();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
+	
 
 }

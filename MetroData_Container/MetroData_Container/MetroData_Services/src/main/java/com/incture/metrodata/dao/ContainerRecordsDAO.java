@@ -85,7 +85,9 @@ public class ContainerRecordsDAO extends BaseDao<ContainerRecordsDo, ContainerRe
        query.setParameter("totalItems", dos.getTotalItems());
        query.setParameter("totalDns", dos.getTotalDns());
        query.setParameter("id", dos.getId());
-       
        query.executeUpdate();
+       
+       getSession().flush();
+       getSession().clear();
 	}
 }
