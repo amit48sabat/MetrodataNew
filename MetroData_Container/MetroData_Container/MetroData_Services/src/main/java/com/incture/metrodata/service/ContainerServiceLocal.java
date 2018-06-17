@@ -19,4 +19,6 @@ public interface ContainerServiceLocal {
 	 public Integer createEntryInDeliveryHeader(ContainerDTO dto) throws Exception;
 
 	void update(ContainerRecordsDTO dos);
+
+	Object test(Long id);
 }

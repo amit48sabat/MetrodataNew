@@ -825,14 +825,15 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		return userDAO.exportDto(dos);
 	}
 
-	public TripDetailsDTO getTripDeliveryNotesCountsByDeliveryNoteId(Long deliveryNoteId) {
-		String hql = "SELECT t from TripDetailsDo t  join t.deliveryHeader d where d.deliveryNoteId = :deliveryNoteId";
+	public Object getTripDeliveryNotesCountsByDeliveryNoteId(Long deliveryNoteId) {
+		String hql = "SELECT new map(t.tripId as tripId,count( elements(t.deliveryHeader)) as deliveryNoteCount, t.user as user) from TripDetailsDo t  join t.deliveryHeader d where d.deliveryNoteId = :deliveryNoteId "
+				+ "   group by t.user,t.tripId";
 		Query query = getSession().createQuery(hql);
 		query.setParameter("deliveryNoteId", deliveryNoteId);
-		TripDetailsDo tripDo =  (TripDetailsDo) query.uniqueResult();
+		Object tripDo =   query.uniqueResult();
 		getSession().flush();
 		getSession().clear();
-		return exportDto(tripDo);
+		return tripDo;
 	}
 	
 	public int cancelTripById(String tripId){

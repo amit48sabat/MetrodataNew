@@ -247,9 +247,9 @@ public class ContainerService implements ContainerServiceLocal {
 					// deleting the mapping btw trip and delivery note if exits
 
 					// getting the delivery notes corresponding trip
-					TripDetailsDTO tripDto = tripDao
+					Object tripDto = tripDao
 							.getTripDeliveryNotesCountsByDeliveryNoteId(dos.getDeliveryNoteId());
-					if (!ServicesUtil.isEmpty(tripDto.getTripId()) && tripDto.getDeliveryHeader().size() == 1) {
+					/*if (!ServicesUtil.isEmpty(tripDto.getTripId()) && tripDto.getDeliveryHeader().size() == 1) {
 
 						// send notification to driver
 						sendNotificationToDriverWhenAdminUpdateDnStatus(headerDto, adminDto, tripDto);
@@ -269,7 +269,7 @@ public class ContainerService implements ContainerServiceLocal {
 						dos.setValidationStatus("false");
 						dos.setAwbValidated("false");
 
-					}
+					}*/
 					deliveryHeaderDao.removeTripDeliveryNoteMapping(headerDto);
 					dos.setTripped(false);
 				}
@@ -606,5 +606,9 @@ public class ContainerService implements ContainerServiceLocal {
 		}
 	}
 	
-
+   
+	@Override
+	public Object test(Long id){
+		return tripDao.getTripDeliveryNotesCountsByDeliveryNoteId(id);
+	}
 }
