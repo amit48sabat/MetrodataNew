@@ -56,5 +56,4 @@ public interface TripServiceLocal {
 
 	ResponseDto printTripManiFest(String tripId);
 
-	public TripDetailsDTO getDeliveryNoteCountOfTripByDeliveryNoteId(String deliveryNoteId);
 }

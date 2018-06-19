@@ -350,32 +350,31 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 
 	@SuppressWarnings("unchecked")
 	public List<TripDetailsDTO> getLatestOngoingTrip(String userId) throws Exception {
-		
+
 		//
 		UserDetailsDTO userDto = new UserDetailsDTO();
 		userDto.setUserId(userId);
-		userDto = 	userDAO.findById(userDto);
-		
-		String roleName =  userDto.getRole().getRoleName();
+		userDto = userDAO.findById(userDto);
+
+		String roleName = userDto.getRole().getRoleName();
 		String outsideDriver = RoleConstant.OUTSIDE_JAKARTA_DRIVER.getValue();
 		List<String> dnList = new ArrayList<>();
 		dnList.add(TripStatus.TRIP_STATUS_STARTED.getValue());
 		dnList.add(TripStatus.TRIP_STATUS_DRIVER_ASSIGNED.getValue());
-		
-		if(!outsideDriver.equalsIgnoreCase(roleName))
-		dnList.add(TripStatus.TRIP_STATUS_CANCELLED.getValue());
-		
-		String hql = "select distinct t from TripDetailsDo t "
-				+ "where t.user.userId= :userId " + "and t.status in (:tripStatus) " + "order by t.createdAt desc";
+
+		if (!outsideDriver.equalsIgnoreCase(roleName))
+			dnList.add(TripStatus.TRIP_STATUS_CANCELLED.getValue());
+
+		String hql = "select distinct t from TripDetailsDo t " + "where t.user.userId= :userId "
+				+ "and t.status in (:tripStatus) " + "order by t.createdAt desc";
 		Query query = getSession().createQuery(hql);
 		query.setParameterList("tripStatus", dnList);
 		query.setParameter("userId", userId);
-		
-		if(!outsideDriver.equalsIgnoreCase(roleName))
-		{
+
+		if (!outsideDriver.equalsIgnoreCase(roleName)) {
 			query.setMaxResults(1);
 		}
-		
+
 		List<TripDetailsDo> result = (List<TripDetailsDo>) query.list();
 		return exportList(result);
 	}
@@ -825,24 +824,50 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		return userDAO.exportDto(dos);
 	}
 
-	public Object getTripDeliveryNotesCountsByDeliveryNoteId(Long deliveryNoteId) {
+	public Map<String,Object> getTripDeliveryNotesCountsByDeliveryNoteId(Long deliveryNoteId) {
 		String hql = "SELECT new map(t.tripId as tripId,count( elements(t.deliveryHeader)) as deliveryNoteCount, t.user as user) from TripDetailsDo t  join t.deliveryHeader d where d.deliveryNoteId = :deliveryNoteId "
 				+ "   group by t.user,t.tripId";
 		Query query = getSession().createQuery(hql);
 		query.setParameter("deliveryNoteId", deliveryNoteId);
-		Object tripDo =   query.uniqueResult();
+		Object result = query.uniqueResult();
 		getSession().flush();
 		getSession().clear();
-		return tripDo;
+		Map<String,Object> resultSet =  new HashMap<>();
+		Long dncount = -1L;
+		TripDetailsDTO tripDto = null;
+		if (!ServicesUtil.isEmpty(result)) {
+			Map<String, Object> map = (Map<String, Object>) result;
+			
+			if (!ServicesUtil.isEmpty(map) && map.containsKey("tripId")) {
+				String tripId = (String) map.get("tripId");
+				tripDto = new TripDetailsDTO();
+				tripDto.setTripId(tripId);
+				UserDetailsDTO userDto = null;
+				if (map.containsKey("user") && !ServicesUtil.isEmpty(map.get("user"))) {
+					UserDetailsDo userDo = (UserDetailsDo) map.get("user");
+					if(!ServicesUtil.isEmpty(userDo))
+						userDto = userDAO.exportDto(userDo);
+					
+				}
+				tripDto.setUser(userDto);
+				 dncount = (Long) map.get("deliveryNoteCount");
+				
+				
+			}
+		}
+		resultSet.put("tripDto", tripDto);
+		resultSet.put("deliveryNoteCount", dncount);
+		
+		return resultSet;
 	}
-	
-	public int cancelTripById(String tripId){
+
+	public int cancelTripById(String tripId) {
 		String hql = " UPDATE TripDetailsDo t set t.status = :tripStatus where t.tripId = :tripId ";
 		Query query = getSession().createQuery(hql);
 		query.setParameter("tripStatus", TripStatus.TRIP_STATUS_CANCELLED.getValue());
 		query.setParameter("tripId", tripId);
 		int result = query.executeUpdate();
 		return result;
-		
+
 	}
 }

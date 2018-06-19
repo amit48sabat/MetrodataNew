@@ -160,8 +160,12 @@ public class HciDNProcessingThread  extends Thread{
 				// deleting the mapping btw trip and delivery note if exits
 
 				// getting the delivery notes corresponding trip
-				TripDetailsDTO tripDto = tripDao.getTripDeliveryNotesCountsByDeliveryNoteId(dos.getDeliveryNoteId());
-				if (!ServicesUtil.isEmpty(tripDto.getTripId()) && tripDto.getDeliveryHeader().size() == 1) {
+				Map<String,Object> map = tripDao.getTripDeliveryNotesCountsByDeliveryNoteId(dos.getDeliveryNoteId());
+				if(!ServicesUtil.isEmpty(map) && map.containsKey("tripDto") && !ServicesUtil.isEmpty(map.get("tripDto"))){
+					TripDetailsDTO tripDto =(TripDetailsDTO) map.get("tripDto");
+					Long dncount = (Long) map.get("deliveryNoteCount");
+					
+					if(dncount == 1){
 					TripDetailsDTO tripDetailsDTO = new TripDetailsDTO();
 					tripDetailsDTO.setTripId(tripDto.getTripId());
 					tripDetailsDTO.setStatus(TripStatus.TRIP_STATUS_CANCELLED.getValue());
@@ -172,6 +176,7 @@ public class HciDNProcessingThread  extends Thread{
 					tripDao.getSession().clear();
 
 				}
+			}
 				deliveryHeaderDao.removeTripDeliveryNoteMapping(headerDto);
 				dos.setTripped(false);
 			}

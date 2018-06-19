@@ -35,6 +35,7 @@ import com.incture.metrodata.dao.ContainerToDeliveryHeaderDao;
 import com.incture.metrodata.dao.CourierDetailsDAO;
 import com.incture.metrodata.dao.DeliveryHeaderDAO;
 import com.incture.metrodata.dao.TripDAO;
+import com.incture.metrodata.dao.UserDAO;
 import com.incture.metrodata.dao.WareHouseDAO;
 import com.incture.metrodata.dto.ContainerDTO;
 import com.incture.metrodata.dto.ContainerDetailsDTO;
@@ -49,6 +50,7 @@ import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.entity.ContainerRecordsDo;
 import com.incture.metrodata.entity.DeliveryHeaderDo;
 import com.incture.metrodata.entity.DeliveryItemDo;
+import com.incture.metrodata.entity.UserDetailsDo;
 import com.incture.metrodata.entity.WareHouseDetailsDo;
 import com.incture.metrodata.exceptions.ExecutionFault;
 import com.incture.metrodata.exceptions.InvalidInputFault;
@@ -105,6 +107,9 @@ public class ContainerService implements ContainerServiceLocal {
 
 	@Autowired
 	ContainerRecordsServiceLocal containerRecordService;
+	
+	@Autowired
+	UserDAO userDao;
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ContainerService.class);
 
@@ -247,8 +252,32 @@ public class ContainerService implements ContainerServiceLocal {
 					// deleting the mapping btw trip and delivery note if exits
 
 					// getting the delivery notes corresponding trip
-					Object tripDto = tripDao
+					Map<String,Object> map = (Map<String, Object>) tripDao
 							.getTripDeliveryNotesCountsByDeliveryNoteId(dos.getDeliveryNoteId());
+					
+					if(!ServicesUtil.isEmpty(map) && map.containsKey("tripDto") && !ServicesUtil.isEmpty(map.get("tripDto"))){
+						TripDetailsDTO tripDto =(TripDetailsDTO) map.get("tripDto");
+						Long dncount = (Long) map.get("deliveryNoteCount");
+						// send notification to driver
+						sendNotificationToDriverWhenAdminUpdateDnStatus(headerDto, adminDto, tripDto);
+						if(dncount == 1){
+							
+
+							TripDetailsDTO tripDetailsDTO = new TripDetailsDTO();
+							tripDetailsDTO.setTripId(tripId);
+							tripDetailsDTO.setStatus(TripStatus.TRIP_STATUS_CANCELLED.getValue());
+							tripDetailsDTO.setUpdatedAt(new Date());
+							tripDetailsDTO.setUpdatedBy(adminDto.getUserId());
+							tripDao.cancelTripById(tripDto.getTripId());
+							tripDao.getSession().flush();
+							tripDao.getSession().clear();
+
+							// setting to default value
+							dos.setAirwayBillNo(null);
+							dos.setValidationStatus("false");
+							dos.setAwbValidated("false");
+						}
+					}
 					/*if (!ServicesUtil.isEmpty(tripDto.getTripId()) && tripDto.getDeliveryHeader().size() == 1) {
 
 						// send notification to driver
@@ -609,6 +638,12 @@ public class ContainerService implements ContainerServiceLocal {
    
 	@Override
 	public Object test(Long id){
-		return tripDao.getTripDeliveryNotesCountsByDeliveryNoteId(id);
+		Map<String,Object> map = (Map<String,Object>) tripDao.getTripDeliveryNotesCountsByDeliveryNoteId(id);
+		if(!ServicesUtil.isEmpty(map) && map.containsKey("tripId")){
+			String tripId = (String) map.get("tripId");
+			UserDetailsDo user =  (UserDetailsDo) map.get("user");
+			Long dncount = (Long) map.get("deliveryNoteCount");
+		}
+		return map;
 	}
 }

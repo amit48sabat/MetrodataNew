@@ -63,10 +63,10 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 
 	@Autowired
 	HciRestInvoker invoker;
-	
+
 	@Autowired
 	DeliveryItemDAO itemDao;
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(DeliveryHeaderService.class);
 
 	/**
@@ -122,7 +122,8 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 
 				byte[] decodedString;
 				decodedString = Base64.decodeBase64(dto.getFileContent());
-				String fileId = documentServiceLocal.upload(decodedString, "sign_"+dto.getDeliveryNoteId()+UUID.randomUUID()+".png", dto.getFileType());
+				String fileId = documentServiceLocal.upload(decodedString,
+						"sign_" + dto.getDeliveryNoteId() + UUID.randomUUID() + ".png", dto.getFileType());
 				if (ServicesUtil.isEmpty(fileId)) {
 					throw new ExecutionFault("delivery completion failed due sign upload");
 				}
@@ -139,7 +140,8 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 				dto.setLongitude(latAndLong.get("lng"));
 			}
 
-			LOGGER.error("INSIDE UPDATE DELIVERY NOTE SERVICE. UPDATING USER ID ("+updatingUserDto.getUserId() +") . REQUEST PAYLOAD => " + dto);
+			LOGGER.error("INSIDE UPDATE DELIVERY NOTE SERVICE. UPDATING USER ID (" + updatingUserDto.getUserId()
+					+ ") . REQUEST PAYLOAD => " + dto);
 
 			setCreatedAtAndUpdatedAtForDto(dto);
 			dto = deliveryHeaderDao.update(dto);
@@ -156,10 +158,10 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 			responseDto.setCode(200);
 			responseDto.setData(dto);
 			responseDto.setMessage(Message.SUCCESS.toString());
-			
-			LOGGER.error("INSIDE UPDATE DELIVERY NOTE SERVICE. UPDATING USER ID ("+updatingUserDto.getUserId() +") . RESPONSE PAYLOAD <= " + responseDto);
 
-			
+			LOGGER.error("INSIDE UPDATE DELIVERY NOTE SERVICE. UPDATING USER ID (" + updatingUserDto.getUserId()
+					+ ") . RESPONSE PAYLOAD <= " + responseDto);
+
 		} catch (Exception e) {
 			responseDto.setStatus(false);
 			responseDto.setCode(417);
@@ -216,15 +218,17 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 					+ "  to " + DeliveryNoteStatus.getDnStatusDisplayValue(headerDto.getStatus());
 			// notification.sendNotification(title, driverDto.getMobileToken(),
 			// body);
-            
+
 			MessageDetailsDTO messageDto = new MessageDetailsDTO();
 			messageDto.setTitle(title);
 			messageDto.setBody(body);
-			
-			TripDetailsDTO  tripDto = tripDao.getTripDeliveryNotesCountsByDeliveryNoteId(headerDto.getDeliveryNoteId());
-            if(!ServicesUtil.isEmpty(tripDto) && !ServicesUtil.isEmpty(tripDto.getTripId()))
-    			messageDto.setTripId(tripDto.getTripId());
-			
+
+			Map<String, Object> map = tripDao.getTripDeliveryNotesCountsByDeliveryNoteId(headerDto.getDeliveryNoteId());
+			if (!ServicesUtil.isEmpty(map) && map.containsKey("tripDto")) {
+				TripDetailsDTO tripDto = (TripDetailsDTO) map.get("tripDto");
+				messageDto.setTripId(tripDto.getTripId());
+
+			}
 			messageDto.getUsers().add(driverDto);
 			messageDto.setCreatedBy(adminDto.getUserId());
 			messageDto.setUpdatedBy(adminDto.getUserId());
@@ -410,8 +414,8 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 		ResponseDto responseDto = new ResponseDto();
 
 		try {
-			
-			LOGGER.error("INSIDE LIST UPDATE DELIVERY NOTE. REQUEST PAYLOAD "+dtoList);	
+
+			LOGGER.error("INSIDE LIST UPDATE DELIVERY NOTE. REQUEST PAYLOAD " + dtoList);
 			for (DeliveryHeaderDTO dto : dtoList) {
 				update(dto, updaingUserDto);
 			}
@@ -428,7 +432,6 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 		return responseDto;
 	}
 
-	
 	/**
 	 * api to refresh the delivery note list from ecc
 	 */
@@ -437,9 +440,9 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 		ResponseDto responseDto = new ResponseDto();
 
 		try {
-			LOGGER.error("INSIDE REFESH DELIVERY NOTE LIST FROM ECC. REQUEST PAYLOAD ");	
-			 
-			 fetchTheDeliveryNotesFromECC();
+			LOGGER.error("INSIDE REFESH DELIVERY NOTE LIST FROM ECC. REQUEST PAYLOAD ");
+
+			fetchTheDeliveryNotesFromECC();
 			responseDto = getAllDeliveryNoteByAdminsWareHouse(dto);
 		} catch (Exception e) {
 			responseDto.setStatus(false);
@@ -453,23 +456,23 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 	private void fetchTheDeliveryNotesFromECC() {
 		Date date = new Date();
 		DateTime datetime = new DateTime(date);
-		
-        String day = datetime.toString("dd");
-        String month = datetime.toString("MM");
-        String year = datetime.toString("YYYY");
-		String data = year+month+day;
-		String payload = "{ \"DELIVERY\": { \"GI_DATE\": \""+data+"\" } }";
-		LOGGER.error("Hci refresh delivery note list request payload => "+payload);
+
+		String day = datetime.toString("dd");
+		String month = datetime.toString("MM");
+		String year = datetime.toString("YYYY");
+		String data = year + month + day;
+		String payload = "{ \"DELIVERY\": { \"GI_DATE\": \"" + data + "\" } }";
+		LOGGER.error("Hci refresh delivery note list request payload => " + payload);
 		String response = invoker.postDataToServer("/metrodatadetails", payload);
-		LOGGER.error("Hci  refresh delivery note list service response <= " +response);
-		
-		
-		// DELETE THE UNLINK DELIVERY ITEM FROM DELIVERY ITEM TABLE KEEP ONLY ITEMS WHICH ARE MAPPED TO SOME DELIVERY NOTES ONLY
+		LOGGER.error("Hci  refresh delivery note list service response <= " + response);
+
+		// DELETE THE UNLINK DELIVERY ITEM FROM DELIVERY ITEM TABLE KEEP ONLY
+		// ITEMS WHICH ARE MAPPED TO SOME DELIVERY NOTES ONLY
 		int rowAffected = itemDao.deleteUnlinkDeliveryItems();
-		
-		LOGGER.error("Delivery note refesh from ECC. Deleted <"+rowAffected+"> unlinked delivery items from delivery_item table");
-		
-		
-	} 
+
+		LOGGER.error("Delivery note refesh from ECC. Deleted <" + rowAffected
+				+ "> unlinked delivery items from delivery_item table");
+
+	}
 
 }

@@ -127,7 +127,7 @@ public class UserDAO extends BaseDao<UserDetailsDo, UserDetailsDTO> {
 	}
 
 	@Override
-	UserDetailsDTO exportDto(UserDetailsDo detailsDo) {
+	public UserDetailsDTO exportDto(UserDetailsDo detailsDo) {
 		UserDetailsDTO userDetailsDTO = new UserDetailsDTO();
 		if (!ServicesUtil.isEmpty(detailsDo)) {
 			if (!ServicesUtil.isEmpty(detailsDo.getUserId())) {
