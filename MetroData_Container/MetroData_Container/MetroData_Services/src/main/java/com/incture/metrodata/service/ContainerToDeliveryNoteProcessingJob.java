@@ -38,7 +38,10 @@ public class ContainerToDeliveryNoteProcessingJob implements Job {
 			Scheduler scheduler = con.getScheduler();
 			
 			
-			if (!ServicesUtil.isEmpty(scheduler.getContext().get("data"))) {
+			if (!ServicesUtil.isEmpty(scheduler.getContext().get("data"))
+				&& !ServicesUtil.isEmpty(scheduler.getContext().get("timeStamp"))
+				&& !ServicesUtil.isEmpty(scheduler.getContext().get("containerRecordId"))
+				) {
 				
 			 Date timeStamp = (Date) scheduler.getContext().get("timeStamp");
 			 LOGGER.error(" INSIDE DN_PROCESSING_SCHEDULER STARTED => "+scheduler.getSchedulerInstanceId() +" FOR TIMESTAMP "+timeStamp);

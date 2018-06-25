@@ -21,4 +21,6 @@ public interface ContainerServiceLocal {
 	void update(ContainerRecordsDTO dos);
 
 	Object test(Long id);
+
+	ContainerRecordsDTO getContainerRecordById(Long id);
 }

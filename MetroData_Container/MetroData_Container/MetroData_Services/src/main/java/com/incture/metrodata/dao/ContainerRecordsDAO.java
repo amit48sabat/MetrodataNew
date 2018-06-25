@@ -3,6 +3,7 @@ package com.incture.metrodata.dao;
 import javax.transaction.Transactional;
 
 import org.hibernate.Query;
+import org.hibernate.SQLQuery;
 import org.springframework.stereotype.Repository;
 
 import com.incture.metrodata.dto.ContainerRecordsDTO;
@@ -49,9 +50,9 @@ public class ContainerRecordsDAO extends BaseDao<ContainerRecordsDo, ContainerRe
 	}
 
 	@Override
-	public ContainerRecordsDTO exportDto(ContainerRecordsDo dos){
-		ContainerRecordsDTO dto = new  ContainerRecordsDTO();
-		
+	public ContainerRecordsDTO exportDto(ContainerRecordsDo dos) {
+		ContainerRecordsDTO dto = new ContainerRecordsDTO();
+
 		if (!ServicesUtil.isEmpty(dos.getId()))
 			dto.setId(dos.getId());
 
@@ -74,20 +75,39 @@ public class ContainerRecordsDAO extends BaseDao<ContainerRecordsDo, ContainerRe
 	}
 
 	public void markPatloadAsDeleted(ContainerRecordsDo dos) {
-		
-	/*	Query query= getSession().createQuery("select id from ContainerRecordsDo  WHERE createdAt = :createdAt");
-		query.setParameter("createdAt", dos.getCreatedAt());
-		Long id = (Long) query.uniqueResult();*/
-		
+
+		/*
+		 * Query query= getSession().
+		 * createQuery("select id from ContainerRecordsDo  WHERE createdAt = :createdAt"
+		 * ); query.setParameter("createdAt", dos.getCreatedAt()); Long id =
+		 * (Long) query.uniqueResult();
+		 */
+
 		String hql = "UPDATE ContainerRecordsDo SET deleted = 1, totalItems = :totalItems, totalDns = :totalDns "
 				+ " WHERE id = :id";
-		Query  query = getSession().createQuery(hql);
-       query.setParameter("totalItems", dos.getTotalItems());
-       query.setParameter("totalDns", dos.getTotalDns());
-       query.setParameter("id", dos.getId());
-       query.executeUpdate();
-       
-       getSession().flush();
-       getSession().clear();
+		Query query = getSession().createQuery(hql);
+		query.setParameter("totalItems", dos.getTotalItems());
+		query.setParameter("totalDns", dos.getTotalDns());
+		query.setParameter("id", dos.getId());
+		query.executeUpdate();
+
+		getSession().flush();
+		getSession().clear();
 	}
+
+	
+	public ContainerRecordsDTO find(ContainerRecordsDTO dto){
+		
+		String sql = "SELECT * FROM  CONTAINER_RECORDS_DETAILS  "
+				+ " WHERE id = :id";
+		SQLQuery query = getSession().createSQLQuery(sql);
+		query.addEntity(ContainerRecordsDo.class);
+		query.setParameter("id", dto.getId());
+		ContainerRecordsDo dos =  (ContainerRecordsDo)query.uniqueResult();
+		if(!ServicesUtil.isEmpty(dos))
+		return exportDto(dos);
+		else
+			return null;
+		
+		}
 }

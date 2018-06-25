@@ -107,10 +107,10 @@ public class ContainerService implements ContainerServiceLocal {
 
 	@Autowired
 	ContainerRecordsServiceLocal containerRecordService;
-	
+
 	@Autowired
 	UserDAO userDao;
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(ContainerService.class);
 
 	private Integer BATCH_SIZE = 50;
@@ -120,7 +120,7 @@ public class ContainerService implements ContainerServiceLocal {
 	public ResponseDto create(String controllerJson) {
 
 		ResponseDto response = new ResponseDto();
-		
+
 		Map<Object, Object> inputDataMap = new LinkedHashMap<>();
 		inputDataMap.put("inputString", controllerJson);
 
@@ -160,20 +160,18 @@ public class ContainerService implements ContainerServiceLocal {
 				Trigger trigger = TriggerBuilder.newTrigger().withIdentity(triggerName, group).startNow().build();
 				Scheduler scheduler = new StdSchedulerFactory().getScheduler();
 
-				
-				
 				ContainerRecordsDo recordsDo = new ContainerRecordsDo();
 				recordsDo.setPayload(controllerJson.trim());
 				recordsDo.setCreatedAt(currdate);
-				
-                 //containerRecordService.create(recordsDo);
-				
+
+				// containerRecordService.create(recordsDo);
+
 				containerRecordsDAO.getSession().persist(recordsDo);
-				
-                containerRecordsDAO.getSession().flush();
-                containerRecordsDAO.getSession().clear();
-                containerRecordsDAO.getSession().getTransaction().commit();
-                // adding data to scheduler context
+
+				containerRecordsDAO.getSession().flush();
+				containerRecordsDAO.getSession().clear();
+				containerRecordsDAO.getSession().getTransaction().commit();
+				// adding data to scheduler context
 				scheduler.getContext().put("data", dto);
 				scheduler.getContext().put("timeStamp", currdate);
 				scheduler.getContext().put("containerRecordId", recordsDo.getId());
@@ -252,16 +250,16 @@ public class ContainerService implements ContainerServiceLocal {
 					// deleting the mapping btw trip and delivery note if exits
 
 					// getting the delivery notes corresponding trip
-					Map<String,Object> map = (Map<String, Object>) tripDao
+					Map<String, Object> map = (Map<String, Object>) tripDao
 							.getTripDeliveryNotesCountsByDeliveryNoteId(dos.getDeliveryNoteId());
-					
-					if(!ServicesUtil.isEmpty(map) && map.containsKey("tripDto") && !ServicesUtil.isEmpty(map.get("tripDto"))){
-						TripDetailsDTO tripDto =(TripDetailsDTO) map.get("tripDto");
+
+					if (!ServicesUtil.isEmpty(map) && map.containsKey("tripDto")
+							&& !ServicesUtil.isEmpty(map.get("tripDto"))) {
+						TripDetailsDTO tripDto = (TripDetailsDTO) map.get("tripDto");
 						Long dncount = (Long) map.get("deliveryNoteCount");
 						// send notification to driver
 						sendNotificationToDriverWhenAdminUpdateDnStatus(headerDto, adminDto, tripDto);
-						if(dncount == 1){
-							
+						if (dncount == 1) {
 
 							TripDetailsDTO tripDetailsDTO = new TripDetailsDTO();
 							tripDetailsDTO.setTripId(tripId);
@@ -278,27 +276,30 @@ public class ContainerService implements ContainerServiceLocal {
 							dos.setAwbValidated("false");
 						}
 					}
-					/*if (!ServicesUtil.isEmpty(tripDto.getTripId()) && tripDto.getDeliveryHeader().size() == 1) {
-
-						// send notification to driver
-						sendNotificationToDriverWhenAdminUpdateDnStatus(headerDto, adminDto, tripDto);
-
-						TripDetailsDTO tripDetailsDTO = new TripDetailsDTO();
-						tripId = tripDto.getTripId();
-						tripDetailsDTO.setTripId(tripId);
-						tripDetailsDTO.setStatus(TripStatus.TRIP_STATUS_CANCELLED.getValue());
-						tripDetailsDTO.setUpdatedAt(new Date());
-						tripDetailsDTO.setUpdatedBy(adminDto.getUserId());
-						tripDao.cancelTripById(tripDto.getTripId());
-						tripDao.getSession().flush();
-						tripDao.getSession().clear();
-
-						// setting to default value
-						dos.setAirwayBillNo(null);
-						dos.setValidationStatus("false");
-						dos.setAwbValidated("false");
-
-					}*/
+					/*
+					 * if (!ServicesUtil.isEmpty(tripDto.getTripId()) &&
+					 * tripDto.getDeliveryHeader().size() == 1) {
+					 * 
+					 * // send notification to driver
+					 * sendNotificationToDriverWhenAdminUpdateDnStatus(
+					 * headerDto, adminDto, tripDto);
+					 * 
+					 * TripDetailsDTO tripDetailsDTO = new TripDetailsDTO();
+					 * tripId = tripDto.getTripId();
+					 * tripDetailsDTO.setTripId(tripId);
+					 * tripDetailsDTO.setStatus(TripStatus.TRIP_STATUS_CANCELLED
+					 * .getValue()); tripDetailsDTO.setUpdatedAt(new Date());
+					 * tripDetailsDTO.setUpdatedBy(adminDto.getUserId());
+					 * tripDao.cancelTripById(tripDto.getTripId());
+					 * tripDao.getSession().flush();
+					 * tripDao.getSession().clear();
+					 * 
+					 * // setting to default value dos.setAirwayBillNo(null);
+					 * dos.setValidationStatus("false");
+					 * dos.setAwbValidated("false");
+					 * 
+					 * }
+					 */
 					deliveryHeaderDao.removeTripDeliveryNoteMapping(headerDto);
 					dos.setTripped(false);
 				}
@@ -467,21 +468,24 @@ public class ContainerService implements ContainerServiceLocal {
 				dos.setUpdatedAt(currDate);
 				if (ServicesUtil.isEmpty(d.getSTAT())) {
 					dos.setCreatedAt(currDate);
-					if (!ServicesUtil.isEmpty(currentStatusMap.get(dos.getDeliveryNoteId()))
-							&& currentStatusMap.get(dos.getDeliveryNoteId())
-									.equals(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue())
-							|| currentStatusMap.get(dos.getDeliveryNoteId()).equals("")) {
-						dos.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
-						currentStatusMap.put(dos.getDeliveryNoteId(),
-								DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
-					} else {
-						if (!ServicesUtil.isEmpty(prevStatusMap.get(dos.getDeliveryNoteId())) && !prevStatusMap
-								.get(dos.getDeliveryNoteId()).equals(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue()))
-							dos.setStatus(prevStatusMap.get(dos.getDeliveryNoteId()));
-						else {
+					if (!ServicesUtil.isEmpty(currentStatusMap.get(dos.getDeliveryNoteId()))) {
+						if (currentStatusMap.get(dos.getDeliveryNoteId())
+								.equals(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue())
+								|| currentStatusMap.get(dos.getDeliveryNoteId()).equals("")) {
 							dos.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
+							currentStatusMap.put(dos.getDeliveryNoteId(),
+									DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
 						}
+					} else {
+						if (!ServicesUtil.isEmpty(prevStatusMap.get(dos.getDeliveryNoteId()))) {
+							if (!prevStatusMap.get(dos.getDeliveryNoteId())
+									.equals(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue()))
+								dos.setStatus(prevStatusMap.get(dos.getDeliveryNoteId()));
+							else {
+								dos.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
+							}
 
+						}
 					}
 				}
 
@@ -634,16 +638,29 @@ public class ContainerService implements ContainerServiceLocal {
 			e.printStackTrace();
 		}
 	}
-	
-   
+
 	@Override
-	public Object test(Long id){
-		Map<String,Object> map = (Map<String,Object>) tripDao.getTripDeliveryNotesCountsByDeliveryNoteId(id);
-		if(!ServicesUtil.isEmpty(map) && map.containsKey("tripId")){
+	public Object test(Long id) {
+		Map<String, Object> map = (Map<String, Object>) tripDao.getTripDeliveryNotesCountsByDeliveryNoteId(id);
+		if (!ServicesUtil.isEmpty(map) && map.containsKey("tripId")) {
 			String tripId = (String) map.get("tripId");
-			UserDetailsDo user =  (UserDetailsDo) map.get("user");
+			UserDetailsDo user = (UserDetailsDo) map.get("user");
 			Long dncount = (Long) map.get("deliveryNoteCount");
 		}
 		return map;
+	}
+
+	@Override
+	public ContainerRecordsDTO getContainerRecordById(Long id) {
+		ContainerRecordsDTO dto = new ContainerRecordsDTO();
+		dto.setId(id);
+		try {
+			dto = containerRecordsDAO.find(dto);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return dto;
 	}
 }

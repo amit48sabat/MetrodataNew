@@ -33,7 +33,7 @@ public class ContainerRecordsDTO extends BaseDto {
 	}
 
 	@Override
-	public Object getPrimaryKey() {
+	public Long getPrimaryKey() {
 		// TODO Auto-generated method stub
 		return id;
 	}

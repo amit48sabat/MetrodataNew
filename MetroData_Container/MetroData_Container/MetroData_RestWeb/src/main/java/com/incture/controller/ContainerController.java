@@ -1,21 +1,27 @@
 package com.incture.controller;
 
-import org.hibernate.HibernateException;
-import org.hibernate.TransactionException;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.incture.metrodata.constant.Message;
+import com.incture.metrodata.dto.ContainerRecordsDTO;
 import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.service.ContainerServiceLocal;
+import com.incture.metrodata.util.ServicesUtil;
 
 @RestController
 @CrossOrigin
@@ -47,5 +53,24 @@ public class ContainerController {
 		}
 
 		return response;
+	}
+	
+	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
+	public void find(@PathVariable Long id, HttpServletResponse response) {
+		
+		try {
+			LOGGER.error("INSIDE CREATE CONTAINER CONTROLLER ");
+			ContainerRecordsDTO data = containerService.getContainerRecordById(id);
+			 if(!ServicesUtil.isEmpty(data))
+			 {
+				 InputStream targetStream = new ByteArrayInputStream(data.getPayload().getBytes());
+				 org.apache.commons.io.IOUtils.copy(targetStream, response.getOutputStream());
+			     response.flushBuffer();
+			 }
+		} catch (Exception e) {
+			e.printStackTrace();
+			 throw new RuntimeException("IOError writing file to output stream");
+		}	
+
 	}
 }
