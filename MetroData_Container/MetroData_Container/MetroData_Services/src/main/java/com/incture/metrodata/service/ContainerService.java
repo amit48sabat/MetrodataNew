@@ -13,6 +13,7 @@ import org.apache.http.HttpStatus;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
+import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
@@ -153,11 +154,13 @@ public class ContainerService implements ContainerServiceLocal {
 				String jobIdentity = "DnProcessJob" + timeStamp;
 				String group = "group" + timeStamp;
 				String triggerName = "DnProcessTrigger" + timeStamp;
+				String jobName = "Job" + timeStamp;
 				Date currdate = new Date();
-
+                
 				JobDetail job = JobBuilder.newJob(ContainerToDeliveryNoteProcessingJob.class)
 						.withIdentity(jobIdentity, group).build();
-				Trigger trigger = TriggerBuilder.newTrigger().withIdentity(triggerName, group).startNow().build();
+		
+				SimpleTrigger trigger = (SimpleTrigger)TriggerBuilder.newTrigger().withIdentity(triggerName, group).startNow().build();
 				Scheduler scheduler = new StdSchedulerFactory().getScheduler();
 
 				ContainerRecordsDo recordsDo = new ContainerRecordsDo();
@@ -175,6 +178,7 @@ public class ContainerService implements ContainerServiceLocal {
 				scheduler.getContext().put("data", dto);
 				scheduler.getContext().put("timeStamp", currdate);
 				scheduler.getContext().put("containerRecordId", recordsDo.getId());
+				scheduler.getContext().put("jobName", jobName);
 				/*
 				 * int i=1; for (ContainerDetailsDTO d : containerDetailsDTOs) {
 				 * containerDao.create(d, new ContainerDetailsDo());
@@ -199,8 +203,8 @@ public class ContainerService implements ContainerServiceLocal {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-
-				scheduler.shutdown(true);
+                 scheduler.standby();
+				//scheduler.shutdown(true);
 
 				/*
 				 * Object data = createEntryInDeliveryHeader(dto); LOGGER.

@@ -28,7 +28,7 @@ public class ContainerToDeliveryNoteProcessingJob implements Job {
 	static AbstractApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
 	ContainerServiceLocal containerService = (ContainerServiceLocal) context.getBean("containerService");
 	DeliveryItemServiceLocal itemService = (DeliveryItemServiceLocal) context.getBean("deliveryItemService");
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(ContainerToDeliveryNoteProcessingJob.class);
 
 	@SuppressWarnings("unchecked")
@@ -36,40 +36,45 @@ public class ContainerToDeliveryNoteProcessingJob implements Job {
 
 		try {
 			Scheduler scheduler = con.getScheduler();
-			
-			
+
 			if (!ServicesUtil.isEmpty(scheduler.getContext().get("data"))
-				&& !ServicesUtil.isEmpty(scheduler.getContext().get("timeStamp"))
-				&& !ServicesUtil.isEmpty(scheduler.getContext().get("containerRecordId"))
-				) {
-				
-			 Date timeStamp = (Date) scheduler.getContext().get("timeStamp");
-			 LOGGER.error(" INSIDE DN_PROCESSING_SCHEDULER STARTED => "+scheduler.getSchedulerInstanceId() +" FOR TIMESTAMP "+timeStamp);
-			 Long totalItems = 0L;
-			 Long containerRecordId =  (Long) scheduler.getContext().get("containerRecordId");
-			 Long totalDns = 0L;
+					&& !ServicesUtil.isEmpty(scheduler.getContext().get("timeStamp"))
+					&& !ServicesUtil.isEmpty(scheduler.getContext().get("containerRecordId"))) {
+
+				Date timeStamp = (Date) scheduler.getContext().get("timeStamp");
+				String jobName = (String) scheduler.getContext().get("jobName");
+
+				LOGGER.error(" INSIDE DN_PROCESSING_SCHEDULER STARTED => " + jobName
+						+ " FOR TIMESTAMP " + timeStamp);
+				Long totalItems = 0L;
+				Long containerRecordId = (Long) scheduler.getContext().get("containerRecordId");
+				Long totalDns = 0L;
 				ContainerDTO containerDTO = (ContainerDTO) con.getScheduler().getContext().get("data");
-                
+
 				if (!ServicesUtil.isEmpty(containerDTO)) {
 					LOGGER.error(" INSIDE CONTAINER_TO_DN_PROS_JOB.");
 					totalDns = (long) containerService.createEntryInDeliveryHeader(containerDTO);
 					List<ContainerDetailsDTO> items = (List<ContainerDetailsDTO>) containerDTO.getDELIVERY().getITEM();
 					totalItems = (long) items.size();
-					
+
 					ContainerRecordsDTO dto = new ContainerRecordsDTO();
-					
+
 					dto.setCreatedAt(timeStamp);
 					dto.setDeleted(1);
 					dto.setTotalDns(totalDns);
 					dto.setTotalItems(totalItems);
 					dto.setId(containerRecordId);
 					containerService.update(dto);
-					LOGGER.error(" DELETED MARKED THE PAYLOAD OF TIMESTAMP "+timeStamp );
-					
-					// DELETE THE UNLINK DELIVERY ITEM FROM DELIVERY ITEM TABLE KEEP ONLY ITEMS WHICH ARE MAPPED TO SOME DELIVERY NOTES ONLY
+					LOGGER.error(" DELETED MARKED THE PAYLOAD OF TIMESTAMP " + timeStamp);
+
+					// DELETE THE UNLINK DELIVERY ITEM FROM DELIVERY ITEM TABLE
+					// KEEP ONLY ITEMS WHICH ARE MAPPED TO SOME DELIVERY NOTES
+					// ONLY
 					int rowAffected = itemService.deleteUnlinkDeliveryItems();
-					LOGGER.error(" DN_PROCESSING_SCHEDULER. Deleted <"+rowAffected+"> unlinked delivery items from delivery_item table");
-					LOGGER.error(" INSIDE DN_PROCESSING_SCHEDULER STOPPING SCHEDULER => "+scheduler.getSchedulerInstanceId());
+					LOGGER.error(" DN_PROCESSING_SCHEDULER. Deleted <" + rowAffected
+							+ "> unlinked delivery items from delivery_item table");
+					LOGGER.error(" INSIDE DN_PROCESSING_SCHEDULER STOPPING SCHEDULER => "
+							+ jobName);
 				}
 			}
 
