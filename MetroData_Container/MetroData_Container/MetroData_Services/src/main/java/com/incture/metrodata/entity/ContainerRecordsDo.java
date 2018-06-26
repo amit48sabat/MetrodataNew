@@ -9,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -28,7 +29,7 @@ import lombok.ToString;
 @Where(clause = "DELETED = 0 ")
 public class ContainerRecordsDo implements BaseDo{
   
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hilo_sequence_generator")
+	/*@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hilo_sequence_generator")
     @GenericGenerator(
             name = "hilo_sequence_generator",
             strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
@@ -38,7 +39,17 @@ public class ContainerRecordsDo implements BaseDo{
                     @Parameter(name = "increment_size", value = "1"),
                     @Parameter(name = "optimizer", value = "hilo")
             })
-    @Id
+    @Id*/
+	@Id
+	@TableGenerator(
+            name="containerGen", 
+            table="CONT_ID_GEN", 
+            pkColumnName="GEN_KEY", 
+            valueColumnName="GEN_VALUE", 
+            pkColumnValue="GEN_ID", 
+            allocationSize=1,
+            initialValue=5000)
+    @GeneratedValue(strategy=GenerationType.TABLE, generator="containerGen")
 	private Long id;
 	
 	@Temporal(TemporalType.TIMESTAMP)

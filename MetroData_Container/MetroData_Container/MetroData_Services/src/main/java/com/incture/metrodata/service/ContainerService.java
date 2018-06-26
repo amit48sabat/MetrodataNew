@@ -316,6 +316,22 @@ public class ContainerService implements ContainerServiceLocal {
 							e.printStackTrace();
 						}
 					}
+				
+				
+				// setting warehouse from sloc
+				if (!ServicesUtil.isEmpty(dos.getStorageLocation())) {
+					WareHouseDetailsDo warehouseDo = new WareHouseDetailsDo();
+					warehouseDo.setWareHouseId(dos.getStorageLocation());
+
+					try {
+						// find warehouse by id and assigned to delivery note
+						warehouseDo = wareHouseDao.find(warehouseDo);
+					} catch (Exception e) {
+						LOGGER.error("Invalid SLOC id '" + dos.getStorageLocation() + "' no warehouse found");
+					}
+					dos.setWareHouseDetails(warehouseDo);
+				}
+				
 
 				// if status is created set tripped =false
 				String isStatusCreated = DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue();
@@ -333,8 +349,7 @@ public class ContainerService implements ContainerServiceLocal {
 				}
 
 			} catch (Exception e) {
-				LOGGER.error(" ERROR IN WHILE RFC INVALIDATING DELIVERY NOTE " + dos.getDeliveryNoteId()
-						+ " WITH TRIP ID " + tripId + ". EXCEPTION => " + e.getMessage());
+				LOGGER.error("ERROR WHILE CREATING DELIVERY_NOTE. EXCEPTION => " + e.getMessage());
 			}
 			/*
 			 * if (!ServicesUtil.isEmpty(dos.getStatus()) &&
@@ -408,12 +423,16 @@ public class ContainerService implements ContainerServiceLocal {
 					} catch (InvalidInputFault e) {
 						dos = new DeliveryHeaderDo();
 					}
-
-					map.put(d.getDELIVNO(), dos);
-					if (!currentStatusMap.containsKey(d.getDELIVNO()))
-						currentStatusMap.put(d.getDELIVNO(), "");
-					prevStatusMap.put(d.getDELIVNO(), dos.getStatus());
 				}
+
+				map.put(d.getDELIVNO(), dos);
+				if (!currentStatusMap.containsKey(d.getDELIVNO()))
+					currentStatusMap.put(d.getDELIVNO(), "");
+				if (ServicesUtil.isEmpty(dos.getStatus()))
+					prevStatusMap.put(d.getDELIVNO(), "");
+				else
+					prevStatusMap.put(d.getDELIVNO(), dos.getStatus());
+
 				dos = map.get(d.getDELIVNO());
 				DeliveryItemDo itemDo = new DeliveryItemDo();
 
@@ -442,10 +461,14 @@ public class ContainerService implements ContainerServiceLocal {
 					dos.setSoldToAddress(d.getSOLDADD());
 				if (!ServicesUtil.isEmpty(d.getSHIPTYP()))
 					dos.setShippingType(d.getSHIPTYP());
+				
 				if (!ServicesUtil.isEmpty(d.getINSTDELV()))
-					dos.setInstructionForDelivery(d.getINSTDELV());
+				{
+					String instruction =  d.getINSTDELV().substring(0, Math.min(d.getINSTDELV().length(), 1000));
+					dos.setInstructionForDelivery(instruction);
+				}
 
-				// setting warehouse from sloc
+				/*// setting warehouse from sloc
 				if (!ServicesUtil.isEmpty(d.getSLOC())) {
 					WareHouseDetailsDo warehouseDo = new WareHouseDetailsDo();
 					warehouseDo.setWareHouseId(d.getSLOC());
@@ -457,7 +480,7 @@ public class ContainerService implements ContainerServiceLocal {
 						throw new InvalidInputFault("Invalid SLOC id '" + d.getSLOC() + "' no warehouse found");
 					}
 					dos.setWareHouseDetails(warehouseDo);
-				}
+				}*/
 
 				// set other params
 				if (!ServicesUtil.isEmpty(d.getCREATEDT())) {
@@ -468,24 +491,19 @@ public class ContainerService implements ContainerServiceLocal {
 				dos.setUpdatedAt(currDate);
 				if (ServicesUtil.isEmpty(d.getSTAT())) {
 					dos.setCreatedAt(currDate);
-					if (!ServicesUtil.isEmpty(currentStatusMap.get(dos.getDeliveryNoteId()))) {
-						if (currentStatusMap.get(dos.getDeliveryNoteId())
-								.equals(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue())
-								|| currentStatusMap.get(dos.getDeliveryNoteId()).equals("")) {
-							dos.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
-							currentStatusMap.put(dos.getDeliveryNoteId(),
-									DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
-						}
+					if (ServicesUtil.isEmpty(currentStatusMap.get(dos.getDeliveryNoteId())) || currentStatusMap
+							.get(dos.getDeliveryNoteId()).equals(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue())) {
+						dos.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
+						currentStatusMap.put(dos.getDeliveryNoteId(),
+								DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
 					} else {
-						if (!ServicesUtil.isEmpty(prevStatusMap.get(dos.getDeliveryNoteId()))) {
-							if (!prevStatusMap.get(dos.getDeliveryNoteId())
-									.equals(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue()))
-								dos.setStatus(prevStatusMap.get(dos.getDeliveryNoteId()));
-							else {
-								dos.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
-							}
-
+						if (!ServicesUtil.isEmpty(prevStatusMap.get(dos.getDeliveryNoteId())) && !prevStatusMap
+								.get(dos.getDeliveryNoteId()).equals(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue()))
+							dos.setStatus(prevStatusMap.get(dos.getDeliveryNoteId()));
+						else {
+							dos.setStatus(DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue());
 						}
+
 					}
 				}
 
@@ -496,10 +514,8 @@ public class ContainerService implements ContainerServiceLocal {
 
 					// setting delivery note status as RFC_Invaidated and set
 					// tripped to false again
-					if (!ServicesUtil.isEmpty(currentStatusMap.get(dos.getDeliveryNoteId()))
-							&& currentStatusMap.get(dos.getDeliveryNoteId())
-									.equals(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue())
-							|| currentStatusMap.get(dos.getDeliveryNoteId()).equals("")) {
+					if (ServicesUtil.isEmpty(currentStatusMap.get(dos.getDeliveryNoteId())) || currentStatusMap
+							.get(dos.getDeliveryNoteId()).equals(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue())) {
 						dos.setStatus(DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue());
 						currentStatusMap.put(dos.getDeliveryNoteId(), DeliveryNoteStatus.RFC_DN_INVALIDATED.getValue());
 					} else {
