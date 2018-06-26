@@ -316,7 +316,7 @@ public class MessageService implements MessageServiceLocal {
 					userMap.put(createdBy, userDto);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					//e.printStackTrace();
 				}
 			}
 		}
