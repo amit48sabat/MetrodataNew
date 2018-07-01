@@ -36,9 +36,9 @@ public class DNFetchSchedulerService implements DNFetchSchedulerServiceLocal,Job
         String year = datetime.toString("YYYY");
 		String data = year+month+day;
 		String payload = "{ \"DELIVERY\": { \"GI_DATE\": \""+data+"\" } }";
-		LOGGER.error("Hci service request payload => "+payload);
+		LOGGER.error("Hci service request [ "+date+" ] payload => "+payload);
 		String response = invoker.postDataToServer("/metrodatadetails", payload);
-		LOGGER.error("Hci service response <= " +response);
+		LOGGER.error("Hci service [ "+date+" ] response <= " +response);
 
 	}
 

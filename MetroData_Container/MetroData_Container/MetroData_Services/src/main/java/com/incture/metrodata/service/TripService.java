@@ -197,7 +197,8 @@ public class TripService implements TripServiceLocal {
 			responseDto.setStatus(false);
 			// LOGGER.error("ERROR WHILE CREATING TRIP : " +e.getMessage());
 			responseDto.setCode(500);
-			e.printStackTrace();
+			LOGGER.error("EXCEPTION : INSIDE UPDATE TRIP SERVICE. RESPONSE PAYLOAD <= "+e.getMessage());
+			//e.printStackTrace();
 			responseDto.setMessage(Message.FAILED + " : " + e.getMessage());
 		}
 		return responseDto;
@@ -275,7 +276,7 @@ public class TripService implements TripServiceLocal {
 			responseDto.setCode(500);
 			responseDto.setMessage(Message.FAILED + " : " + e.getMessage());
 			//// LOGGER.error("ERROR WHILE CREATING TRIP : " +e.getMessage());
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		return responseDto;
 	}
@@ -469,7 +470,7 @@ public class TripService implements TripServiceLocal {
 			}
 		} catch (InvalidInputFault e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("EXCEPTION : IN ASSIGN  DRIVER. RESPONSE PAYLOAD <= "+e.getMessage());
 			responseDto.setStatus(false);
 			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			responseDto.setMessage(e.getMessage());
@@ -522,7 +523,7 @@ public class TripService implements TripServiceLocal {
 
 		} catch (Exception e) {
 
-			e.printStackTrace();
+			LOGGER.error("EXCEPTION : INSIDE DRIVER TRIP HISTORY RESPONSE PAYLOAD <= "+e.getMessage());
 			responseDto.setStatus(false);
 			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			responseDto.setMessage(e.getMessage());
@@ -585,7 +586,7 @@ public class TripService implements TripServiceLocal {
 			responseDto.setStatus(false);
 			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			responseDto.setMessage(Message.FAILED.getValue());
-			e.printStackTrace();
+			LOGGER.error("EXCEPTION : INSIDE GET ALL TRIPS ASSOCIATED WITH ADMIN TRIP SERVICE. RESPONSE PAYLOAD <= "+e.getMessage());
 		}
 		return responseDto;
 	}
@@ -610,7 +611,7 @@ public class TripService implements TripServiceLocal {
 			responseDto.setStatus(false);
 			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			responseDto.setMessage(Message.FAILED.getValue());
-			e.printStackTrace();
+			LOGGER.error("EXCEPTION : INSIDE GET ADMIN DASHBOARD ASSOCIATED WITH ADMIN TRIP SERVICE. RESPONSE PAYLOAD <= "+e.getMessage());
 		}
 		return responseDto;
 	}
@@ -637,7 +638,7 @@ public class TripService implements TripServiceLocal {
 			responseDto.setStatus(false);
 			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			responseDto.setMessage(Message.FAILED.getValue());
-			e.printStackTrace();
+			LOGGER.error("EXCEPTION : INSIDE FILTER TRIPS AS PER ADMIN TRIP SERVICE. RESPONSE PAYLOAD <= "+e.getMessage());
 		}
 		return responseDto;
 	}
