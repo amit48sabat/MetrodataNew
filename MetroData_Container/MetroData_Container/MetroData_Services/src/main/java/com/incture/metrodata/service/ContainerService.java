@@ -427,9 +427,11 @@ public class ContainerService implements ContainerServiceLocal {
 					} catch (InvalidInputFault e) {
 						dos = new DeliveryHeaderDo();
 					}
+					
+					map.put(d.getDELIVNO(), dos);
 				}
 
-				map.put(d.getDELIVNO(), dos);
+				
 				if (!currentStatusMap.containsKey(d.getDELIVNO()))
 					currentStatusMap.put(d.getDELIVNO(), "");
 				if (ServicesUtil.isEmpty(dos.getStatus()))
