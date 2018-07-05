@@ -185,7 +185,7 @@ public class HibernateConfiguration {
 	public SchedulerFactory schedulerFactoryBean() {
 		SchedulerFactory sf = new StdSchedulerFactory();
 		
-		String isSchedulerStart = environment.getRequiredProperty("hci.scheduler.start").trim();
+		String isSchedulerStart = "false";
 		if(isSchedulerStart.equalsIgnoreCase("true".trim())){
 			try {
 				Scheduler scheduler = sf.getScheduler();

@@ -156,11 +156,12 @@ public class ContainerService implements ContainerServiceLocal {
 				String triggerName = "DnProcessTrigger" + timeStamp;
 				String jobName = "Job" + timeStamp;
 				Date currdate = new Date();
-                
+
 				JobDetail job = JobBuilder.newJob(ContainerToDeliveryNoteProcessingJob.class)
 						.withIdentity(jobIdentity, group).build();
-		
-				SimpleTrigger trigger = (SimpleTrigger)TriggerBuilder.newTrigger().withIdentity(triggerName, group).startNow().build();
+
+				SimpleTrigger trigger = (SimpleTrigger) TriggerBuilder.newTrigger().withIdentity(triggerName, group)
+						.startNow().build();
 				Scheduler scheduler = new StdSchedulerFactory().getScheduler();
 
 				ContainerRecordsDo recordsDo = new ContainerRecordsDo();
@@ -203,8 +204,11 @@ public class ContainerService implements ContainerServiceLocal {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-                 scheduler.standby();
-				//scheduler.shutdown(true);
+				
+				LOGGER.error("INSIDE CREATE CONTAINER SERVICE : JOB STARTED ID [ "+jobName+" ]");
+				
+				scheduler.standby();
+				// scheduler.shutdown(true);
 
 				/*
 				 * Object data = createEntryInDeliveryHeader(dto); LOGGER.
@@ -320,8 +324,7 @@ public class ContainerService implements ContainerServiceLocal {
 							e.printStackTrace();
 						}
 					}
-				
-				
+
 				// setting warehouse from sloc
 				if (!ServicesUtil.isEmpty(dos.getStorageLocation())) {
 					WareHouseDetailsDo warehouseDo = new WareHouseDetailsDo();
@@ -335,7 +338,6 @@ public class ContainerService implements ContainerServiceLocal {
 					}
 					dos.setWareHouseDetails(warehouseDo);
 				}
-				
 
 				// if status is created set tripped =false
 				String isStatusCreated = DeliveryNoteStatus.DELIVERY_NOTE_CREATED.getValue();
@@ -415,9 +417,9 @@ public class ContainerService implements ContainerServiceLocal {
 				 * if (isVisited.add(d.getDELIVNO())) { dos = new
 				 * DeliveryHeaderDo(); headerList.add(dos); }
 				 */
-				if (ServicesUtil.isEmpty(map.get(d.getDELIVNO()))) {
-					dos = new DeliveryHeaderDo();
+				if (map.containsKey(d.getDELIVNO()) == false) {
 					try {
+						dos = new DeliveryHeaderDo();
 						dos.setDeliveryNoteId(d.getDELIVNO());
 						// fetching the delivery note if exits
 						dos = deliveryHeaderDao.find(dos);
@@ -427,11 +429,12 @@ public class ContainerService implements ContainerServiceLocal {
 					} catch (InvalidInputFault e) {
 						dos = new DeliveryHeaderDo();
 					}
-					
 					map.put(d.getDELIVNO(), dos);
+				} 
+				else {
+					dos = map.get(d.getDELIVNO());
 				}
 
-				
 				if (!currentStatusMap.containsKey(d.getDELIVNO()))
 					currentStatusMap.put(d.getDELIVNO(), "");
 				if (ServicesUtil.isEmpty(dos.getStatus()))
@@ -439,7 +442,6 @@ public class ContainerService implements ContainerServiceLocal {
 				else
 					prevStatusMap.put(d.getDELIVNO(), dos.getStatus());
 
-				dos = map.get(d.getDELIVNO());
 				DeliveryItemDo itemDo = new DeliveryItemDo();
 
 				// setting delivery header
@@ -467,26 +469,25 @@ public class ContainerService implements ContainerServiceLocal {
 					dos.setSoldToAddress(d.getSOLDADD());
 				if (!ServicesUtil.isEmpty(d.getSHIPTYP()))
 					dos.setShippingType(d.getSHIPTYP());
-				
-				if (!ServicesUtil.isEmpty(d.getINSTDELV()))
-				{
-					String instruction =  d.getINSTDELV().substring(0, Math.min(d.getINSTDELV().length(), 1000));
+
+				if (!ServicesUtil.isEmpty(d.getINSTDELV())) {
+					String instruction = d.getINSTDELV().substring(0, Math.min(d.getINSTDELV().length(), 1000));
 					dos.setInstructionForDelivery(instruction);
 				}
 
-				/*// setting warehouse from sloc
-				if (!ServicesUtil.isEmpty(d.getSLOC())) {
-					WareHouseDetailsDo warehouseDo = new WareHouseDetailsDo();
-					warehouseDo.setWareHouseId(d.getSLOC());
-
-					try {
-						// find warehouse by id and assigned to delivery note
-						warehouseDo = wareHouseDao.find(warehouseDo);
-					} catch (Exception e) {
-						throw new InvalidInputFault("Invalid SLOC id '" + d.getSLOC() + "' no warehouse found");
-					}
-					dos.setWareHouseDetails(warehouseDo);
-				}*/
+				/*
+				 * // setting warehouse from sloc if
+				 * (!ServicesUtil.isEmpty(d.getSLOC())) { WareHouseDetailsDo
+				 * warehouseDo = new WareHouseDetailsDo();
+				 * warehouseDo.setWareHouseId(d.getSLOC());
+				 * 
+				 * try { // find warehouse by id and assigned to delivery note
+				 * warehouseDo = wareHouseDao.find(warehouseDo); } catch
+				 * (Exception e) { throw new
+				 * InvalidInputFault("Invalid SLOC id '" + d.getSLOC() +
+				 * "' no warehouse found"); }
+				 * dos.setWareHouseDetails(warehouseDo); }
+				 */
 
 				// set other params
 				if (!ServicesUtil.isEmpty(d.getCREATEDT())) {
