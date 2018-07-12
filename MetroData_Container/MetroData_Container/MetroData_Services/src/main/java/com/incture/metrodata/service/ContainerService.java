@@ -14,7 +14,6 @@ import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SimpleTrigger;
-import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
@@ -111,7 +110,10 @@ public class ContainerService implements ContainerServiceLocal {
 
 	@Autowired
 	UserDAO userDao;
-
+	
+	@Autowired
+	AsyncCompLocal comp;
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ContainerService.class);
 
 	private Integer BATCH_SIZE = 50;
@@ -120,8 +122,11 @@ public class ContainerService implements ContainerServiceLocal {
 	@Override
 	public ResponseDto create(String controllerJson) {
 
+		// map to hold data for processing
+		Map<String, Object> data = new HashMap<>();
+		
 		ResponseDto response = new ResponseDto();
-
+		
 		Map<Object, Object> inputDataMap = new LinkedHashMap<>();
 		inputDataMap.put("inputString", controllerJson);
 
@@ -175,11 +180,23 @@ public class ContainerService implements ContainerServiceLocal {
 				containerRecordsDAO.getSession().flush();
 				containerRecordsDAO.getSession().clear();
 				containerRecordsDAO.getSession().getTransaction().commit();
+				
+				// adding data to scheduler context
+				data.put("data", dto);
+				data.put("timeStamp", currdate);
+				data.put("containerRecordId", recordsDo.getId());
+				data.put("jobName", jobName);
+
+				comp.backgroudDnProcessing(data);
+				
 				// adding data to scheduler context
 				scheduler.getContext().put("data", dto);
 				scheduler.getContext().put("timeStamp", currdate);
 				scheduler.getContext().put("containerRecordId", recordsDo.getId());
 				scheduler.getContext().put("jobName", jobName);
+				
+				
+				
 				/*
 				 * int i=1; for (ContainerDetailsDTO d : containerDetailsDTOs) {
 				 * containerDao.create(d, new ContainerDetailsDo());
@@ -196,8 +213,8 @@ public class ContainerService implements ContainerServiceLocal {
 				 * containerDao.getSession().clear();
 				 */
 
-				scheduler.start();
-				scheduler.scheduleJob(job, trigger);
+				/*scheduler.start();
+				scheduler.scheduleJob(job, trigger);*/
 				try {
 					Thread.sleep(2000);
 				} catch (InterruptedException e) {
@@ -207,7 +224,7 @@ public class ContainerService implements ContainerServiceLocal {
 				
 				LOGGER.error("INSIDE CREATE CONTAINER SERVICE : JOB STARTED ID [ "+jobName+" ]");
 				
-				scheduler.standby();
+				//scheduler.standby();
 				// scheduler.shutdown(true);
 
 				/*
