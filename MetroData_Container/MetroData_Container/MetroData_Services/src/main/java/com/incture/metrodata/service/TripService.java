@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 import org.apache.http.HttpStatus;
 import org.hibernate.HibernateException;
@@ -731,6 +733,13 @@ public class TripService implements TripServiceLocal {
 		document.add(new Paragraph("  "));
 		document.add(new Paragraph("  "));
 
+		
+		// adding timestamp 
+		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss z");
+		format.setTimeZone(TimeZone.getTimeZone("Asia/Jakarta"));
+		document.add(new Paragraph("DATE : "+format.format(detailsDTO.getCreatedAt())));
+		
+		document.add(new Paragraph("  "));
 		for (DeliveryHeaderDTO deliveryHeaderDTO : detailsDTO.getDeliveryHeader()) {
 			Paragraph p = new Paragraph("DELIVERY NOTE : " + deliveryHeaderDTO.getDeliveryNoteId() + " ( "
 					+ deliveryHeaderDTO.getShipToAddress() + " )");
