@@ -263,7 +263,7 @@ public class TripService implements TripServiceLocal {
 					}
 				responseDto.setData(trip);
 			} else {
-				List<TripDetailsDTO> tripList = tripDao.findTripByParam(dto, adminDto);
+				List<TripDetailsDTO> tripList = tripDao.findTripByParamAssociatedWithAdmin(dto, adminDto);
 				responseDto.setData(tripList);
 			}
 

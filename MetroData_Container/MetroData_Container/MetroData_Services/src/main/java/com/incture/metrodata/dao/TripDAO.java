@@ -196,7 +196,9 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 
 		criteria.addOrder(Order.desc("createdAt"));
 		criteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
-
+		criteria.setFirstResult(PaginationUtil.FIRST_RESULT);
+		criteria.setMaxResults(PaginationUtil.MAX_RESULT);
+		
 		List<TripDetailsDo> resultDos = criteria.list();
 		List<TripDetailsDTO> resultDtos = exportList(resultDos);
 		return resultDtos;
@@ -565,14 +567,24 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		String hql = "";
 		Query query;
 		Map<String, Long> dashBoardCountMap = new HashMap<>();
+		Map<String, Long> tempMap = null;
 		// get all the user list if role is super_admin or sales_admin
 		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
 				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
 
+			// total trips
 			hql = "SELECT new map(count(distinct t.tripId) as TOTAL_TRIPS)  FROM TripDetailsDo AS t where (t.status != :status or t.status is null)";
 			query = getSession().createQuery(hql);
 			query.setParameter("status", TripStatus.TRIP_STATUS_CANCELLED.getValue());
 			dashBoardCountMap = (Map<String, Long>) query.uniqueResult();
+			
+			// total enroute trips
+			hql = "SELECT new map(count(distinct t.tripId) as TOTAL_ENROUTE_TRIPS)  FROM TripDetailsDo AS t where t.status = :status";
+			query = getSession().createQuery(hql);
+			query.setParameter("status", TripStatus.TRIP_STATUS_STARTED.getValue());
+			tempMap = (Map<String, Long>) query.uniqueResult();
+			if(tempMap.containsKey("TOTAL_ENROUTE_TRIPS"))
+			dashBoardCountMap.put("TOTAL_ENROUTE_TRIPS", tempMap.get("TOTAL_ENROUTE_TRIPS"));
 
 			hql = "SELECT tdh.status,count(distinct tdh.deliveryNoteId) FROM TripDetailsDo AS t join t.deliveryHeader "
 					+ "tdh WHERE tdh.tripped = true AND tdh.status IN(:deliveryNoteStatusList) group by tdh.status";
@@ -592,12 +604,23 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 
 		} else if (roleName.equals(RoleConstant.ADMIN_INSIDE_JAKARTA.getValue())
 				|| roleName.equals(RoleConstant.ADMIN_OUTSIDE_JAKARTA.getValue())) {
+			
+			// total trips
 			hql = "SELECT new map(count(distinct t.tripId) as TOTAL_TRIPS)  FROM TripDetailsDo AS t where t.createdBy = :userId AND (t.status != :status or t.status is null)";
-
 			query = getSession().createQuery(hql);
 			query.setParameter("userId", userId);
 			query.setParameter("status", TripStatus.TRIP_STATUS_CANCELLED.getValue());
 			dashBoardCountMap = (Map<String, Long>) query.uniqueResult();
+
+			// total enroute trips
+			hql = "SELECT new map(count(distinct t.tripId) as TOTAL_ENROUTE_TRIPS)  FROM TripDetailsDo AS t where t.createdBy = :userId AND (t.status = :status)";
+			query = getSession().createQuery(hql);
+			query.setParameter("userId", userId);
+			query.setParameter("status", TripStatus.TRIP_STATUS_STARTED.getValue());
+			tempMap = (Map<String, Long>) query.uniqueResult();
+			if(tempMap.containsKey("TOTAL_ENROUTE_TRIPS"))
+			dashBoardCountMap.put("TOTAL_ENROUTE_TRIPS", tempMap.get("TOTAL_ENROUTE_TRIPS"));
+			
 
 			hql = "SELECT tdh.status,count(distinct tdh.deliveryNoteId) FROM TripDetailsDo AS t join t.deliveryHeader "
 					+ "tdh WHERE tdh.tripped = true AND t.createdBy = :userId AND tdh.status IN(:deliveryNoteStatusList) group by tdh.status";
@@ -616,11 +639,22 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 				dashBoardCountMap.put("AVG_TRIP_ORDER", avgOrders);
 			}
 		} else if (roleName.equals(RoleConstant.COURIER_ADMIN.getValue())) {
+			
+			// total trips
 			hql = "SELECT new map(count(distinct t.tripId) as TOTAL_TRIPS)  FROM TripDetailsDo AS t where t.user.createdBy = :userId AND (t.status != :status or t.status is null)";
 			query = getSession().createQuery(hql);
 			query.setParameter("userId", userId);
 			query.setParameter("status", TripStatus.TRIP_STATUS_CANCELLED.getValue());
 			dashBoardCountMap = (Map<String, Long>) query.uniqueResult();
+			
+			// total enroute trips
+			hql = "SELECT new map(count(distinct t.tripId) as TOTAL_ENROUTE_TRIPS)  FROM TripDetailsDo AS t where t.user.createdBy = :userId AND (t.status = :status )";
+			query = getSession().createQuery(hql);
+			query.setParameter("userId", userId);
+			query.setParameter("status", TripStatus.TRIP_STATUS_STARTED.getValue());
+			tempMap = (Map<String, Long>) query.uniqueResult();
+			if(tempMap.containsKey("TOTAL_ENROUTE_TRIPS"))
+			dashBoardCountMap.put("TOTAL_ENROUTE_TRIPS", tempMap.get("TOTAL_ENROUTE_TRIPS"));
 
 			hql = "SELECT tdh.status,count(distinct tdh.deliveryNoteId) FROM TripDetailsDo AS t join t.deliveryHeader "
 					+ "tdh WHERE tdh.tripped = true AND  t.user.createdBy = :userId AND tdh.status IN(:deliveryNoteStatusList) group by tdh.status";
@@ -869,5 +903,42 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		int result = query.executeUpdate();
 		return result;
 
+	}
+
+	public List<TripDetailsDTO> findTripByParamAssociatedWithAdmin(TripDetailsDTO dto, UserDetailsDTO adminDto) {
+		
+		boolean isSuperAdmin = false;
+		String hql = "";
+		String roleName = adminDto.getRole().getRoleName();
+		String userId = adminDto.getUserId();
+		// get all the user list if role is super_admin or sales_admin
+		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
+				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
+			hql = "SELECT t FROM TripDetailsDo AS t where t.status = :status ORDER BY t.tripId desc";
+			isSuperAdmin = true;
+		} else if (roleName.equals(RoleConstant.ADMIN_INSIDE_JAKARTA.getValue())
+				|| roleName.equals(RoleConstant.ADMIN_OUTSIDE_JAKARTA.getValue())) {
+			hql = " SELECT distinct t FROM TripDetailsDo AS t where t.createdBy = :createdBy AND (t.status = :status or t.status is null) ORDER BY t.tripId desc";
+		} else if (roleName.equals(RoleConstant.COURIER_ADMIN.getValue())) {
+			hql = " SELECT distinct t FROM TripDetailsDo AS t where t.user.createdBy = :createdBy AND (t.status = :status or t.status is null) ORDER BY t.tripId desc";
+		}
+		Query query = getSession().createQuery(hql);
+		if (!isSuperAdmin) {
+			/*
+			 * if (ServicesUtil.isEmpty(wareHouseIds)) return new
+			 * ArrayList<TripDetailsDo>();
+			 * 
+			 * query.setParameterList("warehouselist", wareHouseIds);
+			 */
+			query.setParameter("createdBy", userId);
+			// [1051, 1101, 11S1]
+		}
+		query.setParameter("status", dto.getStatus());
+		query.setFirstResult(PaginationUtil.FIRST_RESULT);
+		query.setMaxResults(PaginationUtil.MAX_RESULT);
+
+		ArrayList<TripDetailsDo> result = (ArrayList<TripDetailsDo>) query.list();
+		return exportList(result);
+		
 	}
 }

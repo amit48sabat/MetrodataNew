@@ -112,7 +112,13 @@ public class TripController {
 	}
 
 	@RequestMapping(value = "/search", method = RequestMethod.PUT)
-	public ResponseDto find(@RequestBody TripDetailsDTO dto, HttpServletRequest request) {
+	public ResponseDto find(@RequestBody TripDetailsDTO dto, HttpServletRequest request,
+			@RequestParam(value = "firstResult", defaultValue = "0") String firstResult,
+			@RequestParam(value = "maxResult", defaultValue = "0") String maxResult) {
+		
+		// setting pagination
+		ServicesUtil.setPagination(firstResult, maxResult);
+		
 		ResponseDto res = new ResponseDto();
 		String userId = "";
 		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
