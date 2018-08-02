@@ -241,7 +241,7 @@ public class TripService implements TripServiceLocal {
 	 */
 
 	@Override
-	public ResponseDto findByParam(TripDetailsDTO dto, UserDetailsDTO adminDto) {
+	public ResponseDto findByParam(TripDetailsDTO dto, UserDetailsDTO adminDto, String dnStatus) {
 		ResponseDto responseDto = new ResponseDto();
 		try {
 			// find by trip id if trip ID is set or else by trip status
@@ -263,8 +263,7 @@ public class TripService implements TripServiceLocal {
 					}
 				responseDto.setData(trip);
 			} else {
-				List<TripDetailsDTO> tripList = tripDao.findTripByParamAssociatedWithAdmin(dto, adminDto);
-				responseDto.setData(tripList);
+				responseDto = tripDao.findTripByParamAssociatedWithAdmin(dto, adminDto,dnStatus);
 			}
 
 			LOGGER.error("INSIDE FIND TRIP BY PARAM SERVICE. REQUEST PAYLOAD => "+dto);
@@ -571,21 +570,21 @@ public class TripService implements TripServiceLocal {
 	 * api for finding all the trip by admin's driver's warehouse ids (\/)
 	 */
 	@Override
-	public ResponseDto getAllTripsAssociatedWithAdminsDrivers(UserDetailsDTO adminDto) {
+	public ResponseDto getAllTripsAssociatedWithAdminsDrivers(UserDetailsDTO adminDto,String dnStatus) {
 		ResponseDto responseDto = new ResponseDto();
 
 		try {
 			LOGGER.error("INSIDE GET ALL TRIPS ASSOCIATED WITH ADMIN");
 			// adminDto = userDao.findById(adminDto);
-			Object tripList = tripDao.getAllTripsAssociatedWithAdminsDrivers(adminDto.getUserId(),
-					adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails());
+			responseDto = tripDao.getAllTripsAssociatedWithAdminsDrivers(adminDto.getUserId(),
+					adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails(),dnStatus);
 
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
-			responseDto.setData(tripList);
 			responseDto.setMessage(Message.SUCCESS.getValue());
 		} catch (Exception e) {
 			responseDto.setStatus(false);
+			e.printStackTrace();
 			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			responseDto.setMessage(Message.FAILED.getValue());
 			LOGGER.error("EXCEPTION : INSIDE GET ALL TRIPS ASSOCIATED WITH ADMIN TRIP SERVICE. RESPONSE PAYLOAD <= "+e.getMessage());

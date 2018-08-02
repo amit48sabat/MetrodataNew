@@ -93,7 +93,7 @@ public class OrderTrackingDAO extends BaseDao<OrderTrackingDo, OrderTrackingDTO>
 			criteria.add(Restrictions.le("createdAt", dto.getEndedAt()));
 		}
 		
-		criteria.addOrder(Order.desc("createdAt"));
+		criteria.addOrder(Order.desc("id"));
 		
 		List<OrderTrackingDo> resultDos = criteria.list();
 		List<OrderTrackingDTO> resultDtos = exportList(resultDos);

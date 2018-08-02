@@ -12,6 +12,7 @@ import lombok.ToString;
 @ToString
 public class ResponseDto {
 	private int code;
+	private Long totalCount;
 	private boolean status;
 	private String Message;
 	Object data;

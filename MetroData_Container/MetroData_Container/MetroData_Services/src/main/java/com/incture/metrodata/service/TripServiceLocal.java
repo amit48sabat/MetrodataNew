@@ -12,7 +12,7 @@ public interface TripServiceLocal {
 
 	// ResponseDto findById(String requestNo);
 
-	ResponseDto findByParam(TripDetailsDTO dto, UserDetailsDTO adminDto);
+	ResponseDto findByParam(TripDetailsDTO dto, UserDetailsDTO adminDto, String dnStatus);
 
 	ResponseDto delete(String tripId);
 
@@ -33,7 +33,7 @@ public interface TripServiceLocal {
 	/***
 	 * api for finding all the trip as per admin's warehouse id
 	 */
-	ResponseDto getAllTripsAssociatedWithAdminsDrivers(UserDetailsDTO adminDto);
+	ResponseDto getAllTripsAssociatedWithAdminsDrivers(UserDetailsDTO adminDto,String dnStatus);
 
 	/***
 	 * api for admin dashboard as per admin's warehouse id

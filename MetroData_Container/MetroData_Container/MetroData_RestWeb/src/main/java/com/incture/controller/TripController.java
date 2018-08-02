@@ -87,7 +87,8 @@ public class TripController {
 	@RequestMapping(method = RequestMethod.GET)
 	public ResponseDto findAllTrips(HttpServletRequest request,
 			@RequestParam(value = "firstResult", defaultValue = "0") String firstResult,
-			@RequestParam(value = "maxResult", defaultValue = "0") String maxResult) {
+			@RequestParam(value = "maxResult", defaultValue = "0") String maxResult,
+			@RequestParam(value = "dnStatus", defaultValue = "") String dnStatus ){
 
 		// setting pagination
 		ServicesUtil.setPagination(firstResult, maxResult);
@@ -108,13 +109,14 @@ public class TripController {
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
 
 		LOGGER.error("INSIDE FIND ALL TRIPS CONTROLLER. ADMIN ID " + adminDto.getUserId());
-		return tripService.getAllTripsAssociatedWithAdminsDrivers(adminDto);
+		return tripService.getAllTripsAssociatedWithAdminsDrivers(adminDto,dnStatus);
 	}
 
 	@RequestMapping(value = "/search", method = RequestMethod.PUT)
 	public ResponseDto find(@RequestBody TripDetailsDTO dto, HttpServletRequest request,
 			@RequestParam(value = "firstResult", defaultValue = "0") String firstResult,
-			@RequestParam(value = "maxResult", defaultValue = "0") String maxResult) {
+			@RequestParam(value = "maxResult", defaultValue = "0") String maxResult,
+			@RequestParam(value = "dnStatus", defaultValue = "") String dnStatus ) {
 		
 		// setting pagination
 		ServicesUtil.setPagination(firstResult, maxResult);
@@ -134,7 +136,7 @@ public class TripController {
 
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
 		LOGGER.error("INSIDE FIND TRIP CONTROLLER WITH USER ID " + userId);
-		return tripService.findByParam(dto, adminDto);
+		return tripService.findByParam(dto, adminDto, dnStatus);
 	}
 
 	@RequestMapping(value = "/{tripId}", method = RequestMethod.PUT)

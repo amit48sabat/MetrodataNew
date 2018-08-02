@@ -25,6 +25,7 @@ import com.incture.metrodata.constant.RoleConstant;
 import com.incture.metrodata.constant.TripStatus;
 import com.incture.metrodata.dto.DeliveryHeaderDTO;
 import com.incture.metrodata.dto.FilterDTO;
+import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.TripDetailsDTO;
 import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.dto.WareHouseDetailsDTO;
@@ -364,11 +365,11 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		dnList.add(TripStatus.TRIP_STATUS_STARTED.getValue());
 		dnList.add(TripStatus.TRIP_STATUS_DRIVER_ASSIGNED.getValue());
 
-		if (!outsideDriver.equalsIgnoreCase(roleName))
-			dnList.add(TripStatus.TRIP_STATUS_CANCELLED.getValue());
+		/*if (!outsideDriver.equalsIgnoreCase(roleName))
+			dnList.add(TripStatus.TRIP_STATUS_CANCELLED.getValue());*/
 
 		String hql = "select distinct t from TripDetailsDo t " + "where t.user.userId= :userId "
-				+ "and t.status in (:tripStatus) " + "order by t.createdAt desc";
+				+ "and t.status in (:tripStatus) " + "order by t.updatedAt desc";
 		Query query = getSession().createQuery(hql);
 		query.setParameterList("tripStatus", dnList);
 		query.setParameter("userId", userId);
@@ -510,22 +511,38 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public Object getAllTripsAssociatedWithAdminsDrivers(String userId, String roleName,
-			Set<WareHouseDetailsDTO> wareHouseDetails) {
+	public ResponseDto getAllTripsAssociatedWithAdminsDrivers(String userId, String roleName,
+			Set<WareHouseDetailsDTO> wareHouseDetails,String dnStatus) {
 		boolean isSuperAdmin = false;
+		ResponseDto res = new  ResponseDto();
 		String hql = "";
+		String countHql  = "";
+		Long totalCount = 0L;
 		// get all the user list if role is super_admin or sales_admin
 		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
 				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
-			hql = "SELECT t FROM TripDetailsDo AS t where t.status != :status or t.status is null ORDER BY t.tripId desc";
+			hql = "SELECT distinct t FROM TripDetailsDo AS t join t.deliveryHeader dh where (t.status != :status or t.status is null) ";
+			countHql = "SELECT count(distinct t.tripId) FROM TripDetailsDo AS t join t.deliveryHeader dh where (t.status != :status or t.status is null) ";
 			isSuperAdmin = true;
 		} else if (roleName.equals(RoleConstant.ADMIN_INSIDE_JAKARTA.getValue())
 				|| roleName.equals(RoleConstant.ADMIN_OUTSIDE_JAKARTA.getValue())) {
-			hql = " SELECT distinct t FROM TripDetailsDo AS t where t.createdBy = :createdBy AND (t.status != :status or t.status is null) ORDER BY t.tripId desc";
+			hql = " SELECT distinct t FROM TripDetailsDo AS t join t.deliveryHeader dh where t.createdBy = :createdBy AND (t.status != :status or t.status is null) ";
+		   countHql = " SELECT count(distinct t.tripId) FROM TripDetailsDo AS t join t.deliveryHeader dh where t.createdBy = :createdBy AND (t.status != :status or t.status is null) ";
 		} else if (roleName.equals(RoleConstant.COURIER_ADMIN.getValue())) {
-			hql = " SELECT distinct t FROM TripDetailsDo AS t where t.user.createdBy = :createdBy AND (t.status != :status or t.status is null) ORDER BY t.tripId desc";
+			hql = " SELECT distinct t FROM TripDetailsDo AS t join t.deliveryHeader dh where t.user.createdBy = :createdBy AND (t.status != :status or t.status is null) ";
+			countHql = " SELECT count(distinct t.tripId) FROM TripDetailsDo AS t join t.deliveryHeader dh where t.user.createdBy = :createdBy AND (t.status != :status or t.status is null) ";
 		}
-		Query query = getSession().createQuery(hql);
+		
+		Query query  = null;
+		Query query2  = null;
+		if(!ServicesUtil.isEmpty(dnStatus)){
+			hql += " AND dh.status ='"+dnStatus+"' ";
+			countHql += " AND dh.status ='"+dnStatus+"' ";
+		}
+		
+		hql += " ORDER BY t.tripId desc";
+		 query = getSession().createQuery(hql);
+		 query2 = getSession().createQuery(countHql);
 		if (!isSuperAdmin) {
 			/*
 			 * if (ServicesUtil.isEmpty(wareHouseIds)) return new
@@ -534,14 +551,23 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			 * query.setParameterList("warehouselist", wareHouseIds);
 			 */
 			query.setParameter("createdBy", userId);
+			query2.setParameter("createdBy", userId);
 			// [1051, 1101, 11S1]
 		}
 		query.setParameter("status", TripStatus.TRIP_STATUS_CANCELLED.getValue());
+		query2.setParameter("status", TripStatus.TRIP_STATUS_CANCELLED.getValue());
 		query.setFirstResult(PaginationUtil.FIRST_RESULT);
 		query.setMaxResults(PaginationUtil.MAX_RESULT);
 
+		
+		if(!ServicesUtil.isEmpty(dnStatus)){
+			totalCount   = (Long)query2.uniqueResult();
+		}
+		
 		ArrayList<TripDetailsDo> result = (ArrayList<TripDetailsDo>) query.list();
-		return exportList(result);
+		res.setTotalCount(totalCount);
+		res.setData(exportList(result));
+		return res;
 	}
 
 	/***
@@ -905,24 +931,36 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 
 	}
 
-	public List<TripDetailsDTO> findTripByParamAssociatedWithAdmin(TripDetailsDTO dto, UserDetailsDTO adminDto) {
+	public ResponseDto findTripByParamAssociatedWithAdmin(TripDetailsDTO dto, UserDetailsDTO adminDto, String dnStatus) {
 		
 		boolean isSuperAdmin = false;
 		String hql = "";
 		String roleName = adminDto.getRole().getRoleName();
 		String userId = adminDto.getUserId();
 		// get all the user list if role is super_admin or sales_admin
+		String countHql = "";
 		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
 				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
-			hql = "SELECT t FROM TripDetailsDo AS t where t.status = :status ORDER BY t.tripId desc";
+			hql = "SELECT t FROM TripDetailsDo AS t join t.deliveryHeader dh where t.status = :status ";
+			countHql = "SELECT count(distinct t.tripId) FROM TripDetailsDo AS t join t.deliveryHeader dh  where t.status = :status ";
 			isSuperAdmin = true;
 		} else if (roleName.equals(RoleConstant.ADMIN_INSIDE_JAKARTA.getValue())
 				|| roleName.equals(RoleConstant.ADMIN_OUTSIDE_JAKARTA.getValue())) {
-			hql = " SELECT distinct t FROM TripDetailsDo AS t where t.createdBy = :createdBy AND (t.status = :status or t.status is null) ORDER BY t.tripId desc";
+			hql = " SELECT distinct t FROM TripDetailsDo AS t join t.deliveryHeader dh  where t.createdBy = :createdBy AND (t.status = :status) ";
+			countHql = " SELECT count(distinct t.tripId) FROM TripDetailsDo AS t join t.deliveryHeader dh where t.createdBy = :createdBy AND (t.status = :status) ";
 		} else if (roleName.equals(RoleConstant.COURIER_ADMIN.getValue())) {
-			hql = " SELECT distinct t FROM TripDetailsDo AS t where t.user.createdBy = :createdBy AND (t.status = :status or t.status is null) ORDER BY t.tripId desc";
+			hql = " SELECT distinct t FROM TripDetailsDo AS t join t.deliveryHeader dh  where t.user.createdBy = :createdBy AND (t.status = :status) ";
+			countHql = " SELECT count(distinct t.tripId) FROM TripDetailsDo AS t join t.deliveryHeader dh where t.user.createdBy = :createdBy AND (t.status = :status) ";
 		}
+		
+		if(!ServicesUtil.isEmpty(dnStatus)){
+			hql+= " AND dh.status = :dnStatus ";
+			countHql += " AND dh.status = :dnStatus ";
+		}
+		
+		hql += " ORDER BY t.tripId desc";
 		Query query = getSession().createQuery(hql);
+		Query countQuery   =  getSession().createQuery(countHql);
 		if (!isSuperAdmin) {
 			/*
 			 * if (ServicesUtil.isEmpty(wareHouseIds)) return new
@@ -931,14 +969,27 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			 * query.setParameterList("warehouselist", wareHouseIds);
 			 */
 			query.setParameter("createdBy", userId);
+			countQuery.setParameter("createdBy", userId);
 			// [1051, 1101, 11S1]
 		}
+		Long totalCount = 0L;
+		
 		query.setParameter("status", dto.getStatus());
+		countQuery.setParameter("status", dto.getStatus());
 		query.setFirstResult(PaginationUtil.FIRST_RESULT);
 		query.setMaxResults(PaginationUtil.MAX_RESULT);
 
-		ArrayList<TripDetailsDo> result = (ArrayList<TripDetailsDo>) query.list();
-		return exportList(result);
+		if(!ServicesUtil.isEmpty(dnStatus)){
+			query.setParameter("dnStatus", dnStatus);
+			countQuery.setParameter("dnStatus", dnStatus);
+			
+			totalCount   = (Long)countQuery.uniqueResult();
+		}
 		
+		ArrayList<TripDetailsDo> result = (ArrayList<TripDetailsDo>) query.list();
+		ResponseDto  res = new  ResponseDto();
+		res.setData(exportList(result));
+		res.setTotalCount(totalCount);
+		return res;
 	}
 }
