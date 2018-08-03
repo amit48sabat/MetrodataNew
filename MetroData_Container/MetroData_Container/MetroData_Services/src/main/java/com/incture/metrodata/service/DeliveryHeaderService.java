@@ -361,18 +361,17 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 	 * get admins warehouse delivery note
 	 */
 	@Override
-	public ResponseDto getAllDeliveryNoteByAdminsWareHouse(UserDetailsDTO adminDto) {
+	public ResponseDto getAllDeliveryNoteByAdminsWareHouse(UserDetailsDTO adminDto, Long dnId) {
 		ResponseDto responseDto = new ResponseDto();
 
 		try {
 
 			// adminDto = userDao.findById(adminDto);
-			Object userList = deliveryHeaderDao.getAllDeliveryNoteByAdminsWareHouse(adminDto.getUserId(),
-					adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails());
+			responseDto = deliveryHeaderDao.getAllDeliveryNoteByAdminsWareHouse(adminDto.getUserId(),
+					adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails(),dnId);
 
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
-			responseDto.setData(userList);
 			responseDto.setMessage(Message.SUCCESS.getValue());
 		} catch (Exception e) {
 			responseDto.setStatus(false);
@@ -443,7 +442,7 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 			LOGGER.error("INSIDE REFESH DELIVERY NOTE LIST FROM ECC. REQUEST PAYLOAD ");
 
 			fetchTheDeliveryNotesFromECC();
-			responseDto = getAllDeliveryNoteByAdminsWareHouse(dto);
+			responseDto = getAllDeliveryNoteByAdminsWareHouse(dto,0L);
 		} catch (Exception e) {
 			responseDto.setStatus(false);
 			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);

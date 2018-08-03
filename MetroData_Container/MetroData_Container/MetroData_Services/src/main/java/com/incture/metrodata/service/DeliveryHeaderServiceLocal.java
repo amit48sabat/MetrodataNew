@@ -29,7 +29,7 @@ public interface DeliveryHeaderServiceLocal {
 
 	ResponseDto findById(Long deliveryNoteId);
      
-	ResponseDto getAllDeliveryNoteByAdminsWareHouse(UserDetailsDTO  adminDto);
+	ResponseDto getAllDeliveryNoteByAdminsWareHouse(UserDetailsDTO  adminDto, Long dnId);
 
 	ResponseDto getDeliveryNoteByStatus(UserDetailsDTO adminDto,String deliveryNoteId);
 

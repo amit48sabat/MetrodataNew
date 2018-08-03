@@ -69,7 +69,8 @@ class DeliveryHeaderController {
 	@RequestMapping(method = RequestMethod.GET)
 	public @ResponseBody ResponseDto findAllDeliveryHeaders(HttpServletRequest request,
 			@RequestParam(value = "firstResult", defaultValue = "0") String firstResult,
-			@RequestParam(value = "maxResult", defaultValue = "0") String maxResult) {
+			@RequestParam(value = "maxResult", defaultValue = "0") String maxResult,
+			@RequestParam(value = "dnId", defaultValue = "0") Long dnId ) {
 
 		// setting pagination
 		ServicesUtil.setPagination(firstResult, maxResult);
@@ -89,7 +90,7 @@ class DeliveryHeaderController {
 
 		UserDetailsDTO dto = (UserDetailsDTO) res.getData();
 		LOGGER.error("INSIDE FIND ALL DELIVERY NOTE CONTROLLER. USER ID "+userId);
-		return deliveryHeaderServiceLocal.getAllDeliveryNoteByAdminsWareHouse(dto);
+		return deliveryHeaderServiceLocal.getAllDeliveryNoteByAdminsWareHouse(dto,dnId);
 	}
 
 	@RequestMapping(value = "/status", method = RequestMethod.GET)

@@ -20,6 +20,7 @@ import com.incture.metrodata.constant.DeliveryNoteStatus;
 import com.incture.metrodata.constant.RoleConstant;
 import com.incture.metrodata.dto.DeliveryHeaderDTO;
 import com.incture.metrodata.dto.DeliveryItemDTO;
+import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.WareHouseDetailsDTO;
 import com.incture.metrodata.entity.DeliveryHeaderDo;
 import com.incture.metrodata.entity.DeliveryItemDo;
@@ -382,33 +383,67 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<DeliveryHeaderDTO> getAllDeliveryNoteByAdminsWareHouse(String adminId, String roleName,
-			Set<WareHouseDetailsDTO> wareHouseDetails) {
+	public ResponseDto getAllDeliveryNoteByAdminsWareHouse(String adminId, String roleName,
+			Set<WareHouseDetailsDTO> wareHouseDetails, Long dnId) {
 		List<String> wareHouseIds = new ArrayList<String>();
 		for (WareHouseDetailsDTO wareHouse : wareHouseDetails)
 			wareHouseIds.add(wareHouse.getWareHouseId());
 		boolean isSuperAdmin = false;
+		ArrayList<DeliveryHeaderDo> result = null;
+		ResponseDto responseDto = new  ResponseDto();
+		String countHql = "";
 		String hql = "";
 		// get all the user list if role is super_admin or sales_admin
 		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
 				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
-			hql = "SELECT d FROM DeliveryHeaderDo AS d WHERE d.tripped = false AND d.status != 'rfc_del_note_invalidated' ORDER BY d.createdAt desc";
+			hql = "SELECT d FROM DeliveryHeaderDo AS d WHERE d.tripped = false AND d.status != 'rfc_del_note_invalidated' ";
+			countHql = "SELECT count(distinct d.deliveryNoteId) FROM DeliveryHeaderDo AS d WHERE d.tripped = false AND d.status != 'rfc_del_note_invalidated' ";
 			isSuperAdmin = true;
 		} else
-			hql = "SELECT d FROM DeliveryHeaderDo AS d inner join d.wareHouseDetails w WHERE d.tripped = false  AND d.status != 'rfc_del_note_invalidated' AND w.wareHouseId IN (:warehouselist) ORDER BY d.createdAt desc";
+			{
+			    hql = "SELECT d FROM DeliveryHeaderDo AS d inner join d.wareHouseDetails w WHERE d.tripped = false  AND d.status != 'rfc_del_note_invalidated' AND w.wareHouseId IN (:warehouselist) ";
+			    countHql = "SELECT count(distinct d.deliveryNoteId) FROM DeliveryHeaderDo AS d inner join d.wareHouseDetails w WHERE d.tripped = false  AND d.status != 'rfc_del_note_invalidated' AND w.wareHouseId IN (:warehouselist) ";
+			}
+		
+		if(!ServicesUtil.isEmpty(dnId)){
+			hql += " And d.deliveryNoteId = :deliveryNoteId ";
+			countHql += " And d.deliveryNoteId = :deliveryNoteId ";
+		}
+		else
+		hql += " ORDER BY d.createdAt desc";
+		
 		Query query = getSession().createQuery(hql);
-		query.setFirstResult(PaginationUtil.FIRST_RESULT);
-		query.setMaxResults(PaginationUtil.MAX_RESULT);
+		Query totalQuery  =  getSession().createQuery(countHql);
+		
 		if (!isSuperAdmin) {
 			// send no data on if warehouse if is empty
 			if (ServicesUtil.isEmpty(wareHouseIds))
-				return new ArrayList<DeliveryHeaderDTO>();
-
+				result = new ArrayList<DeliveryHeaderDo>();
+			totalQuery.setParameterList("warehouselist", wareHouseIds);
 			query.setParameterList("warehouselist", wareHouseIds);
 		}
-
-		ArrayList<DeliveryHeaderDo> result = (ArrayList<DeliveryHeaderDo>) query.list();
-		return exportList(result);
+		
+		Long totalCount = 0L;
+		if(!ServicesUtil.isEmpty(dnId)){
+			
+			totalQuery.setParameter("deliveryNoteId", dnId);
+			query.setParameter("deliveryNoteId", dnId);
+			
+			DeliveryHeaderDo deliveryNoteDo = (DeliveryHeaderDo) query.uniqueResult();
+			result =new ArrayList<>();
+			result.add(deliveryNoteDo);
+		}
+		else{
+			totalCount = (Long) totalQuery.uniqueResult();
+			
+			query.setFirstResult(PaginationUtil.FIRST_RESULT);
+			query.setMaxResults(PaginationUtil.MAX_RESULT);
+			result = (ArrayList<DeliveryHeaderDo>) query.list();
+		}
+		 
+		responseDto.setData(result);
+		responseDto.setTotalCount(totalCount);
+		return responseDto;
 
 	}
 
