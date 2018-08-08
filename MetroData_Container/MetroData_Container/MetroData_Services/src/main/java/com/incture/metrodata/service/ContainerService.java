@@ -507,8 +507,8 @@ public class ContainerService implements ContainerServiceLocal {
 				 */
 
 				// set other params
-				if (!ServicesUtil.isEmpty(d.getCREATEDT())) {
-					Date eccCreatedDate = new SimpleDateFormat("yyyy-MM-dd").parse(d.getCREATEDT());
+				if (!ServicesUtil.isEmpty(d.getCREATEDT()) && !ServicesUtil.isEmpty(d.getCREATETM())) {
+					Date eccCreatedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(d.getCREATEDT()+" "+d.getCREATETM());
 					dos.setCreatedDate(eccCreatedDate);
 				}
 
