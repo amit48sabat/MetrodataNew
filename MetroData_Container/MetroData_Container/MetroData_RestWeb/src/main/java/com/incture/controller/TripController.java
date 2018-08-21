@@ -119,7 +119,7 @@ public class TripController {
 			@RequestParam(value = "dnStatus", defaultValue = "") String dnStatus ) {
 		
 		// setting pagination
-		ServicesUtil.setPagination(firstResult, maxResult);
+		ServicesUtil.setPagination(firstResult, maxResult); 
 		
 		ResponseDto res = new ResponseDto();
 		String userId = "";
