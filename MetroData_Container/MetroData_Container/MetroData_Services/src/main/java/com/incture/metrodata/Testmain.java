@@ -1,10 +1,14 @@
 package com.incture.metrodata;
 
-import java.text.ParseException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.incture.metrodata.service.SequenceNumberGen;
+import com.incture.metrodata.util.ServicesUtil;
 
 class MergeSort {
 
@@ -58,23 +62,14 @@ class MergeSort {
 public class Testmain {
 
 	public static void main(String[] args) {
-		int a[] = { 100, 4, 200, 1, 3, 2 };
-		/*
-		 * MergeSort m = new MergeSort(); m.mergesort(a, 0, a.length-1);
-		 * 
-		 * for (int i = 0; i <a.length; i++) System.out.println(a[i]);
-		 */
+		Long str = 1534813490083L;
+		Date today;
+		String dateOut;
+		DateFormat dateFormatter;
 
-		String d = "2018-07-04 23:15:36";
-		Date ecc;
-		try {
-			ecc = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(d);
-			System.out.println(ecc);
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+		new Date(Long.valueOf(str));
+		System.out.println(ServicesUtil.convertTime(str));
+		System.out.println(new Date());
 	}
 
 	public static int longestConsecutive(int[] num) {

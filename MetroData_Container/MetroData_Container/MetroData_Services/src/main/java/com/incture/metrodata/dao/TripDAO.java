@@ -309,7 +309,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		Criteria criteria = getSession().createCriteria(TripDetailsDo.class);
 		Criteria userCriteria = criteria.createCriteria("user");
 		userCriteria.add(Restrictions.eq("userId", userId));
-		criteria.addOrder(Order.desc("createdAt"));
+		criteria.addOrder(Order.desc("updatedAt"));
 
 		if (!ServicesUtil.isEmpty(start) && !ServicesUtil.isEmpty(end)) {
 			criteria.add(Restrictions.ge("endTime", new Date(start)));
@@ -931,36 +931,53 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 
 	}
 
-	public ResponseDto findTripByParamAssociatedWithAdmin(TripDetailsDTO dto, UserDetailsDTO adminDto, String dnStatus) {
+	public ResponseDto findTripByParamAssociatedWithAdmin(TripDetailsDTO dto, Map<String, Object> paramMap) {
+		
+		UserDetailsDTO adminDto = paramMap.containsKey("adminDto") ? (UserDetailsDTO) paramMap.get("adminDto") : null;
+		String dnStatus = paramMap.containsKey("dnStatus") ? (String) paramMap.get("dnStatus") : "";
+	    List<String> warehouseList = paramMap.containsKey("warehouseList") ? (List<String>) paramMap.get("warehouseList") : null;
+		Date from = paramMap.containsKey("from") ? (Date) paramMap.get("from") : null;
+		Date to = paramMap.containsKey("to") ? (Date) paramMap.get("to") : null;
 		
 		boolean isSuperAdmin = false;
-		String hql = "";
+		StringBuffer hql = new StringBuffer("");
+		
 		String roleName = adminDto.getRole().getRoleName();
 		String userId = adminDto.getUserId();
 		// get all the user list if role is super_admin or sales_admin
-		String countHql = "";
+		StringBuffer countHql = new StringBuffer("");
 		if (roleName.equals(RoleConstant.SUPER_ADMIN.getValue())
 				|| roleName.equals(RoleConstant.SALES_ADMIN.getValue())) {
-			hql = "SELECT t FROM TripDetailsDo AS t join t.deliveryHeader dh where t.status = :status ";
-			countHql = "SELECT count(distinct t.tripId) FROM TripDetailsDo AS t join t.deliveryHeader dh  where t.status = :status ";
+			hql.append("SELECT distinct t FROM TripDetailsDo AS t join t.deliveryHeader dh join dh.wareHouseDetails w where t.status = :status ");
+			countHql.append("SELECT count(distinct t.tripId) FROM TripDetailsDo AS t join t.deliveryHeader dh join dh.wareHouseDetails w where t.status = :status ");
 			isSuperAdmin = true;
 		} else if (roleName.equals(RoleConstant.ADMIN_INSIDE_JAKARTA.getValue())
 				|| roleName.equals(RoleConstant.ADMIN_OUTSIDE_JAKARTA.getValue())) {
-			hql = " SELECT distinct t FROM TripDetailsDo AS t join t.deliveryHeader dh  where t.createdBy = :createdBy AND (t.status = :status) ";
-			countHql = " SELECT count(distinct t.tripId) FROM TripDetailsDo AS t join t.deliveryHeader dh where t.createdBy = :createdBy AND (t.status = :status) ";
+			hql.append(" SELECT distinct t FROM TripDetailsDo AS t join t.deliveryHeader dh  join dh.wareHouseDetails w where t.createdBy = :createdBy AND (t.status = :status) ");
+			countHql.append(" SELECT count(distinct t.tripId) FROM TripDetailsDo AS t join t.deliveryHeader dh  join dh.wareHouseDetails w where t.createdBy = :createdBy AND (t.status = :status) ");
 		} else if (roleName.equals(RoleConstant.COURIER_ADMIN.getValue())) {
-			hql = " SELECT distinct t FROM TripDetailsDo AS t join t.deliveryHeader dh  where t.user.createdBy = :createdBy AND (t.status = :status) ";
-			countHql = " SELECT count(distinct t.tripId) FROM TripDetailsDo AS t join t.deliveryHeader dh where t.user.createdBy = :createdBy AND (t.status = :status) ";
+			hql.append(" SELECT distinct t FROM TripDetailsDo AS t join t.deliveryHeader dh  join dh.wareHouseDetails w  where t.user.createdBy = :createdBy AND (t.status = :status) ");
+			countHql.append(" SELECT count(distinct t.tripId) FROM TripDetailsDo AS t join t.deliveryHeader dh  join dh.wareHouseDetails w where t.user.createdBy = :createdBy AND (t.status = :status) ");
 		}
 		
 		if(!ServicesUtil.isEmpty(dnStatus)){
-			hql+= " AND dh.status = :dnStatus ";
-			countHql += " AND dh.status = :dnStatus ";
+			hql.append(" AND dh.status = :dnStatus ");
+			countHql.append(" AND dh.status = :dnStatus ");
 		}
 		
-		hql += " ORDER BY t.tripId desc";
-		Query query = getSession().createQuery(hql);
-		Query countQuery   =  getSession().createQuery(countHql);
+		if(!ServicesUtil.isEmpty(warehouseList)){
+			hql.append(" AND w.wareHouseId in (:warehouseList) ");	
+			countHql.append(" AND w.wareHouseId in (:warehouseList) ");	
+		}
+		
+		if(!ServicesUtil.isEmpty(from) && !ServicesUtil.isEmpty(to)){
+			hql.append(" AND ( (t.createdAt between :from and :to) OR (t.startTime between :from and :to) OR (t.endTime between :from and :to)) ");	
+			countHql.append(" AND ( (t.createdAt between :from and :to) OR (t.startTime between :from and :to) OR (t.endTime between :from and :to)) ");	
+		}
+		
+		hql.append(" ORDER BY t.tripId desc");
+		Query query = getSession().createQuery(hql.toString());
+		Query countQuery   =  getSession().createQuery(countHql.toString());
 		if (!isSuperAdmin) {
 			/*
 			 * if (ServicesUtil.isEmpty(wareHouseIds)) return new
@@ -968,10 +985,23 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			 * 
 			 * query.setParameterList("warehouselist", wareHouseIds);
 			 */
+			
 			query.setParameter("createdBy", userId);
 			countQuery.setParameter("createdBy", userId);
 			// [1051, 1101, 11S1]
 		}
+		if(!ServicesUtil.isEmpty(warehouseList)){
+			query.setParameterList("warehouseList", warehouseList);
+			countQuery.setParameterList("warehouseList", warehouseList);
+		}
+		if(!ServicesUtil.isEmpty(from) && !ServicesUtil.isEmpty(to)){
+			query.setParameter("from", from);
+			query.setParameter("to", to);
+			
+			countQuery.setParameter("from", from);
+			countQuery.setParameter("to", to);
+		}
+		
 		Long totalCount = 0L;
 		
 		query.setParameter("status", dto.getStatus());

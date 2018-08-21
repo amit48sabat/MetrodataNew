@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
@@ -314,6 +315,10 @@ public class ServicesUtil {
 			PaginationUtil.FIRST_RESULT = 0;
 			PaginationUtil.MAX_RESULT = 0;
 		}
+	}
+	
+	public static Date convertTime(long time){
+	   return new Date(time);
 	}
 	
 }

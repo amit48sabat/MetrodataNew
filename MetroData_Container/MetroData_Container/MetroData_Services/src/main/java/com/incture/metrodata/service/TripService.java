@@ -90,7 +90,7 @@ public class TripService implements TripServiceLocal {
 			
 			// assigning tripId before processing
 			String year = Calendar.getInstance().get(Calendar.YEAR) + "";
-			year  = year.substring(2);
+			year = year.substring(2);
 			String tripId = SequenceNumberGen.getInstance().getNextSeqNumber("TRIP"+year, 6, tripDao.getSession());
 			dto.setTripId(tripId);
 
@@ -244,7 +244,7 @@ public class TripService implements TripServiceLocal {
 	 */
 
 	@Override
-	public ResponseDto findByParam(TripDetailsDTO dto, UserDetailsDTO adminDto, String dnStatus) {
+	public ResponseDto findByParam(TripDetailsDTO dto,Map<String, Object> paramMap) {
 		ResponseDto responseDto = new ResponseDto();
 		try {
 			// find by trip id if trip ID is set or else by trip status
@@ -266,7 +266,7 @@ public class TripService implements TripServiceLocal {
 					}
 				responseDto.setData(trip);
 			} else {
-				responseDto = tripDao.findTripByParamAssociatedWithAdmin(dto, adminDto,dnStatus);
+				responseDto = tripDao.findTripByParamAssociatedWithAdmin(dto,paramMap);
 			}
 
 			LOGGER.error("INSIDE FIND TRIP BY PARAM SERVICE. REQUEST PAYLOAD => "+dto);

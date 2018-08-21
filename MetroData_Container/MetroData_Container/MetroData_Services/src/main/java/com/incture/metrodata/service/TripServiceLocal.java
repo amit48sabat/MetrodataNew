@@ -1,5 +1,7 @@
 package com.incture.metrodata.service;
 
+import java.util.Map;
+
 import com.incture.metrodata.dto.FilterDTO;
 import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.TripDetailsDTO;
@@ -12,7 +14,7 @@ public interface TripServiceLocal {
 
 	// ResponseDto findById(String requestNo);
 
-	ResponseDto findByParam(TripDetailsDTO dto, UserDetailsDTO adminDto, String dnStatus);
+	ResponseDto findByParam(TripDetailsDTO dto,  Map<String, Object> parmMap);
 
 	ResponseDto delete(String tripId);
 

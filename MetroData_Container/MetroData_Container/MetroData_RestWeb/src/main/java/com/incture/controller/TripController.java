@@ -4,6 +4,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.Timestamp;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -114,12 +119,15 @@ public class TripController {
 
 	@RequestMapping(value = "/search", method = RequestMethod.PUT)
 	public ResponseDto find(@RequestBody TripDetailsDTO dto, HttpServletRequest request,
-			@RequestParam(value = "firstResult", defaultValue = "0") String firstResult,
-			@RequestParam(value = "maxResult", defaultValue = "0") String maxResult,
-			@RequestParam(value = "dnStatus", defaultValue = "") String dnStatus ) {
+			@RequestParam(defaultValue = "0") String firstResult,
+			@RequestParam(defaultValue = "0") String maxResult,
+			@RequestParam(defaultValue = "") String dnStatus,
+			@RequestParam(required=false) List<String> warehouseList,
+			@RequestParam(required=false) Long from,
+            @RequestParam(required=false) Long to) {
 		
 		// setting pagination
-		ServicesUtil.setPagination(firstResult, maxResult); 
+		ServicesUtil.setPagination(firstResult, maxResult);
 		
 		ResponseDto res = new ResponseDto();
 		String userId = "";
@@ -136,7 +144,15 @@ public class TripController {
 
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
 		LOGGER.error("INSIDE FIND TRIP CONTROLLER WITH USER ID " + userId);
-		return tripService.findByParam(dto, adminDto, dnStatus);
+		
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+		paramMap.put("adminDto", adminDto);
+		paramMap.put("dnStatus", dnStatus);
+		paramMap.put("warehouseList", warehouseList);
+		paramMap.put("from", ServicesUtil.convertTime(from));
+		paramMap.put("to", ServicesUtil.convertTime(to));
+		
+		return tripService.findByParam(dto, paramMap);
 	}
 
 	@RequestMapping(value = "/{tripId}", method = RequestMethod.PUT)
