@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -88,7 +89,9 @@ public class TripService implements TripServiceLocal {
 			dto.setStatus(TripStatus.TRIP_STATUS_CREATED.getValue());
 			
 			// assigning tripId before processing
-			String tripId = SequenceNumberGen.getInstance().getNextSeqNumber("TRIP", 8, tripDao.getSession());
+			String year = Calendar.getInstance().get(Calendar.YEAR) + "";
+			year  = year.substring(2);
+			String tripId = SequenceNumberGen.getInstance().getNextSeqNumber("TRIP"+year, 6, tripDao.getSession());
 			dto.setTripId(tripId);
 
 			/*
