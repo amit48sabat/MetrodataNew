@@ -93,7 +93,10 @@ public class TripController {
 	public ResponseDto findAllTrips(HttpServletRequest request,
 			@RequestParam(value = "firstResult", defaultValue = "0") String firstResult,
 			@RequestParam(value = "maxResult", defaultValue = "0") String maxResult,
-			@RequestParam(value = "dnStatus", defaultValue = "") String dnStatus ){
+			@RequestParam(value = "dnStatus", defaultValue = "") String dnStatus,
+			@RequestParam(required=false) List<String> warehouseList,
+			@RequestParam(required=false) Long from,
+            @RequestParam(required=false) Long to ){
 
 		// setting pagination
 		ServicesUtil.setPagination(firstResult, maxResult);
@@ -113,8 +116,16 @@ public class TripController {
 
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
 
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+		paramMap.put("adminDto", adminDto);
+		paramMap.put("dnStatus", dnStatus);
+		paramMap.put("warehouseList", warehouseList);
+		if (!ServicesUtil.isEmpty(from) && !ServicesUtil.isEmpty(to)) {
+		paramMap.put("from", ServicesUtil.convertTime(from));
+		paramMap.put("to", ServicesUtil.convertTime(to));
+		}
 		LOGGER.error("INSIDE FIND ALL TRIPS CONTROLLER. ADMIN ID " + adminDto.getUserId());
-		return tripService.getAllTripsAssociatedWithAdminsDrivers(adminDto,dnStatus);
+		return tripService.getAllTripsAssociatedWithAdminsDrivers(paramMap);
 	}
 
 	@RequestMapping(value = "/search", method = RequestMethod.PUT)
@@ -149,8 +160,10 @@ public class TripController {
 		paramMap.put("adminDto", adminDto);
 		paramMap.put("dnStatus", dnStatus);
 		paramMap.put("warehouseList", warehouseList);
-		paramMap.put("from", ServicesUtil.convertTime(from));
-		paramMap.put("to", ServicesUtil.convertTime(to));
+		if (!ServicesUtil.isEmpty(from) && !ServicesUtil.isEmpty(to)) {
+			paramMap.put("from", ServicesUtil.convertTime(from));
+			paramMap.put("to", ServicesUtil.convertTime(to));
+		}
 		
 		return tripService.findByParam(dto, paramMap);
 	}
@@ -175,7 +188,10 @@ public class TripController {
 	}
 
 	@RequestMapping(value = "/filter", method = RequestMethod.PUT)
-	public ResponseDto filter(@RequestBody FilterDTO dto, HttpServletRequest request) {
+	public ResponseDto filter(@RequestBody FilterDTO dto, HttpServletRequest request,
+			@RequestParam(required=false) List<String> warehouseList,
+			@RequestParam(required=false) Long from,
+            @RequestParam(required=false) Long to) {
 		ResponseDto res = new ResponseDto();
 		String userId = "";
 		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
@@ -190,8 +206,18 @@ public class TripController {
 			return ServicesUtil.getUnauthorizedResponseDto();
 
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
+		
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+		paramMap.put("adminDto", adminDto);
+		paramMap.put("warehouseList", warehouseList);
+		if (!ServicesUtil.isEmpty(from) && !ServicesUtil.isEmpty(to)) {
+			paramMap.put("from", ServicesUtil.convertTime(from));
+			paramMap.put("to", ServicesUtil.convertTime(to));
+			}
 		LOGGER.error("INSIDE FILTER TRIP CONTROLLER WITH USER ID " + userId);
-		return tripService.filterTripsAsPerAdmin(adminDto, dto);
+		
+		
+		return tripService.filterTripsAsPerAdmin(paramMap,dto);
 		// return tripService.filter(dto);
 	}
 

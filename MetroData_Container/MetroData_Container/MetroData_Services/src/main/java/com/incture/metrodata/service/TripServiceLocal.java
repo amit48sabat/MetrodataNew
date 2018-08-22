@@ -35,17 +35,17 @@ public interface TripServiceLocal {
 	/***
 	 * api for finding all the trip as per admin's warehouse id
 	 */
-	ResponseDto getAllTripsAssociatedWithAdminsDrivers(UserDetailsDTO adminDto,String dnStatus);
+	ResponseDto getAllTripsAssociatedWithAdminsDrivers(Map<String, Object> paramMap);
 
 	/***
 	 * api for admin dashboard as per admin's warehouse id
 	 */
-	ResponseDto getAdminDashboardAssociatedWithAdmins(UserDetailsDTO adminDto);
+	ResponseDto getAdminDashboardAssociatedWithAdmins(Map<String, Object> paramMap);
 
 	/***
 	 * api for filtering trip as per logged in admin
 	 */
-	ResponseDto filterTripsAsPerAdmin(UserDetailsDTO adminDto, FilterDTO filterDto);
+	ResponseDto filterTripsAsPerAdmin(Map<String, Object> paramMap, FilterDTO filterDto);
 
 	/**
 	 * api for leaderboard report as per logged in admin or super_admin

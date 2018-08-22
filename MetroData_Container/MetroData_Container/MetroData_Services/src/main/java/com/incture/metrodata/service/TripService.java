@@ -573,14 +573,13 @@ public class TripService implements TripServiceLocal {
 	 * api for finding all the trip by admin's driver's warehouse ids (\/)
 	 */
 	@Override
-	public ResponseDto getAllTripsAssociatedWithAdminsDrivers(UserDetailsDTO adminDto,String dnStatus) {
+	public ResponseDto getAllTripsAssociatedWithAdminsDrivers(Map<String, Object> paramMap) {
 		ResponseDto responseDto = new ResponseDto();
 
 		try {
 			LOGGER.error("INSIDE GET ALL TRIPS ASSOCIATED WITH ADMIN");
 			// adminDto = userDao.findById(adminDto);
-			responseDto = tripDao.getAllTripsAssociatedWithAdminsDrivers(adminDto.getUserId(),
-					adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails(),dnStatus);
+			responseDto = tripDao.getAllTripsAssociatedWithAdminsDrivers(paramMap);
 
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
@@ -598,14 +597,13 @@ public class TripService implements TripServiceLocal {
 	/***
 	 * api for admin dashboard as per admin's warehouse id
 	 */
-	public ResponseDto getAdminDashboardAssociatedWithAdmins(UserDetailsDTO adminDto) {
+	public ResponseDto getAdminDashboardAssociatedWithAdmins(Map<String, Object> paramMap) {
 		ResponseDto responseDto = new ResponseDto();
 
 		try {
 
 			// adminDto = userDao.findById(adminDto);
-			Map<String, Long> adminReportData = (Map<String, Long>) tripDao.getAdminDashboardAssociatedWithAdmins(
-					adminDto.getUserId(), adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails());
+			Map<String, Long> adminReportData = (Map<String, Long>) tripDao.getAdminDashboardAssociatedWithAdmins(paramMap);
 
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
@@ -624,15 +622,14 @@ public class TripService implements TripServiceLocal {
 	 * api for filtering trip as per logged in admin (\/)
 	 */
 	@Override
-	public ResponseDto filterTripsAsPerAdmin(UserDetailsDTO adminDto, FilterDTO filterDto) {
+	public ResponseDto filterTripsAsPerAdmin(Map<String, Object> paramMap, FilterDTO filterDto) {
 		ResponseDto responseDto = new ResponseDto();
 
 		try {
 
 			// adminDto = userDao.findById(adminDto);
 
-			List<TripDetailsDTO> data = tripDao.getFilteredTripsAssociatedWithAdmins(filterDto, adminDto.getUserId(),
-					adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails());
+			List<TripDetailsDTO> data = tripDao.getFilteredTripsAssociatedWithAdmins(filterDto, paramMap);
 
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
