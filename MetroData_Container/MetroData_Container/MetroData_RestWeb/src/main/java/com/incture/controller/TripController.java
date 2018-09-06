@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Timestamp;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -73,18 +74,17 @@ public class TripController {
 		dto.setCreatedBy(userId);
 		dto.setUpdatedBy(userId);
 		dto.setTrackFreq(adminDto.getTrackFreq());
-		
-		LOGGER.error("INSIDE CREATE TRIP CONTROLLER. TRIP CREATOR ID "+userId);
-		try{
+
+		LOGGER.error("INSIDE CREATE TRIP CONTROLLER. TRIP CREATOR ID " + userId);
+		try {
 			res = tripService.create(dto);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			res.setStatus(false);
 			//// LOGGER.error("ERROR WHILE CREATING TRIP : " +e.getMessage());
 			res.setCode(500);
 			res.setData(null);
 			res.setMessage(Message.FAILED + " : " + "delivery note is already a part of trip.");
-			//e.printStackTrace();
+			// e.printStackTrace();
 		}
 		return res;
 	}
@@ -94,9 +94,12 @@ public class TripController {
 			@RequestParam(value = "firstResult", defaultValue = "0") String firstResult,
 			@RequestParam(value = "maxResult", defaultValue = "0") String maxResult,
 			@RequestParam(value = "dnStatus", defaultValue = "") String dnStatus,
-			@RequestParam(required=false) List<String> warehouseList,
-			@RequestParam(required=false) Long from,
-            @RequestParam(required=false) Long to ){
+			@RequestParam(required = false) Long from, @RequestParam(required = false) Long to,
+			@RequestParam(value = "warehouseList", required = false) String warehouses) {
+		List<String> warehouseList = null;
+		if (!ServicesUtil.isEmpty(warehouses)) {
+			warehouseList = Arrays.asList(warehouses.split(","));
+		}
 
 		// setting pagination
 		ServicesUtil.setPagination(firstResult, maxResult);
@@ -121,8 +124,8 @@ public class TripController {
 		paramMap.put("dnStatus", dnStatus);
 		paramMap.put("warehouseList", warehouseList);
 		if (!ServicesUtil.isEmpty(from) && !ServicesUtil.isEmpty(to)) {
-		paramMap.put("from", ServicesUtil.convertTime(from));
-		paramMap.put("to", ServicesUtil.convertTime(to));
+			paramMap.put("from", ServicesUtil.convertTime(from));
+			paramMap.put("to", ServicesUtil.convertTime(to));
 		}
 		LOGGER.error("INSIDE FIND ALL TRIPS CONTROLLER. ADMIN ID " + adminDto.getUserId());
 		return tripService.getAllTripsAssociatedWithAdminsDrivers(paramMap);
@@ -130,16 +133,18 @@ public class TripController {
 
 	@RequestMapping(value = "/search", method = RequestMethod.PUT)
 	public ResponseDto find(@RequestBody TripDetailsDTO dto, HttpServletRequest request,
-			@RequestParam(defaultValue = "0") String firstResult,
-			@RequestParam(defaultValue = "0") String maxResult,
-			@RequestParam(defaultValue = "") String dnStatus,
-			@RequestParam(required=false) List<String> warehouseList,
-			@RequestParam(required=false) Long from,
-            @RequestParam(required=false) Long to) {
-		
+			@RequestParam(defaultValue = "0") String firstResult, @RequestParam(defaultValue = "0") String maxResult,
+			@RequestParam(defaultValue = "") String dnStatus, @RequestParam(required = false) Long from,
+			@RequestParam(required = false) Long to,
+			@RequestParam(value = "warehouseList", required = false) String warehouses) {
+		List<String> warehouseList = null;
+		if (!ServicesUtil.isEmpty(warehouses)) {
+			warehouseList = Arrays.asList(warehouses.split(","));
+		}
+
 		// setting pagination
 		ServicesUtil.setPagination(firstResult, maxResult);
-		
+
 		ResponseDto res = new ResponseDto();
 		String userId = "";
 		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
@@ -155,7 +160,7 @@ public class TripController {
 
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
 		LOGGER.error("INSIDE FIND TRIP CONTROLLER WITH USER ID " + userId);
-		
+
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put("adminDto", adminDto);
 		paramMap.put("dnStatus", dnStatus);
@@ -164,7 +169,7 @@ public class TripController {
 			paramMap.put("from", ServicesUtil.convertTime(from));
 			paramMap.put("to", ServicesUtil.convertTime(to));
 		}
-		
+
 		return tripService.findByParam(dto, paramMap);
 	}
 
@@ -189,9 +194,12 @@ public class TripController {
 
 	@RequestMapping(value = "/filter", method = RequestMethod.PUT)
 	public ResponseDto filter(@RequestBody FilterDTO dto, HttpServletRequest request,
-			@RequestParam(required=false) List<String> warehouseList,
-			@RequestParam(required=false) Long from,
-            @RequestParam(required=false) Long to) {
+			@RequestParam(required = false) Long from, @RequestParam(required = false) Long to,
+			@RequestParam(value = "warehouseList", required = false) String warehouses) {
+		List<String> warehouseList = null;
+		if (!ServicesUtil.isEmpty(warehouses)) {
+			warehouseList = Arrays.asList(warehouses.split(","));
+		}
 		ResponseDto res = new ResponseDto();
 		String userId = "";
 		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
@@ -206,18 +214,17 @@ public class TripController {
 			return ServicesUtil.getUnauthorizedResponseDto();
 
 		UserDetailsDTO adminDto = (UserDetailsDTO) res.getData();
-		
+
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put("adminDto", adminDto);
 		paramMap.put("warehouseList", warehouseList);
 		if (!ServicesUtil.isEmpty(from) && !ServicesUtil.isEmpty(to)) {
 			paramMap.put("from", ServicesUtil.convertTime(from));
 			paramMap.put("to", ServicesUtil.convertTime(to));
-			}
+		}
 		LOGGER.error("INSIDE FILTER TRIP CONTROLLER WITH USER ID " + userId);
-		
-		
-		return tripService.filterTripsAsPerAdmin(paramMap,dto);
+
+		return tripService.filterTripsAsPerAdmin(paramMap, dto);
 		// return tripService.filter(dto);
 	}
 

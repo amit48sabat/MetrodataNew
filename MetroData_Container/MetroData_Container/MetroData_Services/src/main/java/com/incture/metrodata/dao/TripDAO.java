@@ -604,7 +604,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		query.setMaxResults(PaginationUtil.MAX_RESULT);
 
 		
-			totalCount = (Long) query2.uniqueResult();
+		totalCount = (Long) query2.uniqueResult();
 		
 		ArrayList<TripDetailsDo> result = (ArrayList<TripDetailsDo>) query.list();
 		res.setTotalCount(totalCount);
@@ -1221,10 +1221,9 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		if (!ServicesUtil.isEmpty(dnStatus)) {
 			query.setParameter("dnStatus", dnStatus);
 			countQuery.setParameter("dnStatus", dnStatus);
-
-			totalCount = (Long) countQuery.uniqueResult();
 		}
-
+		totalCount = (Long) countQuery.uniqueResult();
+		
 		ArrayList<TripDetailsDo> result = (ArrayList<TripDetailsDo>) query.list();
 		ResponseDto res = new ResponseDto();
 		res.setData(exportList(result));
