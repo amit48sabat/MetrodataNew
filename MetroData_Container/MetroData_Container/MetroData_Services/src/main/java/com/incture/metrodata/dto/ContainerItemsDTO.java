@@ -1,5 +1,7 @@
 package com.incture.metrodata.dto;
 
+import java.util.List;
+
 import com.incture.metrodata.exceptions.InvalidInputFault;
 import com.incture.metrodata.util.DB_Operation;
 
@@ -11,7 +13,7 @@ import lombok.ToString;
 @Setter
 @ToString
 public class ContainerItemsDTO extends BaseDto{
-	Object ITEM ;
+	List<ContainerDetailsDTO> ITEM ;
 
 	@Override
 	public void validate(DB_Operation enOperation) throws InvalidInputFault {

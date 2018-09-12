@@ -23,4 +23,6 @@ public interface ContainerServiceLocal {
 	Object test(Long id);
 
 	ContainerRecordsDTO getContainerRecordById(Long id);
+
+	//ContainerDTO stringPayloadToContainerDto(String controllerJson);
 }

@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.Gson;
 import com.incture.metrodata.dto.ContainerDTO;
 import com.incture.metrodata.dto.ContainerDetailsDTO;
 import com.incture.metrodata.dto.ContainerRecordsDTO;
@@ -34,8 +35,12 @@ public class AsyncComp implements AsyncCompLocal{
 		try {
 			
 
-			if (!ServicesUtil.isEmpty(data)) {
+			if (!ServicesUtil.isEmpty(data) && !ServicesUtil.isEmpty(data.get("data"))) {
 
+				String payload = (String) data.get("data");
+				Gson gson = new Gson();
+				ContainerDTO containerDTO = gson.fromJson(payload, ContainerDTO.class);
+				
 				Date timeStamp = (Date) data.get("timeStamp");
 				String jobName = (String) data.get("jobName");
 
@@ -44,7 +49,6 @@ public class AsyncComp implements AsyncCompLocal{
 				Long totalItems = 0L;
 				Long containerRecordId = (Long) data.get("containerRecordId");
 				Long totalDns = 0L;
-				ContainerDTO containerDTO = (ContainerDTO) data.get("data");
 
 				if (!ServicesUtil.isEmpty(containerDTO)) {
 					LOGGER.error(" INSIDE CONTAINER_TO_DN_PROS_JOB.");

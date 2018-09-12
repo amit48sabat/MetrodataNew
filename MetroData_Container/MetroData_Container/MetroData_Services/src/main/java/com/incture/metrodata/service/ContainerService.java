@@ -124,9 +124,10 @@ public class ContainerService implements ContainerServiceLocal {
 
 		// map to hold data for processing
 		Map<String, Object> data = new HashMap<>();
-		
 		ResponseDto response = new ResponseDto();
 		
+		
+		/*
 		Map<Object, Object> inputDataMap = new LinkedHashMap<>();
 		inputDataMap.put("inputString", controllerJson);
 
@@ -146,28 +147,32 @@ public class ContainerService implements ContainerServiceLocal {
 				list.add(d);
 			}
 		}
-		dto.getDELIVERY().setITEM(list);
-		inputDataMap.put("processObject", dto);
+		dto.getDELIVERY().setITEM(list);*/
+	//	inputDataMap.put("processObject", dto);
 		// LOGGER.error("INSIDE CREATE CONTAINER SERVIE WITH REQUEST PAYLOAD =>
 		// " + dto);
-		if (!ServicesUtil.isEmpty(dto) && !ServicesUtil.isEmpty(dto.getDELIVERY())) {
+		/*if (!ServicesUtil.isEmpty(dto) && !ServicesUtil.isEmpty(dto.getDELIVERY())) {
 			List<ContainerDetailsDTO> containerDetailsDTOs = (List<ContainerDetailsDTO>) dto.getDELIVERY().getITEM();
-
+*/
 			try {
+				
+				if(controllerJson.contains("{\"DELIVERY\":{\"ITEM\":{") && controllerJson.contains("}}}")){
+					controllerJson  = convertToContainerDetailsDTO(controllerJson);
+				 }
 
 				long timeStamp = System.currentTimeMillis();
-				String jobIdentity = "DnProcessJob" + timeStamp;
 				String group = "group" + timeStamp;
-				String triggerName = "DnProcessTrigger" + timeStamp;
+				/*String jobIdentity = "DnProcessJob" + timeStamp;
+				String triggerName = "DnProcessTrigger" + timeStamp;*/
 				String jobName = "Job" + timeStamp;
 				Date currdate = new Date();
 
-				JobDetail job = JobBuilder.newJob(ContainerToDeliveryNoteProcessingJob.class)
+				/*JobDetail job = JobBuilder.newJob(ContainerToDeliveryNoteProcessingJob.class)
 						.withIdentity(jobIdentity, group).build();
 
 				SimpleTrigger trigger = (SimpleTrigger) TriggerBuilder.newTrigger().withIdentity(triggerName, group)
 						.startNow().build();
-				Scheduler scheduler = new StdSchedulerFactory().getScheduler();
+				Scheduler scheduler = new StdSchedulerFactory().getScheduler();*/
 
 				ContainerRecordsDo recordsDo = new ContainerRecordsDo();
 				recordsDo.setPayload(controllerJson.trim());
@@ -182,18 +187,18 @@ public class ContainerService implements ContainerServiceLocal {
 				containerRecordsDAO.getSession().getTransaction().commit();
 				
 				// adding data to scheduler context
-				data.put("data", dto);
+				data.put("data", controllerJson);
 				data.put("timeStamp", currdate);
 				data.put("containerRecordId", recordsDo.getId());
 				data.put("jobName", jobName);
 
 				comp.backgroudDnProcessing(data);
 				
-				// adding data to scheduler context
+				/*// adding data to scheduler context
 				scheduler.getContext().put("data", dto);
 				scheduler.getContext().put("timeStamp", currdate);
 				scheduler.getContext().put("containerRecordId", recordsDo.getId());
-				scheduler.getContext().put("jobName", jobName);
+				scheduler.getContext().put("jobName", jobName);*/
 				
 				
 				
@@ -215,12 +220,12 @@ public class ContainerService implements ContainerServiceLocal {
 
 				/*scheduler.start();
 				scheduler.scheduleJob(job, trigger);*/
-				try {
+				/*try {
 					Thread.sleep(2000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
+				}*/
 				
 				LOGGER.error("INSIDE CREATE CONTAINER SERVICE : JOB STARTED ID [ "+jobName+" ]");
 				
@@ -241,11 +246,11 @@ public class ContainerService implements ContainerServiceLocal {
 				response.setMessage(Message.FAILED + " : " + e.toString());
 				e.printStackTrace();
 			}
-		} else {
+			/*} else {
 			response.setStatus(true);
 			response.setMessage(Message.SUCCESS.getValue());
 			response.setCode(HttpStatus.SC_OK);
-		}
+		}*/
 
 		return response;
 	}
@@ -255,11 +260,17 @@ public class ContainerService implements ContainerServiceLocal {
 		Map<Long, String> delNoteAddrMap = new HashMap<>();
 
 		Map<Long, DeliveryHeaderDo> headerMap = importDto(dto.getDELIVERY(), context, delNoteAddrMap);
-		DeliveryHeaderDo dos = null;
+		
 		int i = 0;
-		for (Map.Entry<Long, DeliveryHeaderDo> entry : headerMap.entrySet()) {
+		//for (Map.Entry<Long, DeliveryHeaderDo> entry : headerMap.entrySet()) {
+		try{
+		
+		headerMap.entrySet()
+		   .stream()
+		   .forEach(entry->{
+			DeliveryHeaderDo dos = null;
 			dos = entry.getValue();
-			i++;
+			//i++;
 			LOGGER.error(" Processing DN no => " + dos.getDeliveryNoteId());
 			UserDetailsDTO adminDto = new UserDetailsDTO();
 			adminDto.setEmail(defaultUserVo.getEmail());
@@ -381,7 +392,7 @@ public class ContainerService implements ContainerServiceLocal {
 			 * !dos.getTripped()) dos.setTripped(false); }
 			 */
 
-		}
+		//}
 
 		// marking items as deleted as they are processed
 
@@ -397,8 +408,13 @@ public class ContainerService implements ContainerServiceLocal {
 		 * + rowAffected +
 		 * " > WERE PROCESSED SUCCESSFULLY AND MARKED AS DELETED");
 		 */
+			
+		});
+		} catch (Exception e) {
+			LOGGER.error("ERROR WHILE CREATING DELIVERY_NOTE. EXCEPTION => " + e.getMessage());
+		}
 
-		return i;
+		return headerMap.size();
 
 	}
 
@@ -702,5 +718,41 @@ public class ContainerService implements ContainerServiceLocal {
 		}
 
 		return dto;
+	}
+	
+	// string payload to containerDto conversion
+	/*@SuppressWarnings("unchecked")
+	@Override
+	public ContainerDTO stringPayloadToContainerDto(String controllerJson){
+		// map to hold data for processing
+				Gson gson = new Gson();
+				ContainerDTO dto = gson.fromJson(controllerJson.toString(), ContainerDTO.class);
+				List<ContainerDetailsDTO> list = new ArrayList<>();
+				// System.out.println(dto.getDELIVERY().getITEM());
+				if (dto.getDELIVERY().getITEM() instanceof LinkedTreeMap) {
+					LinkedTreeMap<String, String> item2 = (LinkedTreeMap) dto.getDELIVERY().getITEM();
+					ContainerDetailsDTO d = getLinkedTreeMapToContainerDetailsDto(item2);
+					list.add(d);
+					// System.out.println(d.getAREACODE());
+				} else if (dto.getDELIVERY().getITEM() instanceof ArrayList) {
+					List<LinkedTreeMap> item2 = (List<LinkedTreeMap>) dto.getDELIVERY().getITEM();
+					for (LinkedTreeMap i : item2) {
+						ContainerDetailsDTO d = getLinkedTreeMapToContainerDetailsDto(i);
+						list.add(d);
+					}
+				}
+				dto.getDELIVERY().setITEM(list);
+				// LOGGER.error("INSIDE CREATE CONTAINER SERVIE WITH REQUEST PAYLOAD =>
+				// " + dto);
+				if (!ServicesUtil.isEmpty(dto) && !ServicesUtil.isEmpty(dto.getDELIVERY())) {
+					List<ContainerDetailsDTO> containerDetailsDTOs = (List<ContainerDetailsDTO>) dto.getDELIVERY().getITEM();
+
+	             }
+	  return dto;
+	}*/
+	
+	private  String convertToContainerDetailsDTO(String payload) {
+		return  payload.replace("{\"DELIVERY\":{\"ITEM\":{", "{\"DELIVERY\":{\"ITEM\":[{").replace("}}}", "}]}}");
+		
 	}
 }

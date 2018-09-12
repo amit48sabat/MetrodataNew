@@ -1,5 +1,6 @@
 package com.incture.controller;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,10 +43,16 @@ public class AdminController {
 	
 	@RequestMapping(value = "/dashboard", method = RequestMethod.GET)
 	public ResponseDto adminDashbord(HttpServletRequest request,
-			@RequestParam(required=false) List<String> warehouseList,
+			@RequestParam(value="warehouseList",required=false)  String warehouses,
 			@RequestParam(required=false) Long from,
             @RequestParam(required=false) Long to) {
 		ResponseDto res = new ResponseDto();
+		
+		List<String> warehouseList = null;
+		if(!ServicesUtil.isEmpty(warehouses)){
+			warehouseList =  Arrays.asList(warehouses.split(","));
+		}
+		
 		String userId = "";
 		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
 			userId = request.getUserPrincipal().getName();

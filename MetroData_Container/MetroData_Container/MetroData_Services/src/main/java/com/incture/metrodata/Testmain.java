@@ -1,109 +1,156 @@
 package com.incture.metrodata;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import org.quartz.SchedulerException;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.AbstractApplicationContext;
 
-import com.incture.metrodata.service.SequenceNumberGen;
+import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
+import com.incture.metrodata.configuration.AppConfig;
+import com.incture.metrodata.dto.ContainerDTO;
+import com.incture.metrodata.dto.ContainerDetailsDTO;
+import com.incture.metrodata.service.ContainerServiceLocal;
 import com.incture.metrodata.util.ServicesUtil;
 
-class MergeSort {
-
-	public void mergesort(int a[], int l, int r) {
-		if (l < r) {
-			int m = l + r / 2;
-			mergesort(a, l, m);
-			mergesort(a, m + 1, r);
-			merge(a, l, m, r);
-		}
-	}
-
-	private void merge(int[] a, int l, int m, int r) {
-		int L[] = new int[l + m + 1];
-		int R[] = new int[r - m];
-		int lc = l, mc = m, rc = r;
-		for (int i = 0; i < L.length; i++)
-			L[i] = a[lc++];
-		for (int i = 0; i < R.length; i++)
-			R[i] = a[++mc];
-
-		int k = l, i = 0, j = 0;
-		while (i < L.length && j < R.length) {
-			if (L[i] > R[j]) {
-				a[k] = R[j++];
-
-			} else {
-				a[k] = L[i++];
-				i++;
-			}
-			k++;
-		}
-
-		if (i < L.length) {
-			for (; i <= m; i++)
-				a[k++] = L[i];
-		} else if (j < R.length) {
-			for (i = j; i <= r; i++)
-				a[k++] = R[i];
-		}
-
-	}
-
-	public void swap(int a[], int i, int j) {
-		int t = a[i];
-		a[i] = a[j];
-		a[j] = t;
-	}
-}
 
 public class Testmain {
+	static AbstractApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+	
+	
+	public static void main( String[] args ) throws SchedulerException
+    {
+		String controllerJson = "{\"DELIVERY\":{\"ITEM\":[{\"SALESGRP\":\"55V-IvanaKamoto\",\"DELIVNO\":\"6569259483\",\"CREATEDT\":\"2018-01-25\",\"CREATETM\":\"14:50:30\",\"PURCHORD\":\"ponum-123\",\"REFNO\":\"2560010911\",\"SLOC\":\"W001\",\"SHIPADD\":\"item1EXECUTIVECENTREBLOKIINO.1-2JL.LAKSAMANABINTAN-SEIPANAS\",\"CITY\":\"BATAM\",\"AREACODE\":\"008-Batam\",\"TELP\":\"0778-433007\",\"SOLDADD\":\"KOMPLEKSEXECUTIVECENTREBLOKIINO.1-2JL.LAKSAMANABINTAN-SEIPANAS\",\"SHIPTYP\":\"01-Regular\",\"INSTDELV\":\"FormHeader,headernote1,headernote11,headernote111,headernote3,headernote4,\",\"SERNUM\":\"123\",\"MAT\":\"90PT01U1-M02280\",\"BATCH\":\"item1\",\"DESC\":\"ASUSAIOV221ICUK-BA035D-I36006U/4GB/\",\"QTY\":\"6.000\",\"VOL\":\"191.520\"},{\"SALESGRP\":\"55V-IvanaKamoto\",\"DELIVNO\":\"6569259483\",\"CREATEDT\":\"2018-01-25\",\"CREATETM\":\"14:50:30\",\"PURCHORD\":\"ponum-123\",\"REFNO\":\"2560010911\",\"SLOC\":\"W001\",\"SHIPADD\":\"item2EXECUTIVECENTREBLOKIINO.1-2JL.LAKSAMANABINTAN-SEIPANAS\",\"CITY\":\"BATAM\",\"AREACODE\":\"008-Batam\",\"TELP\":\"0778-433007\",\"SOLDADD\":\"KOMPLEKSEXECUTIVECENTREBLOKIINO.1-2JL.LAKSAMANABINTAN-SEIPANAS\",\"SHIPTYP\":\"01-Regular\",\"INSTDELV\":\"FormHeader,headernote1,headernote11,headernote111,headernote3,headernote4,\",\"SERNUM\":\"123\",\"MAT\":\"90PT01U1-M02280\",\"BATCH\":\"item2\",\"DESC\":\"ASUSAIOV221ICUK-BA035D-I36006U/4GB/\",\"QTY\":\"6.000\",\"VOL\":\"191.520\",\"STAT\":\"\"},{\"SALESGRP\":\"55V-IvanaKamoto\",\"DELIVNO\":\"6569259483\",\"CREATEDT\":\"2018-01-25\",\"CREATETM\":\"14:50:30\",\"PURCHORD\":\"ponum-123\",\"REFNO\":\"2560010911\",\"SLOC\":\"W001\",\"SHIPADD\":\"KOMPLEKSEXECUTIVECENTREBLOKIINO.1-2JL.LAKSAMANABINTAN-SEIPANAS\",\"CITY\":\"BATAM\",\"AREACODE\":\"008-Batam\",\"TELP\":\"0778-433007\",\"SOLDADD\":\"item3EXECUTIVECENTREBLOKIINO.1-2JL.LAKSAMANABINTAN-SEIPANAS\",\"SHIPTYP\":\"01-Regular\",\"INSTDELV\":\"FormHeader,headernote1,headernote11,headernote111,headernote3,headernote4,\",\"SERNUM\":\"2345\",\"MAT\":\"90PT01U1-M02281\",\"BATCH\":\"item3\",\"DESC\":\"ASUSAIOV221ICUK-BA035D-I36006U/4GB/\",\"QTY\":\"6.000\",\"VOL\":\"191.520\",\"STAT\":\"\"}]}}";
+		String single = "{\"DELIVERY\":{\"ITEM\":{\"SALESGRP\":\"55V-IvanaKamoto\",\"DELIVNO\":\"6569259483\",\"CREATEDT\":\"2018-01-25\",\"CREATETM\":\"14:50:30\",\"PURCHORD\":\"ponum-123\",\"REFNO\":\"2560010911\",\"SLOC\":\"W001\",\"SHIPADD\":\"item1EXECUTIVECENTREBLOKIINO.1-2JL.LAKSAMANABINTAN-SEIPANAS\",\"CITY\":\"BATAM\",\"AREACODE\":\"008-Batam\",\"TELP\":\"0778-433007\",\"SOLDADD\":\"KOMPLEKSEXECUTIVECENTREBLOKIINO.1-2JL.LAKSAMANABINTAN-SEIPANAS\",\"SHIPTYP\":\"01-Regular\",\"INSTDELV\":\"FormHeader,headernote1,headernote11,headernote111,headernote3,headernote4,\",\"SERNUM\":\"123\",\"MAT\":\"90PT01U1-M02280\",\"BATCH\":\"item1\",\"DESC\":\"ASUSAIOV221ICUK-BA035D-I36006U/4GB/\",\"QTY\":\"6.000\",\"VOL\":\"191.520\"}}}";
+		String test = "{\"DELIVERY\":{\"ITEM\":{\"SALESGRP\":\"EC1-Ecommerce001\",\"DELIVNO\":\"4557001634\",\"CREATEDT\":\"2018-06-22\",\"CREATETM\":\"13:21:02\",\"PURCHORD\":\"65\",\"REFNO\":\"2570001354\",\"SLOC\":\"1401\",\"SHIPADD\":\"SEGITIGA MAS KOSAMBI  - BLOK F-10 JL. JEND. AHMAD YANI  NO. 221 - 225\",\"CITY\":\"BANDUNG\",\"AREACODE\":\"005-Bandung\",\"TELP\":\"022-7237036\",\"SOLDADD\":\"JL.JEND.A.YANI NO.221-223 RUKO SEGITIGA MAS KOSAMBI B 6 MERDEKA - SUMUR BANDUNG\",\"SHIPTYP\":\"01-Regular\",\"INSTDELV\":\"\",\"SERNUM\":\"\",\"MAT\":\"L0R97AA\",\"BATCH\":\"\",\"DESC\":\"HP 975A BLACK ORIGINAL PAGEWIDE CRTG\",\"QTY\":\"2.000\",\"VOL\":\"576.000\",\"STAT\":\"\"}}}";
+	    String payload = test;
+		 if(payload.contains("{\"DELIVERY\":{\"ITEM\":{") && payload.contains("}}}")){
+			 payload  = convertToContainerDetailsDTO(payload);
+		 }
+		
+		
+		ContainerServiceLocal containerService = (ContainerServiceLocal) context.getBean("containerService");
+		 Gson gson = new Gson();
+		System.out.println(gson.fromJson(payload, ContainerDTO.class));
+		containerService.create(controllerJson);
+		containerService.create(single);
+		containerService.create(test);
+		//containerService.findAll();
+		/*Gson gson = new Gson();
+		ContainerDTO dto = gson.fromJson(controllerJson.toString(), ContainerDTO.class);
+		List<ContainerDetailsDTO> list = new ArrayList<>();
+		// System.out.println(dto.getDELIVERY().getITEM());
+		if (dto.getDELIVERY().getITEM() instanceof LinkedTreeMap) {
+			LinkedTreeMap<String, String> item2 = (LinkedTreeMap) dto.getDELIVERY().getITEM();
+			ContainerDetailsDTO d = getLinkedTreeMapToContainerDetailsDto(item2);
+			list.add(d);
+			// System.out.println(d.getAREACODE());
+		} else if (dto.getDELIVERY().getITEM() instanceof ArrayList) {
+			List<LinkedTreeMap> item2 = (List<LinkedTreeMap>) dto.getDELIVERY().getITEM();
+			for (LinkedTreeMap i : item2) {
+				ContainerDetailsDTO d = getLinkedTreeMapToContainerDetailsDto(i);
+				list.add(d);
+			}
+		}
+		dto.getDELIVERY().setITEM(list);
+		
+		 JobDetail job = JobBuilder.newJob(ContainerToDeliveryNoteProcessingJob.class).withIdentity("dummyJobName", "group1").build();
+		Trigger trigger = TriggerBuilder.newTrigger().withIdentity("DnProcessTrigger", "group1")
+				.startNow().build();
+		Scheduler scheduler = new StdSchedulerFactory().getScheduler();
+		scheduler.getContext().put("data", dto);
+		
+		scheduler.start();
+		scheduler.scheduleJob(job, trigger);
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		scheduler.shutdown(true);*/
 
-	public static void main(String[] args) {
-		Long str = 1534813490083L;
-		Date today;
-		String dateOut;
-		DateFormat dateFormatter;
 
-		new Date(Long.valueOf(str));
-		System.out.println(ServicesUtil.convertTime(str));
-		System.out.println(new Date());
+    }
+	
+	private static String convertToContainerDetailsDTO(String payload) {
+		return  payload.replace("{\"DELIVERY\":{\"ITEM\":{", "{\"DELIVERY\":{\"ITEM\":[{").replace("}}}", "}]}}");
+		
 	}
 
-	public static int longestConsecutive(int[] num) {
-		// if array is empty, return 0
-		if (num.length == 0) {
-			return 0;
-		}
+	static ContainerDetailsDTO getLinkedTreeMapToContainerDetailsDto(LinkedTreeMap<String, String> map) {
+		ContainerDetailsDTO dto = new ContainerDetailsDTO();
+		if ( map.containsKey("id") && !ServicesUtil.isEmpty(map.get("id")))
+			dto.setId(Long.parseLong(map.get("id")));
+		if (map.containsKey("DELIVNO") && !ServicesUtil.isEmpty(map.get("DELIVNO")))
+			dto.setDELIVNO(Long.parseLong(map.get("DELIVNO")));
+		if (map.containsKey("CREATEDT") && !ServicesUtil.isEmpty(map.get("CREATEDT")))
+			dto.setCREATEDT(map.get("CREATEDT"));
+		if (map.containsKey("CREATETM") && !ServicesUtil.isEmpty(map.get("CREATETM")))
+			dto.setCREATETM(map.get("CREATETM"));
+		if (map.containsKey("SALESGRP") && !ServicesUtil.isEmpty(map.get("SALESGRP")))
+			dto.setSALESGRP(map.get("SALESGRP"));
+		if (map.containsKey("PURCHORD") && !ServicesUtil.isEmpty(map.get("PURCHORD")))
+			dto.setPURCHORD(map.get("PURCHORD"));
+		if (map.containsKey("REFNO") && !ServicesUtil.isEmpty(map.get("REFNO")))
+			dto.setREFNO(map.get("REFNO"));
+		if (map.containsKey("SLOC") && !ServicesUtil.isEmpty(map.get("SLOC")))
+			dto.setSLOC(map.get("SLOC"));
+		if (map.containsKey("SHIPADD") && !ServicesUtil.isEmpty(map.get("SHIPADD")))
+			dto.setSHIPADD(map.get("SHIPADD"));
+		if (map.containsKey("CITY") && !ServicesUtil.isEmpty(map.get("CITY")))
+			dto.setCITY(map.get("CITY"));
+		if (map.containsKey("AREACODE") && !ServicesUtil.isEmpty(map.get("AREACODE")))
+			dto.setAREACODE(map.get("AREACODE"));
+		if (map.containsKey("TELP") && !ServicesUtil.isEmpty(map.get("TELP")))
+			dto.setTELP(map.get("TELP"));
+		if (map.containsKey("SOLDADD") && !ServicesUtil.isEmpty(map.get("SOLDADD")))
+			dto.setSOLDADD(map.get("SOLDADD"));
+		if (map.containsKey("SHIPTYP") && !ServicesUtil.isEmpty(map.get("SHIPTYP")))
+			dto.setSHIPTYP(map.get("SHIPTYP"));
+		if (map.containsKey("INSTDELV") && !ServicesUtil.isEmpty(map.get("INSTDELV")))
+			dto.setINSTDELV(map.get("INSTDELV"));
+		if (map.containsKey("SERNUM") && !ServicesUtil.isEmpty(map.get("SERNUM")))
+			dto.setSERNUM(map.get("SERNUM"));
+		if (map.containsKey("MAT") && !ServicesUtil.isEmpty(map.get("MAT")))
+			dto.setMAT(map.get("MAT"));
+		if (map.containsKey("BATCH") && !ServicesUtil.isEmpty(map.get("BATCH")))
+			dto.setBATCH(map.get("BATCH"));
+		if (map.containsKey("DESC") && !ServicesUtil.isEmpty(map.get("DESC")))
+			dto.setDESC(map.get("DESC"));
+		if (map.containsKey("QTY") && !ServicesUtil.isEmpty(map.get("QTY")))
+			dto.setQTY(map.get("QTY"));
+		if (map.containsKey("VOL") && !ServicesUtil.isEmpty(map.get("VOL")))
+			dto.setVOL(map.get("VOL"));
+		if (map.containsKey("STAT") && !ServicesUtil.isEmpty(map.get("STAT")))
+			dto.setSTAT(map.get("STAT"));
 
-		Set<Integer> set = new HashSet<Integer>();
-		int max = 1;
-
-		for (int e : num)
-			set.add(e);
-
-		for (int e : num) {
-			int left = e - 1;
-			int right = e + 1;
-			int count = 1;
-
-			while (set.contains(left)) {
-				count++;
-				set.remove(left);
-				left--;
-			}
-
-			while (set.contains(right)) {
-				count++;
-				set.remove(right);
-				right++;
-			}
-
-			max = Math.max(count, max);
-		}
-
-		return max;
+		return dto;
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
