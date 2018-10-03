@@ -50,6 +50,9 @@ public class ContainerDAO extends BaseDao<ContainerDetailsDo, ContainerDetailsDT
 			if(!ServicesUtil.isEmpty(dto.getSLOC())){
 				dos.setSLOC(dto.getSLOC());
 			}
+			if(!ServicesUtil.isEmpty(dto.getSHIPNAME())){
+				dos.setSHIPNAME(dto.getSHIPNAME());
+			}
 			if(!ServicesUtil.isEmpty(dto.getSHIPADD())){
 				dos.setSHIPADD(dto.getSHIPADD());
 			}
@@ -126,6 +129,9 @@ public class ContainerDAO extends BaseDao<ContainerDetailsDo, ContainerDetailsDT
 			}
 			if(!ServicesUtil.isEmpty(dos.getSLOC())){
 				dto.setSLOC(dos.getSLOC());
+			}
+			if(!ServicesUtil.isEmpty(dos.getSHIPNAME())){
+				dto.setSHIPNAME(dos.getSHIPNAME());
 			}
 			if(!ServicesUtil.isEmpty(dos.getSHIPADD())){
 				dto.setSHIPADD(dos.getSHIPADD());

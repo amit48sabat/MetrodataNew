@@ -20,6 +20,7 @@ public class ContainerDetailsDTO extends BaseDto{
 	private String PURCHORD;
 	private String REFNO;
 	private String SLOC;
+	private String SHIPNAME;
 	private String SHIPADD;
 	private String CITY;
 	private String AREACODE;

@@ -80,6 +80,9 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getStorageLocation())) {
 				deliveryHeaderDo.setStorageLocation(deliveryHeaderDTO.getStorageLocation());
 			}
+			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getCustName())) {
+				deliveryHeaderDo.setCustName(deliveryHeaderDTO.getCustName());
+			}
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getTelephone())) {
 				deliveryHeaderDo.setTelephone(deliveryHeaderDTO.getTelephone());
 			}
@@ -128,6 +131,9 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			}
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getCreatedAt())) {
 				deliveryHeaderDo.setCreatedAt(deliveryHeaderDTO.getCreatedAt());
+			}
+			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getCustEmail())) {
+				deliveryHeaderDo.setCustEmail(deliveryHeaderDTO.getCustEmail());
 			}
 			if (!ServicesUtil.isEmpty(deliveryHeaderDTO.getUpdatedAt())) {
 				deliveryHeaderDo.setUpdatedAt(deliveryHeaderDTO.getUpdatedAt());
@@ -225,6 +231,9 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getStorageLocation())) {
 				deliveryHeaderDTO.setStorageLocation(deliveryHeaderDo.getStorageLocation());
 			}
+			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getCustName())) {
+				deliveryHeaderDTO.setCustName(deliveryHeaderDo.getCustName());
+			}
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getTelephone())) {
 				deliveryHeaderDTO.setTelephone(deliveryHeaderDo.getTelephone());
 			}
@@ -257,6 +266,11 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 
 				deliveryHeaderDTO.setInvalidateIds(deliveryHeaderDo.getInvalidateIds());
 			}
+
+			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getCustEmail())) {
+
+				deliveryHeaderDTO.setCustEmail(deliveryHeaderDo.getCustEmail());
+			}
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getDeliveryOrder())) {
 				deliveryHeaderDTO.setDeliveryOrder(deliveryHeaderDo.getDeliveryOrder());
 			}
@@ -284,6 +298,9 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			}
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getDeliveredAtLongitude())) {
 				deliveryHeaderDTO.setDeliveredAtLongitude(deliveryHeaderDo.getDeliveredAtLongitude());
+			}
+			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getCustEmail())) {
+				deliveryHeaderDTO.setCustEmail(deliveryHeaderDo.getCustEmail());
 			}
 			if (!ServicesUtil.isEmpty(deliveryHeaderDo.getAirwayBillNo())) {
 				

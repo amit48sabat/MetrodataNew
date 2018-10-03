@@ -69,6 +69,9 @@ public class ContainerDetailsDo implements BaseDo {
 
 	@Column(name = "SLOC")
 	private String SLOC;
+	
+	@Column(name = "SHIPNAME")
+	private String SHIPNAME;
 
 	@Column(name = "SHIPADD")
 	private String SHIPADD;

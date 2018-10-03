@@ -1,16 +1,19 @@
 package com.incture.metrodata.service;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpStatus;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +69,9 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 
 	@Autowired
 	DeliveryItemDAO itemDao;
+
+	@Autowired
+	EmailServiceLocal emailService;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DeliveryHeaderService.class);
 
@@ -183,6 +189,26 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 				|| status.equalsIgnoreCase(DeliveryNoteStatus.DELIVERY_NOTE_REJECTED.getValue())
 				|| status.equalsIgnoreCase(DeliveryNoteStatus.DELIVERY_NOTE_PARTIALLY_REJECTED.getValue())) {
 			dto.setEndedAt(currDate);
+
+			DeliveryHeaderDo dos = new DeliveryHeaderDo();
+			dos.setDeliveryNoteId(dto.getDeliveryNoteId());
+			dos = deliveryHeaderDao.find(dos);
+
+			// send email
+			if (!ServicesUtil.isEmpty(dos.getCustEmail())) {
+				SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss z");
+				format.setTimeZone(TimeZone.getTimeZone("Asia/Jakarta"));
+				Map<String, Object> map = new HashMap<>();
+				map.put("endTime", format.format(new Date()));
+				map.put("receiverName" , dto.getReceiverName());
+				map.put("dnNo",dos.getDeliveryNoteId()+"");
+				map.put("shipTo",dos.getCustName());
+				map.put("address",dos.getShipToAddress());
+				map.put("sendTo",dos.getCustEmail());
+
+				emailService.sendMail(map);
+			}
+
 		}
 		if (status.equalsIgnoreCase(DeliveryNoteStatus.DRIVER_DN_INVALIDATED.getValue())) {
 			tempDTO = deliveryHeaderDao.getByKeys(dto);
@@ -204,6 +230,12 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 			// deliveryHeaderDao.removeTripDeliveryNoteMapping(dto);
 		}
 
+	}
+
+	private String getBody(DeliveryHeaderDTO dto) {
+		String body = "Hi, " + dto.getCustName() + " Your Delivery no. " + dto.getDeliveryNoteId() + " is successfully "
+				+ DeliveryNoteStatus.getDnStatusDisplayValue(dto.getStatus());
+		return body;
 	}
 
 	private void sendNotificationToDriverWhenAdminUpdateDnStatus(DeliveryHeaderDTO headerDto, UserDetailsDTO adminDto)
@@ -368,7 +400,7 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 
 			// adminDto = userDao.findById(adminDto);
 			responseDto = deliveryHeaderDao.getAllDeliveryNoteByAdminsWareHouse(adminDto.getUserId(),
-					adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails(),dnId);
+					adminDto.getRole().getRoleName(), adminDto.getWareHouseDetails(), dnId);
 
 			responseDto.setStatus(true);
 			responseDto.setCode(HttpStatus.SC_OK);
@@ -442,7 +474,7 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 			LOGGER.error("INSIDE REFESH DELIVERY NOTE LIST FROM ECC. REQUEST PAYLOAD ");
 
 			fetchTheDeliveryNotesFromECC();
-			responseDto = getAllDeliveryNoteByAdminsWareHouse(dto,0L);
+			responseDto = getAllDeliveryNoteByAdminsWareHouse(dto, 0L);
 		} catch (Exception e) {
 			responseDto.setStatus(false);
 			responseDto.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);

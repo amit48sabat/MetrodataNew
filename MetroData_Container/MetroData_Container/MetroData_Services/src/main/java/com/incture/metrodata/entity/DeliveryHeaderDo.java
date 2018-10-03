@@ -64,6 +64,9 @@ public class DeliveryHeaderDo implements BaseDo {
 	@Column(name = "STORAGE_LOC")
 	private String storageLocation;
 
+	@Column(name = "CUST_NAME")
+	private String custName;
+	
 	@Column(name = "CITY")
 	private String city;
 
@@ -161,6 +164,10 @@ public class DeliveryHeaderDo implements BaseDo {
 	
 	@Column(name = "DELEVERED_AT_LAT")
     private Double deliveredAtLatitude; 
+	
+	
+	@Column(name="CUST_EMAIL",length=100)
+	private String custEmail;
 
 	// getters and setters
 

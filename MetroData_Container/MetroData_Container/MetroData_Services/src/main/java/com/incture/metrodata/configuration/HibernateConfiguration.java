@@ -29,6 +29,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.orm.hibernate4.HibernateTransactionManager;
 import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -224,4 +226,21 @@ public class HibernateConfiguration {
 		return pool;
 	}
 	
+	
+	@Bean
+	public JavaMailSender getJavaMailSender() {
+	JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+	mailSender.setHost(environment.getRequiredProperty("spring.mail.host"));
+	mailSender.setPort(Integer.parseInt(environment.getRequiredProperty("spring.mail.port")));
+	mailSender.setUsername(environment.getRequiredProperty("spring.mail.username"));
+	mailSender.setPassword(environment.getRequiredProperty("spring.mail.password"));
+	
+	Properties props = mailSender.getJavaMailProperties();
+    props.put("mail.transport.protocol", "smtp");
+    props.put("mail.smtp.auth", "true");
+    props.put("mail.smtp.starttls.enable", "true");
+    props.put("mail.debug", "true");
+	
+	return mailSender;
+	}
 }

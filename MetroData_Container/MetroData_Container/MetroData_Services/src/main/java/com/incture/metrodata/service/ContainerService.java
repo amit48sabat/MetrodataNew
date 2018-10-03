@@ -472,6 +472,8 @@ public class ContainerService implements ContainerServiceLocal {
 					dos.setRefNo(Long.parseLong(d.getREFNO()));
 				if (!ServicesUtil.isEmpty(d.getSLOC()))
 					dos.setStorageLocation(d.getSLOC());
+				if (!ServicesUtil.isEmpty(d.getSHIPNAME()))
+					dos.setCustName(d.getSHIPNAME());
 				if (!ServicesUtil.isEmpty(d.getSHIPADD())) {
 					String shipToAddress = d.getSHIPADD();
 					dos.setShipToAddress(shipToAddress);
@@ -622,6 +624,8 @@ public class ContainerService implements ContainerServiceLocal {
 			dto.setREFNO(map.get("REFNO"));
 		if (map.containsKey("SLOC") && !ServicesUtil.isEmpty(map.get("SLOC")))
 			dto.setSLOC(map.get("SLOC"));
+		if (map.containsKey("SHIPNAME") && !ServicesUtil.isEmpty(map.get("SHIPNAME")))
+			dto.setSHIPNAME(map.get("SHIPNAME"));
 		if (map.containsKey("SHIPADD") && !ServicesUtil.isEmpty(map.get("SHIPADD")))
 			dto.setSHIPADD(map.get("SHIPADD"));
 		if (map.containsKey("CITY") && !ServicesUtil.isEmpty(map.get("CITY")))

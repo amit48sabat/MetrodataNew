@@ -30,6 +30,7 @@ public class DeliveryHeaderDTO extends BaseDto {
 	private String purchaseOrder;
 	private long refNo;
 	private String storageLocation;
+	private String custName;
 	private String city;
 	private String areaCode;
 	private String telephone;
@@ -62,6 +63,7 @@ public class DeliveryHeaderDTO extends BaseDto {
 	private String awbValidated;
 	private Double deliveredAtLongitude;
 	private Double deliveredAtLatitude;
+	private String custEmail;
 
 	@Override
 	public void validate(DB_Operation enOperation) throws InvalidInputFault {
