@@ -13,7 +13,7 @@
 	<name>MetroData_RestWeb Maven Webapp</name>
 	<url>http://maven.apache.org</url>
 	<properties>
-		<springframework.version>4.3.0.RELEASE</springframework.version>
+		<springframework.version>4.2.4.RELEASE</springframework.version>
 		<jackson.library>2.7.5</jackson.library>
 	</properties>
 
@@ -112,6 +112,26 @@
 
 		/bug fixing -->
 
+
+     <dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${springframework.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-websocket</artifactId>
+			<version>${springframework.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-messaging</artifactId>
+			<version>${springframework.version}</version>
+		</dependency>
+		
+		
+		
 	</dependencies>
 
 	<build>
