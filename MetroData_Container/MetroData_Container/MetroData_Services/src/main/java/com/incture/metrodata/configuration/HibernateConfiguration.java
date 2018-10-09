@@ -10,6 +10,8 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
 import javax.sql.DataSource;
 
 import org.hibernate.SessionFactory;
@@ -29,8 +31,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.orm.hibernate4.HibernateTransactionManager;
 import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -227,7 +227,7 @@ public class HibernateConfiguration {
 	}
 	
 	
-	@Bean
+	/*@Bean
 	public JavaMailSender getJavaMailSender() {
 	JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 	mailSender.setHost(environment.getRequiredProperty("spring.mail.host"));
@@ -242,5 +242,23 @@ public class HibernateConfiguration {
     props.put("mail.debug", "true");
 	
 	return mailSender;
+	}*/
+	
+	@Bean
+	public  Session getJavaMailSender() {
+		Properties props = new Properties();
+	      props.put("mail.smtp.auth", "true");
+	      props.put("mail.smtp.starttls.enable", "true");
+	      props.put("mail.smtp.host", environment.getRequiredProperty("spring.mail.host"));
+	      props.put("mail.smtp.port", environment.getRequiredProperty("spring.mail.port"));
+
+		Session session = Session.getInstance(props,
+		         new javax.mail.Authenticator() {
+		            protected PasswordAuthentication getPasswordAuthentication() {
+		               return new PasswordAuthentication(environment.getRequiredProperty("spring.mail.username"), environment.getRequiredProperty("spring.mail.password"));
+		            }
+		         });
+		
+		return session;
 	}
 }

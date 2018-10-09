@@ -172,6 +172,7 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 			responseDto.setStatus(false);
 			responseDto.setCode(417);
 			responseDto.setMessage(Message.FAILED + " : " + e.getMessage());
+			e.printStackTrace();
 		}
 		return responseDto;
 	}
@@ -205,7 +206,7 @@ public class DeliveryHeaderService implements DeliveryHeaderServiceLocal {
 				map.put("shipTo",dos.getCustName());
 				map.put("address",dos.getShipToAddress());
 				map.put("sendTo",dos.getCustEmail());
-
+				map.put("image",dto.getFileContent());
 				emailService.sendMail(map);
 			}
 
