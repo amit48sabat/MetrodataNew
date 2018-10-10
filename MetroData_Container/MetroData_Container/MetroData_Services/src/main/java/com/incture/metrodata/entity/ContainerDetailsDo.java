@@ -87,6 +87,9 @@ public class ContainerDetailsDo implements BaseDo {
 
 	@Column(name = "SOLDADD")
 	private String SOLDADD;
+	
+	@Column(name = "SMTP_ADDR",length=100)
+	private String SMTP_ADDR;
 
 	@Column(name = "SHIPTYP")
 	private String SHIPTYP;

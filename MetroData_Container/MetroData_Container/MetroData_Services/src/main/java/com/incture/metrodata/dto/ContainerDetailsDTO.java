@@ -26,6 +26,7 @@ public class ContainerDetailsDTO extends BaseDto{
 	private String AREACODE;
 	private String TELP;
 	private String SOLDADD;
+	private String SMTP_ADDR;
 	private String SHIPTYP;
 	private String INSTDELV;
 	private String SERNUM;

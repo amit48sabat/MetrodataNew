@@ -488,6 +488,8 @@ public class ContainerService implements ContainerServiceLocal {
 					dos.setSoldToAddress(d.getSOLDADD());
 				if (!ServicesUtil.isEmpty(d.getSHIPTYP()))
 					dos.setShippingType(d.getSHIPTYP());
+				if (!ServicesUtil.isEmpty(d.getSMTP_ADDR()))
+					dos.setCustEmail(d.getSMTP_ADDR());
 
 				if (!ServicesUtil.isEmpty(d.getINSTDELV())) {
 					String instruction = d.getINSTDELV().substring(0, Math.min(d.getINSTDELV().length(), 1000));
@@ -636,6 +638,8 @@ public class ContainerService implements ContainerServiceLocal {
 			dto.setTELP(map.get("TELP"));
 		if (map.containsKey("SOLDADD") && !ServicesUtil.isEmpty(map.get("SOLDADD")))
 			dto.setSOLDADD(map.get("SOLDADD"));
+		if (map.containsKey("SMTP_ADDR"))
+			dto.setSMTP_ADDR(map.get("SMTP_ADDR"));
 		if (map.containsKey("SHIPTYP") && !ServicesUtil.isEmpty(map.get("SHIPTYP")))
 			dto.setSHIPTYP(map.get("SHIPTYP"));
 		if (map.containsKey("INSTDELV") && !ServicesUtil.isEmpty(map.get("INSTDELV")))
