@@ -1,5 +1,6 @@
 package com.incture.metrodata.dto;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -64,7 +65,8 @@ public class DeliveryHeaderDTO extends BaseDto {
 	private Double deliveredAtLongitude;
 	private Double deliveredAtLatitude;
 	private String custEmail;
-
+	private Long timeWeight;
+	private Long distWeight;
 	@Override
 	public void validate(DB_Operation enOperation) throws InvalidInputFault {
 		// TODO Auto-generated method stub
