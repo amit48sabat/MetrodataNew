@@ -14,11 +14,9 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import org.apache.http.HttpStatus;
-import org.hibernate.HibernateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -444,6 +442,10 @@ public class TripService implements TripServiceLocal {
 					&& !dto.getCreatedBy().equalsIgnoreCase(driverDto.getCreatedBy()))
 				throw new InvalidInputFault("Invalid request.");
 
+			if(dto.getDeliveryHeader().isEmpty())
+				throw new InvalidInputFault("Trip was invalidated.");
+			
+			
 			UserDetailsDTO userDetailsDTO = new UserDetailsDTO();
 			if (ServicesUtil.isEmpty(dto.getUser())) {
 
