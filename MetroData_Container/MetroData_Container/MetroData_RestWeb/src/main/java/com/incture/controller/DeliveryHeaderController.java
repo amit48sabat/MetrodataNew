@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.maps.model.LatLng;
 import com.incture.metrodata.dto.DeliveryHeaderDTO;
+import com.incture.metrodata.dto.OptimizedRouteDTO;
 import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.UserDetailsDTO;
 import com.incture.metrodata.service.DeliveryHeaderServiceLocal;
@@ -166,8 +167,7 @@ class DeliveryHeaderController {
 
 	@RequestMapping(value = "/optimizedRoute", method = RequestMethod.PUT)
 	public ResponseDto optimizedDeliveryNoteRoute(HttpServletRequest request,
-			@RequestBody List<DeliveryHeaderDTO> dtoList, @RequestParam("lat") Double lat,
-			@RequestParam("lng") Double lng) {
+			@RequestBody OptimizedRouteDTO routeDto) {
 		ResponseDto res = new ResponseDto();
 		String userId = "";
 		if (!ServicesUtil.isEmpty(request.getUserPrincipal())) {
@@ -183,7 +183,7 @@ class DeliveryHeaderController {
 
 		UserDetailsDTO dto = (UserDetailsDTO) res.getData();
 		LOGGER.error("INSIDE OPTIMIZED ROUTE DELIVERY NOTE CONTROLLER. USER ID " + userId);
-		LatLng userLatLng = new LatLng(lat, lng);
-		return optimizedRouteService.optimizedRoute(dtoList, userLatLng);
+		LatLng userLatLng = new LatLng(routeDto.getLat(), routeDto.getLng());
+		return optimizedRouteService.optimizedRoute(routeDto.getDeliveryHeader(), userLatLng);
 	}
 }

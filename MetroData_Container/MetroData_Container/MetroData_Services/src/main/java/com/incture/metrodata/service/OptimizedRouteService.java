@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,20 +23,25 @@ import com.incture.metrodata.dto.ResponseDto;
 import com.incture.metrodata.dto.opti.DistanceMatrixResponce;
 import com.incture.metrodata.dto.opti.Element;
 import com.incture.metrodata.dto.opti.Row;
+import com.incture.metrodata.util.ServicesUtil;
 
 @Service("optimizedRouteService")
 @Transactional
 public class OptimizedRouteService implements OptimizedRouteServiceLocal {
 
-	//@Value("${distance.matrix.api.key}")
-	String distanceMatrixApiKey="AIzaSyC8YW1oFL25n8ki3XELODzxvhIWzjU-5EA";
-
+	@Autowired
+	Environment environment;
+	
+	/*@Value("${distance.matrix.api.key}")
+	String distanceMatrixApiKey;//="AIzaSyC8YW1oFL25n8ki3XELODzxvhIWzjU-5EA";
+*/
 	private String baseUrl = "https://maps.googleapis.com/maps/api/distancematrix/json?units=matrix";
 
 	@Override
 	public ResponseDto optimizedRoute(List<DeliveryHeaderDTO> dtos, LatLng userLatLong) {
 		ResponseDto responseDto = new ResponseDto();
 		try {
+			String distanceMatrixApiKey = environment.getProperty("distance.matrix.api.key"); 
 			List<LatLng> originslist = new ArrayList<>();
 			originslist.add(userLatLong);
 			String userLatLngEncoded = new EncodedPolyline(originslist).getEncodedPath();
@@ -54,6 +62,11 @@ public class OptimizedRouteService implements OptimizedRouteServiceLocal {
 					response.append(inputLine);
 				}
 				in.close();
+				
+				if(ServicesUtil.isEmpty(in)){
+					throw new Exception("Error: route can not be optimized at this time. Please try again.");
+				}
+				
 				DistanceMatrixResponce res = new Gson().fromJson(response.toString(), DistanceMatrixResponce.class);
 				
 				attachTimeAndDistWeight(dtos,res);
@@ -75,7 +88,7 @@ public class OptimizedRouteService implements OptimizedRouteServiceLocal {
 			}
 		} catch (Exception e) {
 			responseDto.setStatus(false);
-			responseDto.setCode(417);
+			responseDto.setCode(500);
 			responseDto.setMessage(Message.FAILED + " : " + e.toString());
 			e.printStackTrace();
 		}
