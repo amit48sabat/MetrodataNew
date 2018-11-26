@@ -184,6 +184,6 @@ class DeliveryHeaderController {
 		UserDetailsDTO dto = (UserDetailsDTO) res.getData();
 		LOGGER.error("INSIDE OPTIMIZED ROUTE DELIVERY NOTE CONTROLLER. USER ID " + userId);
 		LatLng userLatLng = new LatLng(routeDto.getLat(), routeDto.getLng());
-		return optimizedRouteService.optimizedRoute(routeDto.getDeliveryHeader(), userLatLng);
+		return optimizedRouteService.optimizedRoute(routeDto.getTripId(), userLatLng);
 	}
 }
