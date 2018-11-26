@@ -16,7 +16,7 @@ public class OptimizedRouteDTO extends BaseDto{
 
 	private Double lat;
 	private Double lng;
-	private List<DeliveryHeaderDTO> deliveryHeader;
+	private String tripId;
 	
 	
 	@Override
