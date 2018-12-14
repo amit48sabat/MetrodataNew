@@ -112,6 +112,7 @@ public abstract class BaseDao<E extends BaseDo, D extends BaseDto> {
 		Criteria criteria = getSession().createCriteria(importDto(DB_Operation.RETRIVE, Dto,null).getClass());
 		criteria.addOrder(Order.desc("createdAt"));
 		criteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
+		criteria.setCacheable(true);
 		List<E> listDo = (List<E>) criteria.list();
 		List<D> outDtos = exportList(listDo);
 		return outDtos;

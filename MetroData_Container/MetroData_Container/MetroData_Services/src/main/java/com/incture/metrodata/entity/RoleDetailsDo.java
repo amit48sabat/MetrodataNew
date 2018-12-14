@@ -2,6 +2,7 @@ package com.incture.metrodata.entity;
 
 import java.util.Date;
 
+import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,6 +11,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +24,8 @@ import lombok.ToString;
 @Setter
 @ToString
 @Table(name = "ROLE_DETAILS")
+@Cacheable  
+@Cache(usage=CacheConcurrencyStrategy.READ_ONLY)  
 public class RoleDetailsDo implements BaseDo {
 
 	/**

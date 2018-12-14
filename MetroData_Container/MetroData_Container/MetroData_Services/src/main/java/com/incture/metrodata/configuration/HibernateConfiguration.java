@@ -93,6 +93,15 @@ public class HibernateConfiguration {
 		properties.put("hibernate.format_sql", environment.getRequiredProperty("hibernate.format_sql"));
 		properties.put("hibernate.jdbc.batch_size", environment.getRequiredProperty("hibernate.jdbc.batch_size"));
 		
+		// Hibernate caching
+		properties.put("hibernate.cache.region.factory_class", "org.hibernate.cache.ehcache.EhCacheRegionFactory");
+		properties.put("hibernate.cache.provider_class", "net.sf.ehcache.hibernate.EhCacheProvider");
+		properties.put("hibernate.cache.use_second_level_cache","true");	
+		properties.put("hibernate.cache.use_query_cache", "true");
+		properties.put("hibernate.generate_statistics", "true");
+		properties.put("net.sf.ehcache.configurationResourceName", "/myehcache.xml");
+		
+		
 		String tableCreateOrUpdate = "update";
 		
 		String tableStatus = environment.getRequiredProperty("hibernate.hbm2ddl.auto");
