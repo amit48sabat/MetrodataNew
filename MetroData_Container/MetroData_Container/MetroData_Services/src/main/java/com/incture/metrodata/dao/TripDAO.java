@@ -214,7 +214,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 				+ "lower(t.tripId) like lower(:tripId) ORDER BY tdh.deliveryOrder";
 		Query query = getSession().createQuery(hql);
 		query.setString("tripId", "%" + dto.getTripId() + "%");
-		TripDetailsDo tripDetailsDo = (TripDetailsDo) query.uniqueResult();
+		TripDetailsDo tripDetailsDo = (TripDetailsDo) query.setCacheable(true).uniqueResult();
 		if (ServicesUtil.isEmpty(tripDetailsDo)) {
 			throw new ExecutionFault("No trip is found for id " + dto.getTripId());
 		}
@@ -604,9 +604,9 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 		query.setMaxResults(PaginationUtil.MAX_RESULT);
 
 		
-			totalCount = (Long) query2.uniqueResult();
+			totalCount = (Long) query2.setCacheable(true).uniqueResult();
 		
-		ArrayList<TripDetailsDo> result = (ArrayList<TripDetailsDo>) query.list();
+		ArrayList<TripDetailsDo> result = (ArrayList<TripDetailsDo>) query.setCacheable(true).list();
 		res.setTotalCount(totalCount);
 		res.setData(exportList(result));
 		return res;
@@ -995,7 +995,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			query.setMaxResults(10);
 			query.setParameter("searchParam", "%" + q.toLowerCase() + "%");
 			query.setParameter("status", TripStatus.TRIP_STATUS_CANCELLED.getValue());
-			data = (List<TripDetailsDo>) query.list();
+			data = (List<TripDetailsDo>) query.setCacheable(true).list();
 		}
 		return exportList(data);
 	}
@@ -1074,7 +1074,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			query.setParameterList("driverList", driverList);
 		}
 
-		return query.list();
+		return query.setCacheable(true).list();
 	}
 
 	public UserDetailsDTO getDriverFromTripByDN(DeliveryHeaderDTO headerDto) {
@@ -1225,7 +1225,7 @@ public class TripDAO extends BaseDao<TripDetailsDo, TripDetailsDTO> {
 			totalCount = (Long) countQuery.uniqueResult();
 		}
 
-		ArrayList<TripDetailsDo> result = (ArrayList<TripDetailsDo>) query.list();
+		ArrayList<TripDetailsDo> result = (ArrayList<TripDetailsDo>) query.setCacheable(true).list();
 		ResponseDto res = new ResponseDto();
 		res.setData(exportList(result));
 		res.setTotalCount(totalCount);

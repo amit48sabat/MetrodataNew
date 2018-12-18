@@ -11,6 +11,9 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import lombok.Data;
 import lombok.ToString;
 
@@ -18,6 +21,7 @@ import lombok.ToString;
 @Data
 @ToString
 @Table(name = "ORDER_TRACKING_DETAILS")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE) 
 public class OrderTrackingDo implements BaseDo{
 	
 	/**

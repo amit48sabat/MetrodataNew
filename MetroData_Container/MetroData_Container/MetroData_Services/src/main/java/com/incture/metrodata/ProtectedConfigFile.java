@@ -1,4 +1,5 @@
 package com.incture.metrodata;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 
@@ -8,6 +9,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 
+import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
 
 public class ProtectedConfigFile {
@@ -17,10 +19,11 @@ public class ProtectedConfigFile {
             (byte) 0x10, (byte) 0x12, };
 
     public static void main(String[] args) throws Exception {
-        String originalPassword = "MetroSCP@0987654321";
+        String originalPassword = "Metro@5432112345";
         System.out.println("Original password: " + originalPassword);
         String encryptedPassword = encrypt(originalPassword);
         System.out.println("Encrypted password: " + encryptedPassword);
+        System.out.println("decrypted password: " + decrypt(encryptedPassword));
        
     }
 
@@ -37,6 +40,19 @@ public class ProtectedConfigFile {
         return new BASE64Encoder().encode(bytes);
     }
 
-  
+    private static String decrypt(String property) throws GeneralSecurityException, IOException {
+		SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBEWithMD5AndDES");
+		SecretKey key = keyFactory.generateSecret(new PBEKeySpec(PASSWORD));
+		Cipher pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
+		pbeCipher.init(Cipher.DECRYPT_MODE, key, new PBEParameterSpec(SALT, 20));
+		return new String(pbeCipher.doFinal(base64Decode(property)), "UTF-8");
+	}
+
+	@SuppressWarnings("restriction")
+	private static byte[] base64Decode(String property) throws IOException {
+		// NB: This class is internal, and you probably should use another impl
+		return new BASE64Decoder().decodeBuffer(property);
+	}
+	
 
 }

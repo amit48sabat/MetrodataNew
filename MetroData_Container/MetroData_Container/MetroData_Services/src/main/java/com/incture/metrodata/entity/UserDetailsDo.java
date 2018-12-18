@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,6 +19,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Where;
@@ -31,6 +34,8 @@ import lombok.ToString;
 @Table(name = "USER_DETAILS")
 @DynamicUpdate(true)
 @Where(clause = "DELETE = 0")
+@Cacheable
+@Cache(usage=CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)  
 public class UserDetailsDo implements BaseDo {
 
 	private static final long serialVersionUID = 1L;
@@ -105,11 +110,13 @@ public class UserDetailsDo implements BaseDo {
 	@ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
 	@JoinTable(name = "USERS_WAREHOUSE_MAPPING", joinColumns = { @JoinColumn(name = "USER_ID") }, inverseJoinColumns = {
 			@JoinColumn(name = "WARE_HOUSE_ID") })
+	@Cache(usage=CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)  
 	private Set<WareHouseDetailsDo> wareHouseDetails = new HashSet<WareHouseDetailsDo>(0);
 	
 	@ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
 	@JoinTable(name = "USERS_COURIER_MAPPING", joinColumns = { @JoinColumn(name = "USER_ID") }, inverseJoinColumns = {
 			@JoinColumn(name = "COURIER_ID") })
+	@Cache(usage=CacheConcurrencyStrategy.NONSTRICT_READ_WRITE) 
 	private Set<CourierDetailsDo> courierDetails = new HashSet<CourierDetailsDo>(0);
 	
 	@Column(name = "DELETE")

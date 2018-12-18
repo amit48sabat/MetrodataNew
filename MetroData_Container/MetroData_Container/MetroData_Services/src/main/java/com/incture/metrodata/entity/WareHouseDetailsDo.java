@@ -2,6 +2,7 @@ package com.incture.metrodata.entity;
 
 import java.util.Date;
 
+import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -9,6 +10,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 
 import lombok.Data;
@@ -19,6 +22,8 @@ import lombok.ToString;
 @ToString
 @Table(name = "WARE_HOUSE_DETAILS")
 @DynamicUpdate(true)
+@Cacheable
+@Cache(usage=CacheConcurrencyStrategy.NONSTRICT_READ_WRITE) 
 public class WareHouseDetailsDo implements BaseDo {
 
 	private static final long serialVersionUID = 1L;

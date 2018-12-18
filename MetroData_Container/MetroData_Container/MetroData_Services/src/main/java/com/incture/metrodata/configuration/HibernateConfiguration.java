@@ -98,7 +98,7 @@ public class HibernateConfiguration {
 		properties.put("hibernate.cache.provider_class", "net.sf.ehcache.hibernate.EhCacheProvider");
 		properties.put("hibernate.cache.use_second_level_cache","true");	
 		properties.put("hibernate.cache.use_query_cache", "true");
-		properties.put("hibernate.generate_statistics", "true");
+		//properties.put("hibernate.generate_statistics", "true");
 		properties.put("net.sf.ehcache.configurationResourceName", "/myehcache.xml");
 		
 		

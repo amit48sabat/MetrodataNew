@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,6 +18,9 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import com.incture.metrodata.util.SortDHDoByDeliveryOrder;
 
 import lombok.Data;
@@ -26,6 +30,8 @@ import lombok.ToString;
 @Data // for auto generation of getters and setters
 @ToString
 @Table(name = "TRIP_DETAILS")
+@Cacheable  
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)  
 public class TripDetailsDo implements BaseDo {
 
 	private static final long serialVersionUID = 1L;
@@ -66,6 +72,7 @@ public class TripDetailsDo implements BaseDo {
 	//@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinTable(name = "TRIP_DELIVERY_HEADER_MAPPING", joinColumns = {
 			@JoinColumn(name = "TRIP_ID") }, inverseJoinColumns = { @JoinColumn(name = "DELIVERY_NOTE_ID") })
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)  
 	private Set<DeliveryHeaderDo> deliveryHeader = new TreeSet<DeliveryHeaderDo>(new SortDHDoByDeliveryOrder()); 
 
 	@Column(name = "TRACK_FREQ")
@@ -75,6 +82,7 @@ public class TripDetailsDo implements BaseDo {
 	 * need to be clear with one to one or one to many btw driver to trips
 	 */
 	@OneToOne(targetEntity = UserDetailsDo.class, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@Cache(usage=CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)  
 	private UserDetailsDo user;
 
 	@Override

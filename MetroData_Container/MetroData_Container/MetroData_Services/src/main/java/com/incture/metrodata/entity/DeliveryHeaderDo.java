@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,6 +16,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
@@ -32,6 +35,8 @@ import lombok.ToString;
 @ToString
 @Table(name = "DELIVERY_HEADER")
 @Where(clause = "DELETED = 0")
+@Cacheable
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)  
 public class DeliveryHeaderDo implements BaseDo {
 
 	private static final long serialVersionUID = 1L;
@@ -132,6 +137,7 @@ public class DeliveryHeaderDo implements BaseDo {
 
 	@OneToMany(targetEntity = DeliveryItemDo.class, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@Fetch(value = FetchMode.SUBSELECT)
+	@Cache(usage=CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)  
 	private List<DeliveryItemDo> deliveryItems = new ArrayList<DeliveryItemDo>();
 
 	@Column(name = "DELIVERY_ORDER")
@@ -154,6 +160,7 @@ public class DeliveryHeaderDo implements BaseDo {
 	private Date deliveryDate;
 	
 	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@Cache(usage=CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)  
 	private WareHouseDetailsDo wareHouseDetails;
 
 	@Column(name = "DELETED")

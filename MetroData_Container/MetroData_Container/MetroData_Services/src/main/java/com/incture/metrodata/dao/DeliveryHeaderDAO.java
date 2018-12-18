@@ -455,7 +455,7 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			
 			query.setFirstResult(PaginationUtil.FIRST_RESULT);
 			query.setMaxResults(PaginationUtil.MAX_RESULT);
-			result = (ArrayList<DeliveryHeaderDo>) query.list();
+			result = (ArrayList<DeliveryHeaderDo>) query.setCacheable(true).list();
 		}
 		 
 		responseDto.setData(result);
@@ -496,7 +496,7 @@ public class DeliveryHeaderDAO extends BaseDao<DeliveryHeaderDo, DeliveryHeaderD
 			query.setParameterList("warehouselist", wareHouseIds);
 		}
 
-		ArrayList<DeliveryHeaderDo> result = (ArrayList<DeliveryHeaderDo>) query.list();
+		ArrayList<DeliveryHeaderDo> result = (ArrayList<DeliveryHeaderDo>) query.setCacheable(true).list();
 		return exportList(result);
 	}
 
